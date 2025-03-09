@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup 2FA - Transcendence</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 500px;
+            max-width: 100%;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 18px;
+            letter-spacing: 5px;
+            text-align: center;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .messages {
+            margin-bottom: 15px;
+        }
+        .message {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .qr-code {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .qr-code img {
+            max-width: 200px;
+            height: auto;
+        }
+        .secret-key {
+            font-family: monospace;
+            font-size: 18px;
+            text-align: center;
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .instructions {
+            margin-bottom: 20px;
+        }
+        .instructions ol {
+            margin-left: 20px;
+            padding-left: 0;
+        }
+        .instructions li {
+            margin-bottom: 10px;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Two-Factor Authentication Setup</h1>
+        
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        {% if secret %}
+        <div class="instructions">
+            <h2>Setup Instructions</h2>
+            <ol>
+                <li>Install an authenticator app on your mobile device (Google Authenticator, Authy, etc.)</li>
+                <li>Scan the QR code below with your authenticator app</li>
+                <li>Alternatively, you can manually enter the secret key into your app</li>
+                <li>Enter the 6-digit code from your authenticator app to verify setup</li>
+            </ol>
+        </div>
+        
+        <div class="qr-code">
+            <img src="{{ qr_code_url }}" alt="QR Code">
+        </div>
+        
+        <div class="secret-key">
+            {{ secret }}
+        </div>
+        
+        <form method="post" action="{% url 'verify_2fa_setup' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="otp_code">Verification Code</label>
+                <input type="text" id="otp_code" name="otp_code" maxlength="6" placeholder="000000" required autofocus>
+            </div>
+            <button type="submit">Verify and Enable 2FA</button>
+        </form>
+        {% else %}
+        <p>Would you like to enable two-factor authentication for your account?</p>
+        <p>Two-factor authentication adds an extra layer of security to your account by requiring a verification code from your mobile device in addition to your password.</p>
+        
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit">Setup 2FA</button>
+        </form>
+        {% endif %}
+        
+        <div class="back-link">
+            <p><a href="/home/">Back to Home</a></p>
+        </div>
+    </div>
+</body>
+</html> 

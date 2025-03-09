@@ -4,6 +4,7 @@ from django.contrib.auth.models import (
     BaseUserManager,
     PermissionsMixin,
 )
+from django.conf import settings
 from utils.crypto import encrypt_2fa_secret, decrypt_2fa_secret
 
 

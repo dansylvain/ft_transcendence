@@ -34,6 +34,24 @@
 			top: 20px;
 			right: 20px;
 		}
+
+		.alert {
+			margin-bottom: 15px;
+			padding: 10px;
+			border-radius: 4px;
+		}
+
+		.alert-danger {
+			background-color: #f8d7da;
+			color: #721c24;
+			border: 1px solid #f5c6cb;
+		}
+
+		.alert-success {
+			background-color: #d4edda;
+			color: #155724;
+			border: 1px solid #c3e6cb;
+		}
 	</style>
 </head>
 
@@ -58,11 +76,19 @@
 					<!-- Login Form -->
 					<div id="login-form" class="form-container active w-75">
 						<h2 class="mb-4">Log In</h2>
-						<div id="login-message"></div>
-						<form class="d-flex flex-column align-items-start w-100" method="post" action="/user/login/">
+						<div id="login-message">
+							{% if messages %}
+							{% for message in messages %}
+							<div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %}">
+								{{ message }}
+							</div>
+							{% endfor %}
+							{% endif %}
+						</div>
+						<form class="d-flex flex-column align-items-start w-100" method="post" action="/auth/login/">
 							{% csrf_token %}
-							<label>Username or Email</label>
-							<input class="mb-3 form-control" type="text" name="username" placeholder="Username or Email"
+							<label>Username</label>
+							<input class="mb-3 form-control" type="text" name="username" placeholder="Username"
 								required>
 							<label>Password</label>
 							<input class="mb-3 form-control" type="password" name="password" placeholder="Password"
@@ -74,8 +100,16 @@
 					<!-- Sign Up Form -->
 					<div id="signup-form" class="form-container w-75">
 						<h2 class="mb-4">Sign Up</h2>
-						<div id="signup-message"></div>
-						<form class="d-flex flex-column align-items-start w-100" method="post" action="/nope">
+						<div id="signup-message">
+							{% if messages %}
+							{% for message in messages %}
+							<div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %}">
+								{{ message }}
+							</div>
+							{% endfor %}
+							{% endif %}
+						</div>
+						<form class="d-flex flex-column align-items-start w-100" method="post" action="/auth/register/">
 							{% csrf_token %}
 							<label>Username</label>
 							<input class="mb-3 form-control" type="text" name="username" placeholder="Username"
@@ -86,10 +120,10 @@
 							<input class="mb-3 form-control" type="password" name="password" placeholder="Password"
 							required>
 							<label>Confirm Password</label>
-							<input class="mb-3 form-control" type="password" name="confirm_password"
+							<input class="mb-3 form-control" type="password" name="password_confirm"
 							placeholder="Confirm Password" required>
 							<div class="form-check form-switch">
-								<input class="form-check-input" type="checkbox" role="switch"
+								<input class="form-check-input" type="checkbox" role="switch" name="enable_2fa"
 									id="flexSwitchCheckDefault">
 								<label class="form-check-label" for="flexSwitchCheckDefault">ENABLE 2FA</label>
 							</div>

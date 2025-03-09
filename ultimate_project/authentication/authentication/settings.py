@@ -67,6 +67,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+    "authentication_app.middleware.JWTAuthenticationMiddleware",  # JWT Authentication
 ]
 
 ROOT_URLCONF = f"{NAME}.urls"
@@ -174,3 +175,18 @@ LOGGING = {
         },
     },
 }
+
+# Determine if cookies should be secure based on environment
+SECURE_COOKIES = os.getenv("env", "prod") == "prod"
+
+# JWT Settings
+JWT_AUTH = {
+    "JWT_SECRET_KEY": SECRET_KEY,
+    "JWT_ALGORITHM": "HS256",
+    "JWT_ALLOW_REFRESH": True,
+    "JWT_EXPIRATION_DELTA": 60 * 60 * 24,  # 1 day
+    "JWT_REFRESH_EXPIRATION_DELTA": 60 * 60 * 24 * 7,  # 7 days
+}
+
+# Login URL for redirects
+LOGIN_URL = "/login/"

@@ -176,15 +176,12 @@ async def match_proxy(
     #     return await proxy_request("static_files", "/home/", request)
 
 
-@app.api_route("/auth/{path:path}", methods=["GET"])
+@app.api_route("/auth/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
 async def authentication_proxy(path: str, request: Request):
     """
     Proxy requests to the authentication microservice.
     """
     return await proxy_request("authentication", f"auth/{path}", request)
-
-
-
 
 
 @app.api_route("/api/{path:path}", methods=["GET"])
@@ -193,42 +190,54 @@ async def databaseapi_proxy(path: str, request: Request):
     Proxy requests to the database API microservice.
 
     - **path**: The path to the resource in the database API
-    
+
     ### Examples:
     - **List all players**: GET /api/player/
     - **Get player by ID**: GET /api/player/1/
     - **Filter players by username**: GET /api/player/?username=player1
     - **Filter players by email**: GET /api/player/?email=example
-    
+
     - **List all tournaments**: GET /api/tournament/
     - **Get tournament by ID**: GET /api/tournament/1/
-    
+
     - **List all matches**: GET /api/match/
     - **Get match by ID**: GET /api/match/1/
     - **Filter matches by player**: GET /api/match/?player1=1
     - **Filter matches by tournament**: GET /api/match/?tournament=1
-    
-    ### Pagination:
-    - All list endpoints are paginated with 10 items per page
-    - **Navigate pages**: GET /api/player/?page=2
-    
-    ### Response format:
-    ```json
-    {
-        "count": 100,
-        "next": "http://localhost:8005/api/player/?page=2",
-        "previous": null,
-        "results": [
-            {
-                "id": 1,
-                "username": "player1",
-                "email": "player1@example.com",
-                ...
-            },
-            ...
-        ]
-    }
-    ```
+    """
+    return await proxy_request("databaseapi", f"api/{path}", request)
+
+
+@app.api_route("/api/{path:path}", methods=["POST"])
+async def databaseapi_proxy_post(path: str, request: Request):
+    """
+    Proxy POST requests to the database API microservice.
+
+    - **path**: The path to the resource in the database API
+
+    ### Examples:
+    - **Register a new user**: POST /api/register/
+    - **Verify credentials**: POST /api/verify-credentials/
+    - **Refresh token**: POST /api/token/refresh/
+    - **Verify token**: POST /api/token/verify/
+    - **Enable 2FA**: POST /api/enable-2fa/
+    - **Verify 2FA setup**: POST /api/verify-2fa-setup/
+    """
+    return await proxy_request("databaseapi", f"api/{path}", request)
+
+
+@app.api_route("/api/{path:path}", methods=["PUT"])
+async def databaseapi_proxy_put(path: str, request: Request):
+    """
+    Proxy PUT requests to the database API microservice.
+    """
+    return await proxy_request("databaseapi", f"api/{path}", request)
+
+
+@app.api_route("/api/{path:path}", methods=["DELETE"])
+async def databaseapi_proxy_delete(path: str, request: Request):
+    """
+    Proxy DELETE requests to the database API microservice.
     """
     return await proxy_request("databaseapi", f"api/{path}", request)
 
