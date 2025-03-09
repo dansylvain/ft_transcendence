@@ -3,16 +3,12 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.authtoken.models import Token
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def verify_credentials(request):
-    """
-    Verify username and password without creating a session.
-    Returns user info and token on success.
-    """
     username = request.data.get("username")
     password = request.data.get("password")
 
@@ -22,17 +18,19 @@ def verify_credentials(request):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    # Authententicate the user within the database system
-    # ! IMPORTANT : Authenticate does not login the user 
     user = authenticate(username=username, password=password)
 
     if user:
+        # Generate JWT tokens
+        refresh = RefreshToken.for_user(user)
+
         return Response(
             {
-                "success": True, # returs a 200 code
-                # returning extra info, see if pertinent in the login workflow
+                "success": True,
                 "user_id": user.id,
-                "username": user.first_name,
+                "username": user.username,
+                "access_token": str(refresh.access_token),
+                "refresh_token": str(refresh),
             }
         )
     else:

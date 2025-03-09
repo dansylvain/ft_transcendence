@@ -10,3 +10,4 @@ pillow
 cryptography
 django-rest-framework
 django-filter
+djangorestframework-simplejwt
