@@ -228,7 +228,7 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = (
     "Lax"  # Use 'None' with SESSION_COOKIE_SECURE=True in production
 )
-SESSION_COOKIE_PATH = "/"
+SESSION_COOKIE_PATH = "/" 
 CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
 CSRF_COOKIE_HTTPONLY = False  # JavaScript needs access to CSRF token
 CSRF_COOKIE_SAMESITE = "Lax"  # Use 'None' with CSRF_COOKIE_SECURE=True in production
