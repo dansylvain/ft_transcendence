@@ -13,8 +13,7 @@
 				<div class="card-body">
 					<form hx-post="/user/delete-profile/" 
                           hx-target="#main_div" 
-                          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                          hx-ext="csrf">
+                          hx-headers='{"HX-Request": "true", "X-CSRFToken": "{{ csrf_token }}"}'>
 						{% csrf_token %}
                         <div class="form-group">
 							<label>Enter your password:</label>
