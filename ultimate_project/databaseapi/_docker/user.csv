@@ -16,3 +16,5 @@ test-first_name,test-last_name,test,test@test.com,password,False
 two-fa-first_name,two-fa-last_name,test_2fa,test_2fa@hehe.com,password,True,S3EF2KESUQR45MRTL7MXDSJVI6JQDG4R
 delete-user-fn,delete-user-ln,delete_2fa,delete_2fa@hehe.com,password,True,S3EF2KESUQR45MRTL7MXDSJVI6JQDG42
 delete-std,delete-std,delete_standard,delete-std@hehe.com,password,False
+same-auth,same-auth,same_auth,same_auth@hehe.com,password,False
+same-auth-hehe,same-auth-haha,same_auth_2fa,same_auth_2fa@hehe.com,password,False,9JUF2KESUQR45MRTL7MXDSJVI6JQDG42
