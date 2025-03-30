@@ -1,5 +1,6 @@
 from playwright.sync_api import Playwright, sync_playwright, expect
 from collections import Counter
+import time
 
 # USERS
 LOGIN_REG = "same_auth"
@@ -8,7 +9,6 @@ PASSWORD = "password"
 SECRET_2FA = "9JUF2KESUQR45MRTL7MXDSJVI6JQDG42"
 
 SIMULTANEOUS_USERS = 2
-
 
 BASE_URL = "https://localhost:8443"
 
@@ -32,11 +32,12 @@ def run(playwright: Playwright) -> None:
         modalLogoutButton.click()
         expect(page).to_have_url(f"{BASE_URL}/login/")
 
-    def init_win(browsers, contexts, pages):
+    def init_win(browsers, contexts, pages, positions):
         for _ in range(SIMULTANEOUS_USERS):
-            browsers.append(playwright.chromium.launch(headless=False))
-            # browsers[_] = playwright.chromium.launch(headless=False)
-            # contexts[_] = browsers[_].new_context(ignore_https_errors=True)
+            browsers.append(playwright.chromium.launch(
+                headless=False,
+                args=[f"--window-position={positions[_][0]},{positions[_][1]}", "--window-size=800,600"]
+            ))
             contexts.append(browsers[_].new_context(ignore_https_errors=True))
             pages.append(contexts[_].new_page())
 
@@ -49,11 +50,14 @@ def run(playwright: Playwright) -> None:
         # for _ in range(SIMULTANEOUS_USERS):
         #     contexts[_].close()
     
-    def test_reg_users(browsers, contexts, pages):
+    def test_reg_users(browsers, contexts, pages, positions):
+    
+        init_win(browsers, contexts, pages, positions)
+        
+        for _ in range(SIMULTANEOUS_USERS):
+            pages[_].goto(f"{BASE_URL}/login/")
 
-        init_win(browsers, contexts, pages)
-        
-        
+        time.sleep(10)
         destroy_obj(browsers, contexts)
         pass
     
@@ -63,8 +67,10 @@ def run(playwright: Playwright) -> None:
     browsers = []
     contexts = []
     pages = []
+    positions = [(800, 0), (800, 0)]
+
     
-    test_reg_users(browsers, contexts, pages)
+    test_reg_users(browsers, contexts, pages, positions)
 
     test_2fa_users()
 
