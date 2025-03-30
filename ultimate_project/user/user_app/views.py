@@ -1,5 +1,6 @@
 import os
 from django.shortcuts import render
+from django.views.decorators.cache import cache_control
 from django.http import HttpRequest
 from django.template.loader import render_to_string
 import httpx
@@ -13,27 +14,16 @@ async def get_user_info(username):
         async with httpx.AsyncClient() as client:
             print("\nCALLLED GET USER INFO\n", flush=True) # rm
             
-            # does this go to fastapi container or no ???
-            # becaus if not why have api route in api gateway
-            """ response = await client.get(
-                f"http://databaseapi:8007/api/player/?username={username}"
-            ) """
-            
-            #modify to pass by the api getway instead of diretly calling the 
-            # database api urls
             response = await client.get(
                 f"http://ctn_api_gateway:8005/api/player/?username={username}"
             )
-            print("\n AFTER GET RESPONSE FROM API\n", flush=True) # rm
 
             
             response_text = response.text  # For plain text responses
-            print("\nThe response: ", response_text, "\n", flush=True) #rm
+            print("\n API USER response: ", response_text, "\n", flush=True) #rm
 
-            
             if response.status_code == 200:
                 data = response.json()
-
                 # Check if response is a list (direct array)
                 if isinstance(data, list) and len(data) > 0:
                     return data[0]
@@ -55,8 +45,7 @@ async def profile(request: HttpRequest):
     # Get username from the JWT header
     
     print("PROFILE TMP CALLED\n", flush=True) #rm
-    
-    
+
     username = request.headers.get("X-Username")
     
     print(f"username: {username}\n", flush=True)
@@ -82,7 +71,8 @@ async def profile(request: HttpRequest):
     return render(request, "account.html", 
                   {**context, "page": "partials/profile.html"})  
 
-
+#no useful
+#@cache_control(no_cache=True, must_revalidate=True)
 async def game_stats(request: HttpRequest):
     
     username = request.headers.get("X-Username")

@@ -6,16 +6,14 @@ from django.conf import settings
 urlpatterns = [
     path("", views.index, name="index"),
     path("login/", views.login, name="login"),
-    path("home/", views.home),
+    path("home/", views.home, name="home"),
+    path("error/<int:code>/", views.error, name="error"),
     
-    #user content and wrapper 
+
+    path("reload-template/", views.reload_template, name="reload_template"),
     
-    # this two are useless ??
-    #path("user/account/", views.account),
-    #path("user/stats/", views.stats),
-    
-    path("user-account-profile-wrapper/", views.user_account_profile_template, name="user_account_profile_template"),
-    path("user-stats-wrapper/", views.user_stats_template, name="user_stats_template"),
+    #path("user-account-profile-wrapper/", views.user_account_profile_template, name="user_account_profile_template"),
+    #path("user-stats-wrapper/", views.user_stats_template, name="user_stats_template"),
     
 
     path(
@@ -34,7 +32,6 @@ urlpatterns = [
     path("forgot-password/", views.forgotPassword, name="forgot-password"),
     path("login/", views.forgotPassword, name="login"),
     path("two-factor-auth/", views.twoFactorAuth, name="login"),
-    path("error/<int:code>/", views.error, name="error"),
     path('favicon.ico', RedirectView.as_view(url=settings.STATIC_URL + 'favicon.ico', permanent=True)),
 
 ]

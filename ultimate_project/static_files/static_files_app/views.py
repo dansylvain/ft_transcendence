@@ -126,11 +126,47 @@ def tournament_template(request, user_id):
     )
 
 
-
 @never_cache
+def reload_template(request):
+    
+    """
+    The purpose of `reload_template` is to enable full page reloading while serving 
+    dynamic content through the static container. 
+
+    This function is specifically triggered when a service is requested to be served 
+    through the static container, as defined in the `reverse_proxy_request` function 
+    of the FastAPI app. 
+    
+    """
+    headers = {key: value for key, value in request.headers.items()}
+
+    url = headers["X-Url-To-Reload"]
+    print(f"\n\nprint {url}\n\n", flush=True)
+    page_html = requests.get(url, headers=headers).text
+
+    # Get username from JWT header if available
+    username = request.headers.get("X-Username") or request.session.get("username")
+    
+    print("********************\nTEMPLATE REQUEST\n********************", flush=True)
+
+    return render(
+        request,
+        "index.html",
+        {
+            "username": username,
+            "rasp": os.getenv("rasp", "false"),
+            "pidom": os.getenv("pi_domain", "localhost:8443"),
+            "page": page_html,
+        },
+    )
+
+
+""" @never_cache
 def user_account_profile_template(request):
 
-    page_html = requests.get("http://user:8004/user/account/profile/").text
+    headers = {key: value for key, value in request.headers.items()}
+
+    page_html = requests.get("http://user:8004/user/account/profile/", headers=headers).text
 
     # Get username from JWT header if available
     username = request.headers.get("X-Username") or request.session.get("username")
@@ -147,10 +183,9 @@ def user_account_profile_template(request):
             # "simpleUsers": consumer.players,
             "page": page_html,
         },
-    )
+    ) """
 
-
-@never_cache
+""" @never_cache
 def user_stats_template(request):
     page_html = requests.get("http://user:8004/user/account/game-stats/").text
     
@@ -169,7 +204,7 @@ def user_stats_template(request):
             # "simpleUsers": consumer.players,
             "page": page_html,
         },
-    )
+    ) """
 
 
 @never_cache
