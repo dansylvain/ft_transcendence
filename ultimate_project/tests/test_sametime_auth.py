@@ -49,7 +49,15 @@ def run(playwright: Playwright) -> None:
     def init_win(browsers, contexts, pages, positions, window_sizes):
         for _ in range(SIMULTANEOUS_USERS):
             # Launch browser without specific size/position first
-            browsers.append(playwright.chromium.launch(headless=False))
+            browsers.append(
+                playwright.chromium.launch(
+                    headless=False,
+                    args=[
+                        f"--window-position={positions[_][0]},{positions[_][1]}",
+                        f"--window-size={window_sizes[_][0]},{window_sizes[_][1]}",
+                    ],
+                )
+            )
 
             # Create context with viewport size matching our target window size
             contexts.append(
@@ -64,7 +72,7 @@ def run(playwright: Playwright) -> None:
 
             pages.append(contexts[_].new_page())
 
-            # Maintenant position BOTH windows using their defined positions
+            # Also set position via JavaScript to ensure it takes effect
             pages[_].evaluate(
                 f"window.moveTo({positions[_][0]}, {positions[_][1]}); window.resizeTo({window_sizes[_][0]}, {window_sizes[_][1]});"
             )
@@ -107,8 +115,14 @@ def run(playwright: Playwright) -> None:
     left_position = 0
     right_position = screen_width - window_width
 
-    # Position windows at left and right edges
+    # Position windows at left and right edges with different Y positions
     positions = [(left_position, 20), (right_position, 20)]
+
+    # Better debugging to check what's happening
+    print(f"Screen dimensions: {screen_width}x{screen_height}")
+    print(f"Window size: {window_width}x{window_height}")
+    print(f"Left window position: ({left_position}, 20)")
+    print(f"Right window position: ({right_position}, 20)")
 
     # Set each window to be the same size
     window_sizes = [(window_width, window_height), (window_width, window_height)]
