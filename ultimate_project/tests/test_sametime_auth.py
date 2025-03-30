@@ -1,6 +1,7 @@
 from playwright.sync_api import Playwright, sync_playwright, expect
 from collections import Counter
 import time
+import os
 
 # USERS
 LOGIN_REG = "same_auth"
@@ -33,8 +34,16 @@ def run(playwright: Playwright) -> None:
         # Fallback to common resolution
         return 1920, 1080
 
-    def login(page):
-        pass
+    def login(page, login):
+        expect(page).to_have_url(f"{BASE_URL}/login/")
+
+        # Fill in the username and password
+        page.locator("#username").fill(login)
+        page.locator("#password").fill(PASSWORD)
+        page.locator("#loginButton").click()
+
+        # ! ============= TWO-FA PAGE =============
+        expect(page).to_have_url(f"{BASE_URL}/home/")
 
     def logout(page):
         youpiBanane = page.locator("#youpiBanane")
@@ -92,6 +101,15 @@ def run(playwright: Playwright) -> None:
 
         for _ in range(SIMULTANEOUS_USERS):
             pages[_].goto(f"{BASE_URL}/login/")
+        
+        page1 = pages[0]
+        page2 = pages[1]
+
+        login(page1, LOGIN_REG)
+        login(page2, LOGIN_REG)
+
+        logout(page1)
+        logout(page2)
 
         time.sleep(10)
         destroy_obj(browsers, contexts)
@@ -104,6 +122,7 @@ def run(playwright: Playwright) -> None:
     browsers = []
     contexts = []
     pages = []
+    
 
     screen_width, screen_height = get_screen_size()
 
