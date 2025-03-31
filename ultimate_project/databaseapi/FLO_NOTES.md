@@ -3,8 +3,24 @@
 🟧
 ⚠️
 --------------------------------------------------------------------------------
+									LAST DEV WEEK
+--------------------------------------------------------------------------------
+
+🟧 Test and stabilize multi-users connection 
+
+🟧 Write tests about it once merged with Thomas 
+
+🟧 Beautify register / login / 2fa landing pages
+
+🟧 Find a way to lock the database as well
+
+🟧 Lock all the routes
+
+--------------------------------------------------------------------------------
 									TOUDOU
 --------------------------------------------------------------------------------
+
+
 
 🟧 METTRE LES CHAMPS REQUIRED DANS DELETE-PROFILE.HTMl sur les champs password et otp
 
