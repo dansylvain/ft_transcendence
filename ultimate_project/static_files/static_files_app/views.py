@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.views.decorators.cache import never_cache
 from django.template.loader import render_to_string
+from django.views.decorators.csrf import csrf_exempt
 
 # from django.http import HttpResponse
 # from django.template import Context, Template
@@ -125,7 +126,6 @@ def tournament_template(request, user_id):
         },
     )
 
-
 @never_cache
 def reload_template(request):
     
@@ -159,52 +159,6 @@ def reload_template(request):
             "page": page_html,
         },
     )
-
-
-""" @never_cache
-def user_account_profile_template(request):
-
-    headers = {key: value for key, value in request.headers.items()}
-
-    page_html = requests.get("http://user:8004/user/account/profile/", headers=headers).text
-
-    # Get username from JWT header if available
-    username = request.headers.get("X-Username") or request.session.get("username")
-    
-    print("********************\nTEMPLATE REQUEST\n********************", flush=True)
-
-    return render(
-        request,
-        "index.html",
-        {
-            "username": username,
-            "rasp": os.getenv("rasp", "false"),
-            "pidom": os.getenv("pi_domain", "localhost:8443"),
-            # "simpleUsers": consumer.players,
-            "page": page_html,
-        },
-    ) """
-
-""" @never_cache
-def user_stats_template(request):
-    page_html = requests.get("http://user:8004/user/account/game-stats/").text
-    
-    print("********************\TEMPLATE REQUEST\n********************", flush=True)
-
-    # Get username from JWT header if available
-    username = request.headers.get("X-Username") or request.session.get("username")
-
-    return render(
-        request,
-        "index.html",
-        {
-            "username": username,
-            "rasp": os.getenv("rasp", "false"),
-            "pidom": os.getenv("pi_domain", "localhost:8443"),
-            # "simpleUsers": consumer.players,
-            "page": page_html,
-        },
-    ) """
 
 
 @never_cache
@@ -262,7 +216,7 @@ def twoFactorAuth(request):
     obj = {"username": username, "page": "two-factor-auth.html"}
     return render(request, "index.html", obj)
 
-
+@csrf_exempt    
 @never_cache
 def error(request, code=404):  # Code 404 par défaut
     username = request.session.get("username")

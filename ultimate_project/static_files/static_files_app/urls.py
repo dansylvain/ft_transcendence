@@ -12,9 +12,7 @@ urlpatterns = [
 
     path("reload-template/", views.reload_template, name="reload_template"),
     
-    #path("user-account-profile-wrapper/", views.user_account_profile_template, name="user_account_profile_template"),
-    #path("user-stats-wrapper/", views.user_stats_template, name="user_stats_template"),
-    
+   
 
     path(
         "tournament-match-wrapper/<str:user_id>/",

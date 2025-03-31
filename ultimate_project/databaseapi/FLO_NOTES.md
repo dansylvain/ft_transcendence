@@ -6,9 +6,20 @@
 									TOUDOU
 --------------------------------------------------------------------------------
 
-FIX LES TEST DES 2FA QUI PLANTES PARFOIS dans playright
 
-Retravailler la securisation des routes dans fastAPI
+🟧 
+
+🟧 Tester le multi login sur la branche `prevent_double_auth`
+
+🟧 TESTER LE WORKLOW : Register -> turn on 2FA -> Logout -> Login -> 2FA -> Disable 2fa -> Logout -> Login -> delete user -> Login
+
+✅ CREER DES TEST AVEC LE CSRF TOKEN	
+
+🟧 LIMITER LA LENGHT DES INPUTS DANS LES FORMULAIRES
+
+✅ FIX LES TEST DES 2FA QUI PLANTES PARFOIS dans playright
+
+🟧 Retravailler la securisation des routes dans fastAPI
 
 `STABILIZATION`:
 
@@ -19,7 +30,7 @@ Retravailler la securisation des routes dans fastAPI
 ✅ Tournoi 
 🟧 Mettre des alias a chaque debut de tournoi
 🟧 Injections SQL / XSS
-🟧 HTTPS (wss)
+✅ HTTPS (wss)
 🟧 Secure routes API
 🟧 Changer le mot de passe d'admin
 🟧

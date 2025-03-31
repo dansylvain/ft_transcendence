@@ -53,8 +53,9 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "corsheaders",
 
-    "user_app",
-    "user_management_app",
+    "user_account_app",
+    "user_auth_app",
+    
     "twofa_app",
 ]
 
@@ -177,13 +178,25 @@ CORS_ALLOW_ORIGINS = [
     "http://localhost:8001",  # Tournament
     "http://localhost:8002",  # Match
     "http://localhost:8003",  # Static files
-    
-    # "http://localhost:8004",  # User
-    
+    "http://localhost:8004",  # User
     "http://localhost:8005",  # FastAPI
     "http://localhost:8006",  # Authentication
     "http://localhost:8007",  # DatabaseAPI
+    "https://localhost:8443"  # For secure HTTPS access
     f"https://{PI_DOMAIN}",  # Production
 ]
 CORS_ALLOW_METHODS = ["GET", "POST", "OPTIONS", "PUT", "DELETE"]
 CORS_ALLOW_HEADERS = ["*"]
+
+# Cookie settings
+SESSION_COOKIE_SECURE = True  # Ensures session cookies are only sent over HTTPS
+SESSION_COOKIE_HTTPONLY = True  # Prevents JavaScript access (for security)
+SESSION_COOKIE_SAMESITE = "Lax"  # Allows cookies on same-site navigation, blocks cross-site
+
+CSRF_COOKIE_SECURE = True  # Ensures CSRF cookie is only sent over HTTPS
+CSRF_COOKIE_HTTPONLY = False  # JavaScript needs access to CSRF token
+CSRF_COOKIE_SAMESITE = "Lax"  # Allows CSRF cookie on same-site requests
+
+# CSRF Middleware settings
+CSRF_TRUSTED_ORIGINS = ["https://localhost:8443"]  # Add your domain(s) here
+

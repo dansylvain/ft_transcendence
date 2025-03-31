@@ -14,3 +14,5 @@ Genghis,Khan,user12,user12@hehe.com,password,False
 Paris,Hilton,user13,user13@hehe.com,password,False
 test-first_name,test-last_name,test,test@test.com,password,False
 two-fa-first_name,two-fa-last_name,test_2fa,test_2fa@hehe.com,password,True,S3EF2KESUQR45MRTL7MXDSJVI6JQDG4R
+delete-user-fn,delete-user-ln,delete_2fa,delete_2fa@hehe.com,password,True,S3EF2KESUQR45MRTL7MXDSJVI6JQDG42
+delete-std,delete-std,delete_standard,delete-std@hehe.com,password,False

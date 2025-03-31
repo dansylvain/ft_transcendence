@@ -65,6 +65,7 @@ def check_2fa(request):
     
     return Response({"success": True}, status=status.HTTP_200_OK)
 
+# ! POTENTIALLY OLD CLASS
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def check_2fa_code(request):

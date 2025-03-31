@@ -1,0 +1,10 @@
+URL MANAGE BY THE USER CONTAINER
+
+
+/auth/login/
+/auth/logout/
+/auth/register/
+
+/account/profile/ # main page 
+
+/account/game-stats/ 

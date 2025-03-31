@@ -28,6 +28,10 @@ create_volume:
 
 # Using this rule actually deletes the DB. Run it at your own risks.
 delete_volume:
+	@echo "\n\033[1;33m***| Deleting MIGRATIONS |***\033[0m\n"
+	@bash migrations_delete.sh
+	@echo "\n\033[1;32m***| MIGRATIONS Deteted |***\033[0m\n"
+	
 	@echo "\n\033[1;33m***| Deleting PostgreSQL Volume |***\033[0m\n"
 	@sudo rm -rf ~/volumes_transcendence/
 	@echo "\n\033[1;32m***| PostgreSQL Volume Deteted |***\033[0m\n"
