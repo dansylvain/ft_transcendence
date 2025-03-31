@@ -572,9 +572,13 @@ function onMatchWsMessage(event, pads, [waiting, endCont, end], waitingState) {
 	// requestAnimationFrame(() => {
 	const data = JSON.parse(event.data);
 	// console.log("match mesage: ", data);
+    console.log(data);
 	if (data.state == "end")
 	{	
-		end.innerHTML = "the winner is :" + data.winnerId + end.innerHTML;
+        data.winnerId == -2
+        data.winnerId = " Daffy Duck"
+        end.innerHTML = `The winner is : user${data.winnerId} 
+        <br> Score: ${data.score[0]} : ${data.score[1]} ` + end.innerHTML;
 		endCont.classList.add("end-cont");
 	}
 	if (waitingState[0] != data.state) 
