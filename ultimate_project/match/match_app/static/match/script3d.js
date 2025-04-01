@@ -75,7 +75,7 @@ function actionUpgrade() {
             break;
         case 3:
             window.tjs_ball.material.color.setHex(0xffffff);
-            window.tjs_ball.material.map = textureLoader.load('https://media.tenor.com/YkyhmCCJd_0AAAAM/aaaa.gif');
+            window.tjs_ball.material.map = window.tjs_textureLoader.load('https://media.tenor.com/YkyhmCCJd_0AAAAM/aaaa.gif');
             break;
         default:
             break;
