@@ -199,6 +199,7 @@ SESSION_COOKIE_SAMESITE = "Lax"  # Allows cookies on same-site navigation, block
 CSRF_COOKIE_SECURE = True  # Ensures CSRF cookie is only sent over HTTPS
 CSRF_COOKIE_HTTPONLY = False  # JavaScript needs access to CSRF token
 CSRF_COOKIE_SAMESITE = "Lax"  # Allows CSRF cookie on same-site requests
+#CSRF_COOKIE_NAME = "csrf_token"  # Change the CSRF cookie name
 
 # CSRF Middleware settings
 CSRF_TRUSTED_ORIGINS = ["https://localhost:8443"]  # Add your domain(s) here

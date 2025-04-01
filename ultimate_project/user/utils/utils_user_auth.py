@@ -22,10 +22,16 @@ API_VERIFY_CREDENTIALS = "http://ctn_api_gateway:8005/api/verify-credentials/"
 API_CHECK_2FA = "http://ctn_api_gateway:8005/api/check-2fa/"
 
 
-def generate_django_csrf_token():
-    secret = secrets.token_hex(32)  # 32-byte secret key
-    hashed_token = hashlib.sha256(secret.encode()).hexdigest()
-    return (hashed_token)
+# IN THE FUTURE NEED A WAY TO BE SURE INTERNAT POST
+# ARE VALID
+""" def create_internal_api_token():
+    payload = {
+        "iss": "internal-service",
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1),  # Valid for 1 hour
+        "scope": "internal"
+    }
+    token = jwt.encode(payload, SECRET_JWT_KEY, algorithm="HS256")
+    return token """
 
 async def login_api(username: str, password: str):
     """
@@ -36,7 +42,6 @@ async def login_api(username: str, password: str):
 
     # Vérifier les identifiants en appelant `databaseAPI`
     try:
-        #do
         db_response = requests.post(
             API_VERIFY_CREDENTIALS,
             data={"username": username, "password": password},
@@ -44,33 +49,33 @@ async def login_api(username: str, password: str):
 
         if db_response.status_code != 200:
             error_message = db_response.json().get("error", "Authentication failed")
-            # Return error message to be displayed in the login-result div
             return JsonResponse(
-                content={"success": False, "message": error_message}, status_code=401
+                data={"success": False, "message": error_message}, 
+                status=401
             )
 
-        # 🔹 L'authentification est réussie, récupérer les données utilisateur
+        # L'authentification est réussie, récupérer les données utilisateur
         auth_data = db_response.json()
 
     except requests.exceptions.RequestException as e:
-        # Return error message for connection issues
         return JsonResponse(
-            content={"success": False, "message": f"Service unavailable: {str(e)}"},
-            status_code=500,
+            data={"success": False, "message": f"Service unavailable: {str(e)}"}, 
+            status=500
         )
 
-    # Check if 2FA is enabled
+    # Handle 2FA check
     check_2fa_response = requests.post(
         API_CHECK_2FA, data={"username": username, "password": password}
     )
 
-    # If 2FA is enabled, return 2FA connection page
+    print(f"\n\n == STATUS CODE 2fa: {check_2fa_response.status_code} == \n\n", flush=True)
     if check_2fa_response.status_code == 200:
         return JsonResponse(
-            content={"success": False, "message": "2FA is enabled"}, status_code=401
+            data={"success": False, "message": "2FA is enabled"}, 
+            status=401
         )
 
-    # 🔹 Générer les tokens JWT
+    # Générer les tokens JWT
     expire_access = datetime.datetime.utcnow() + datetime.timedelta(
         minutes=ACCESS_TOKEN_EXPIRE_MINUTES
     )
@@ -85,32 +90,19 @@ async def login_api(username: str, password: str):
     }
     refresh_payload = {
         "user_id": auth_data.get("user_id", 0),
-        "username": username,  # Include username in refresh token too
+        "username": username,
         "exp": expire_refresh,
     }
 
     access_token = jwt.encode(access_payload, SECRET_JWT_KEY, algorithm="HS256")
     refresh_token = jwt.encode(refresh_payload, SECRET_JWT_KEY, algorithm="HS256")
 
-    # 🔹 Log pour debug
-    print(f"Access Token: {access_token[:20]}...", flush=True)
-    print(f"Refresh Token: {refresh_token[:20]}...", flush=True)
-
-    # 🔹 Indiquer à HTMX de rediriger l'utilisateur
-    # response.headers["HX-Redirect"] = "/home"
-    # response.headers["HX-Login-Success"] = "true"
-
     # Create a JSONResponse with success message
     json_response = JsonResponse(
-        content={"success": True, "message": "Connexion réussie"}
+        data={"success": True, "message": "Connexion réussie"}
     )
 
-    # Copy the headers from our response to the JSONResponse
-    # for key, value in response.headers.items():
-    #     json_response.headers[key] = value
-
-    # Make sure the cookies are also set on the JSONResponse
-    # Access token
+    # Set cookies for JWT and CSRF tokens
     json_response.set_cookie(
         key="access_token",
         value=access_token,
@@ -120,8 +112,7 @@ async def login_api(username: str, password: str):
         path="/",
         max_age=60 * 60 * 6,
     )
-
-    # Refresh token
+    # Set the refresh token
     json_response.set_cookie(
         key="refresh_token",
         value=refresh_token,
@@ -132,22 +123,9 @@ async def login_api(username: str, password: str):
         max_age=60 * 60 * 24 * 7,
     )
 
-    # Generate and set CSRF token
-    # csrf_token = secrets.token_urlsafe(64)
-    json_response.set_cookie(
-        key="csrftoken",
-        value=generate_django_csrf_token(),
-        httponly=True,
-        secure=True,
-        samesite="Lax",
-        path="/",
-        max_age=60 * 60 * 6,  # 6 hours, same as access token
-    )
-
-    # Debug log for headers
-    print(f"🔒 Response headers: {dict(json_response.headers)}", flush=True)
-
     return json_response
+
+
 
 # Function to handle user logout
 async def logout_api():
@@ -377,19 +355,6 @@ async def register_api(
             path="/",
             max_age=60 * 60 * 24 * 7,  # 7 days
         )
-
-        # == Generate and set CSRF token == 
-        # csrf_token = secrets.token_urlsafe(64)
-        json_response.set_cookie(
-            key="csrftoken",
-            value=generate_django_csrf_token(),
-            httponly=True,
-            secure=True,
-            samesite="Lax",
-            path="/",
-            max_age=60 * 60 * 6,  # 6 hours, same as access token
-        )
-
         return json_response
 
     except requests.exceptions.RequestException as e:
@@ -565,18 +530,6 @@ async def verify_2fa_and_login(
             samesite="Lax",
             path="/",
             max_age=60 * 60 * 24 * 7,  # 7 days
-        )
-
-        # Generate and set CSRF token
-        # csrf_token = secrets.token_urlsafe(64)
-        json_response.set_cookie(
-            key="csrftoken",
-            value=generate_django_csrf_token(),
-            httponly=True,
-            secure=True,
-            samesite="Lax",
-            path="/",
-            max_age=60 * 60 * 6,  # 6 hours, same as access token
         )
 
         # Debug log for headers

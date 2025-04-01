@@ -72,6 +72,9 @@ services:
       - ./databaseapi:/app/
 
   api_gateway:
+    build:
+      context: ./api_gateway
+      dockerfile: _docker/Dockerfile
     environment:
       - env=dev
     ports:

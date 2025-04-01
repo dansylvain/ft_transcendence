@@ -19,7 +19,7 @@
                     
                     <form hx-post="/user/disable-2fa/" 
                           hx-target="#main_div" 
-                          hx-headers='{"HX-Request": "true", "X-CSRFToken": "{{ csrf_token }}"}'>
+                          hx-headers='{"HX-Request": "true", "X-CSRFToken": "{{ csrftoken }}"}'>
                         {% csrf_token %}
                         <div class="form-group">
                             <label>Enter the 6-digit code from your authenticator app:</label>

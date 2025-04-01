@@ -51,18 +51,22 @@ def check_2fa(request):
     """
     Check if 2FA is enabled for a user.
     """
+    
+    print("\n\n == check2FA called == \n\n", flush=True)
+    
     username = request.data.get("username")
     password = request.data.get("password")
 
     # Verify credentials
     user = authenticate(username=username, password=password)
     if not user:
+        print("\n\n == INVALID CREDENTIALS == \n\n", flush=True)
         return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
     
     # Check if 2FA is enabled
     if not user.two_fa_enabled:
-        return Response({"error": "2FA is not enabled"}, status=status.HTTP_401_UNAUTHORIZED)
-    
+        print("\n\n == 2FA IS NOT ENABLED == \n\n", flush=True)
+        return Response({"success": False, "message": "2FA is not enabled"}, status=status.HTTP_200_OK)
     return Response({"success": True}, status=status.HTTP_200_OK)
 
 # ! POTENTIALLY OLD CLASS

@@ -1,3 +1,4 @@
+{% load static %}
 <div class="container" data-page-type="login">
   <!-- Outer Row -->
   <div class="row justify-content-center">
@@ -20,6 +21,10 @@
                   hx-target="#login-form"
                   hx-swap="outerHTML"
                   hx-indicator="#loading-spinner"
+                  hx-headers='{
+                    "HX-Request": "true",
+                    "X-CSRFToken": "{{ csrftoken }}"
+                  }'
                 >
                   <div class="form-group">
                     <input
@@ -44,16 +49,14 @@
                   <div class="form-group">
                     <input
                       type="submit"
-					  id="loginButton"
+                      id="loginButton"
                       hx-push-url="true"
                       class="btn btn-primary btn-user btn-block"
                       value="Login"
                     />
                   </div>
-                
-				  
-				  <!-- ! END FORM  -->
-				</form>
+                </form>
+                <!-- ! END FORM -->
 
                 <!-- ! Feedback error from the backend -->
                 <div
@@ -61,23 +64,23 @@
                   class="text-center text-danger mt-2"
                 ></div>
 
-                <!-- ! Spinning button  -->
+                <!-- ! Spinning button -->
                 <div id="loading-spinner" class="htmx-indicator text-center my-2">
                   <div class="spinner-border text-primary" role="status">
                     <span class="sr-only">Loading...</span>
                   </div>
                 </div>
 
-				<!-- ! Horizontal Line Separator -->
+                <!-- ! Horizontal Line Separator -->
                 <hr />
-				
-				<!-- ! Link towards register  -->
+
+                <!-- ! Link towards register -->
                 <div
-					id="register-link"
+                  id="register-link"
                   hx-boost="false"
                   hx-trigger="click"
                   hx-push-url="true"
-                  hx-get="/register/"
+                  hx-get="/auth/register/"
                   hx-target="body"
                   class="text-center small"
                   href=""
@@ -93,21 +96,23 @@
     </div>
   </div>
 </div>
+
 <!-- Add Animate.css for shake animation -->
 <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" /> -->
 
 <script>
-document.addEventListener("htmx:beforeSwap", function (evt) {
+  document.addEventListener("htmx:beforeSwap", function (evt) {
     console.log("document.addEventListener working");
-    console.log("LOGIN FORM LISTENNING");
+    console.log("LOGIN FORM LISTENING");
+
     if (evt.detail.target.id === "login-form") {
-    	try {
+      try {
         console.log("Réponse brute:", evt.detail.xhr.responseText);
         const response = JSON.parse(evt.detail.xhr.responseText);
-		
+
         if (response.success) {
-        console.log("SUCCESS")
-        evt.detail.shouldSwap = false;
+          console.log("SUCCESS");
+          evt.detail.shouldSwap = false;
 
           htmx
             .ajax("GET", "/home/", {
@@ -125,21 +130,20 @@ document.addEventListener("htmx:beforeSwap", function (evt) {
             const usernameValue = usernameInput.value;
             console.log("Storing username for 2FA:", usernameValue);
             sessionStorage.setItem("2fa_username", usernameValue);
-            
-            // Set username as global variable as another backup
+
+            // Set username as a global variable as another backup
             window.twoFAUsername = usernameValue;
           } else {
-
             console.error("Username input element not found");
           }
-          
+
           // Redirect to 2FA page
           evt.detail.shouldSwap = false;
           console.log("Redirecting to 2FA page");
-          
+
           // Get username for the URL
           const username = usernameInput ? usernameInput.value : '';
-          
+
           // Include username in the URL to help with page transitions
           htmx
             .ajax("GET", `/two-factor-auth/?username=${encodeURIComponent(username)}`, {
@@ -149,9 +153,9 @@ document.addEventListener("htmx:beforeSwap", function (evt) {
             .then(function () {
               console.log("2FA page loaded, pushing history state");
               history.pushState(null, "", "/two-factor-auth/");
-              
+
               // Extra check to set username after page load
-              setTimeout(function() {
+              setTimeout(function () {
                 const usernameField = document.getElementById('username');
                 if (usernameField && window.twoFAUsername) {
                   usernameField.value = window.twoFAUsername;
@@ -163,8 +167,8 @@ document.addEventListener("htmx:beforeSwap", function (evt) {
           // Sanitize the message using DOMPurify before setting content
           const messageElement = document.getElementById("login-form");
           const sanitizedMessage = DOMPurify.sanitize(response.message);
-          
-		  messageElement.textContent = sanitizedMessage;
+
+          messageElement.textContent = sanitizedMessage;
         }
       } catch (e) {
         console.error("Erreur de traitement de la réponse:", e);

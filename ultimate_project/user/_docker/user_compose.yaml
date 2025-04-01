@@ -10,6 +10,7 @@ services:
       port: ${user_port}
       pi_domain: ${PI_DOMAIN}
       JWT_KEY: ${JWT_KEY}
+      CSRF_SECRET_KEY: ${CSRF_SECRET_KEY}
       DJANGO_SETTINGS_MODULE: user.settings # usefull ??
     env_file:
       - ../../.env

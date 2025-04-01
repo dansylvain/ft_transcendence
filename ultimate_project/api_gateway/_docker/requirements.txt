@@ -6,6 +6,7 @@ jinja2
 django-cors-headers
 cryptography
 PyJWT
+itsdangerous
 requests
 python-multipart
 pyotp

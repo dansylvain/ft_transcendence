@@ -7,6 +7,7 @@ qrcode
 PyJWT
 pyotp
 pillow
+itsdangerous
 cryptography
 django-cors-headers
 httpx
