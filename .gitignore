@@ -1,10 +1,7 @@
 .DS_Store
 # Ignorer tout le dossier env et son contenu
 env/
-# OU
-/env/
-# OU
-env/*
+/home/pf4/Documents/GitHub/ft_transcendence/ultimate_project/.env
 # Django #
 *.log
 *.pot
@@ -146,7 +143,5 @@ GitHub.sublime-settings
 
 
 ultimate_project/staticfiles/*
-migrations/*
-ultimate_project/databaseapi/databaseapi_app/migrations/0001_initial.py
-ultimate_project/databaseapi/databaseapi_app/migrations/__init__.py
+migrations/
 .vscode/settings.json
