@@ -1,7 +1,6 @@
 .DS_Store
 # Ignorer tout le dossier env et son contenu
 env/
-/home/pf4/Documents/GitHub/ft_transcendence/ultimate_project/.env
 # Django #
 *.log
 *.pot
