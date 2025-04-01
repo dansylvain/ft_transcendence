@@ -8,8 +8,7 @@ from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.decorators.cache import cache_control
 
-from ultimate_project.user.utils.manage_user_data import get_user_info_w_username
-
+from ..utils import manage_user_data
 
 @require_http_methods(["GET", "POST"])
 @ensure_csrf_cookie
@@ -135,6 +134,3 @@ async def delete_profile_view(request):
 
             except Exception as e:
                 return JsonResponse({"error": str(e)}, status=500)
-
-
-

@@ -94,7 +94,7 @@ The request will be a POST request to the route "auth/register". Like login, you
 ## TO DO LATER
 ⛔ ✅  Split `admin` id from the `Players` logic to avoid getting disconnected (complicated, if we can avoid it is good )
 
-⛔ ✅ La route `http://localhost:8000/login/` fonctionne, mais la route `http://localhost:8000/login` (check ngninx or fastAPI shit) 
+⛔ ✅ La route `http://localhost:8000/auth/login/` fonctionne, mais la route `http://localhost:8000/auth/login` (check ngninx or fastAPI shit) 
 
 
 # PRIORITY

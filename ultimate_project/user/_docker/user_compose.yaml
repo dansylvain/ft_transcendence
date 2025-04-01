@@ -7,8 +7,8 @@ services:
     environment:
       env: prod
       name: user
-      port: $user_port
-      pi_domain: $PI_DOMAIN
+      port: ${user_port}
+      pi_domain: ${PI_DOMAIN}
       JWT_KEY: ${JWT_KEY}
       DJANGO_SETTINGS_MODULE: user.settings # usefull ??
     env_file:

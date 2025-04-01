@@ -141,8 +141,10 @@ def reload_template(request):
     headers = {key: value for key, value in request.headers.items()}
 
     url = headers["X-Url-To-Reload"]
-    print(f"\n\nprint {url}\n\n", flush=True)
+    print(f"\n\nprint URL IN RELOAD TEMPLATE {url}\n\n", flush=True)
     page_html = requests.get(url, headers=headers).text
+    
+    print(f"\n\nprint URL IN RELOAD TEMPLATE {url}\n\n", flush=True)
 
     # Get username from JWT header if available
     username = request.headers.get("X-Username") or request.session.get("username")

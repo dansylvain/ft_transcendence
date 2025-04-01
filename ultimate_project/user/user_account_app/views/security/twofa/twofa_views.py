@@ -10,9 +10,9 @@ import httpx
 
 # import os
 from django.contrib.auth.decorators import login_required
-from forms.forms import TwoFaForm
+from user_account_app.forms.form_two2fa import TwoFaForm
 
-from ultimate_project.user.utils import manage_user_data
+from utils import manage_user_data
 
 
 async def setup_2fa(request: HttpRequest):
@@ -47,7 +47,7 @@ async def setup_2fa(request: HttpRequest):
 
         # Save the secret to the user via API
         update_data = {"_two_fa_secret": secret}
-        update_result = await update_user_info(user["id"], update_data)
+        update_result = await manage_user_data.update_user_w_user_id(user["id"], update_data)
 
         if not update_result:
             return render(

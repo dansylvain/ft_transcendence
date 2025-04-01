@@ -8,8 +8,7 @@ from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.decorators.cache import cache_control
 
-
-from utils import user_auth
+from utils import utils_user_auth
 
 async def logout_view(request: HttpRequest):
-    return await user_auth.logout_api(request)
+    return await utils_user_auth.logout_api(request)

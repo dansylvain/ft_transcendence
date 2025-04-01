@@ -6,7 +6,7 @@ from utils.authentication import is_authenticated
 
 JWT_SECRET_KEY = os.getenv("JWT_KEY")
 
-def block_authenticated_users():
+def block_and_redir_auth_users():
     """
     Dependency function that prevents authenticated users from accessing certain routes.
     Redirects authenticated users to /home/

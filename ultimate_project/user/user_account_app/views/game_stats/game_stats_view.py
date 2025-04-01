@@ -8,7 +8,7 @@ from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.decorators.cache import cache_control
 
-from utils import get_user_info_w_username
+from utils import manage_user_data
 
 
 #@cache_control(no_cache=True, must_revalidate=True)
@@ -22,20 +22,18 @@ async def game_stats_view(request: HttpRequest):
     }
 
     if username:
-        user = await get_user_info_w_username(username)
+        user = await manage_user_data.get_user_info_w_username(username)
         if user:
             context["user"] = user
 
     if request.headers.get("HX-Request"):
         # Check for custom header indicating inner content request
         if request.headers.get("X-Inner-Content") == "true":
-            # Only return the inner content (profile or game stats)
-            if "/user/account/game-stats/" in request.path:
-                return render(request, "partials/stats.html", context)
+                return render(request, "partials/game_stats/game_stats.html", context)
             
-    return render(request, "account.html", {
+    return render(request, "layouts/account.html", {
         "username": username,
-        "page": "partials/stats.html",
+        "page": "partials/game_stats/game_stats.html",
         **context
     })
     

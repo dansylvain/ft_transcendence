@@ -17,21 +17,15 @@ def health_check(request):
 urlpatterns = [
     path("health/", health_check, name="health_check"),
     # path("debug-headers/", debug_headers, name="debug_headers"),
-   
-   
-    # TO DO
-    # for matchign url to the management app url if any
     
-    path("account/", include("user_account_app.urls")),
-    
+    # Eevrythign related to account management
+    path("account/", include("user_account_app.urls"), name="account"),
     # login, register, logout
-    path("auth/", include("user_auth_app")),
+    path("auth/", include("user_auth_app.urls"), name="auth"),
 
-    
-
-    path("user/setup-2fa/", async_to_sync(twofa_views.setup_2fa)),
-    path("user/verify-2fa/", async_to_sync(twofa_views.verify_2fa)),
-    path("user/disable-2fa/", async_to_sync(twofa_views.disable_2fa)),
+    #path("user/setup-2fa/", async_to_sync(twofa_views.setup_2fa)),
+    #path("user/verify-2fa/", async_to_sync(twofa_views.verify_2fa)),
+    #path("user/disable-2fa/", async_to_sync(twofa_views.disable_2fa)),
     
     
     # base url when going into your account

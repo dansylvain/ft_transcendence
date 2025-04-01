@@ -2,9 +2,9 @@ import os
 from django.http import HttpRequest, JsonResponse
 from django.shortcuts import render
 
-from ultimate_project.user.utils import manage_user_data
+from utils import manage_user_data
 
-async def show_profile(request: HttpRequest):
+async def profile_view(request: HttpRequest):
     # Get username from the JWT header
     
     print("PROFILE VIEW CALLED\n", flush=True) #rm
@@ -29,5 +29,8 @@ async def show_profile(request: HttpRequest):
             return render(request, "partials/profile/profile.html", context)
 
     # If it's a full page loading
-    return render(request, "account.html", 
-                  {**context, "page": "partials/profile/profile.html"})  
+    return render(request, "layouts/account.html", {
+        "username": username,
+        "page": "partials/profile/profile.html",
+        **context
+    })

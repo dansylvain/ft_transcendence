@@ -4,6 +4,7 @@ uvicorn
 django-allauth
 django-otp
 qrcode
+PyJWT
 pyotp
 pillow
 cryptography

@@ -12,14 +12,10 @@ from fastapi.middleware.cors import CORSMiddleware
 templates = Jinja2Templates(directory="templates")
 
 # from fastapi.middleware.cors import CORSMiddleware
-from ultimate_project.api_gateway.utils.auth_helpers import block_authenticated_users
+from utils import auth_helpers, authentication
+
 import json
 
-from utils.authentication import (
-    is_authenticated,
-    refresh_access_token,
-    register_fastAPI,
-)
 
 # ======= 🚀 FastAPI Application Setup for API Gateway 🚀 =======
 
@@ -91,7 +87,7 @@ async def token_refresh_middleware(request: Request, call_next):
     response = await call_next(request)
 
     # Check authentication status after request processing
-    is_auth, user_info = is_authenticated(request)
+    is_auth, user_info = authentication.is_authenticated(request)
 
     # If authenticated and token refresh needed, update the response 
     # cookies
@@ -176,6 +172,8 @@ async def reverse_proxy_handler(target_service: str, incoming_path: str, request
     static service container, using the reload-template/ default URL. 
     The static container then forwards the request to the target service, 
     retrieves the response, and serves it back, enabling full-page reloads.
+    - Use the bool is single page if you want to use the index.html
+        or not
     
     If you need to call a custom URL within the static container, simply 
     call the static service directly and use a URL defined in its 
@@ -236,15 +234,18 @@ async def reverse_proxy_handler(target_service: str, incoming_path: str, request
         # Forward headers (excluding 'host')
             
         # Check user authentication and attach user info headers
-        is_authenticated_user, user_info = is_authenticated(request)
+        is_authenticated_user, user_info = authentication.is_authenticated(request)
         if is_authenticated_user and user_info:
+            print("🔑 ==== IS AUTHENTICATED ==== \n", flush=True)
             forwarded_headers["X-User-ID"] = str(user_info.get("user_id", ""))
             forwarded_headers["X-Username"] = user_info.get("username", "")
 
         # Debug log cookies
+        print("=" * 50 + "\n", flush=True)
         print(f"🔑 Forwarding headers:", flush=True)
         for key, value in forwarded_headers.items():
             print(f"{key}: {value}", flush=True)
+        print("=" * 50 + "\n", flush=True)
         print(f"🍪 Forwarding cookies: {request.cookies}", flush=True)
 
         request_method = request.method
@@ -315,14 +316,13 @@ async def tournament_proxy(path: str, request: Request):
     # global user_id
     # user_id += 1
 
-    is_auth, user_info = is_authenticated(request)
+    is_auth, user_info = authentication.is_authenticated(request)
 
     if is_auth:
         user_id = user_info.get("user_id")
     else:
         user_id = 0
 
-        # return RedirectResponse(url="/login/") # to FIX FLO
         # return RedirectResponse(url="/login/") # to FIX FLO
 
     print(
@@ -410,7 +410,7 @@ async def match_proxy(path: str, request: Request, matchId: int = Query(None),
 
 # ====== 🚀 USER SERVICE ROUTE 🚀 ======
 
-#OK
+# WILL BE SUED INT EH FURTUR FOR THE FRIENDSHIP SYSTEM
 @app.api_route("/user/{path:path}", methods=["GET"])
 async def user_route(path: str, request: Request):
 
@@ -434,22 +434,24 @@ async def user_account_route(path: str, request: Request):
             serve_from_static=True, static_service_name="static_files")
 
 @app.api_route("/auth/{path:path}", methods=["GET"])
-async def user_auth_route(path:str, request: Request):
+async def user_auth_get_route(path:str, request: Request):
     
     # BUT PB WITH LOGOUT NEED TO ACESS LOGOUT
     # but becuse logout is as post so no problem maybe
-    response = await block_authenticated_users()(request)
+    response = await auth_helpers.block_and_redir_auth_users()(request)
     if response:
         return response
+    print("\ROUTE AUTH WITH GET CALLED\n", flush=True)
     if "HX-Request" in request.headers:        
         return await reverse_proxy_handler("user", "/auth/" + path, request)
     else:
         return await reverse_proxy_handler("user", "/auth/" + path, request, 
-            serve_from_static=True, static_service_name="static_files")
+            serve_from_static=True, static_service_name="static_files", )
 
 @app.api_route("/auth/{path:path}", methods=["POST"])
-async def user_auth_route(path:str, request: Request):
+async def user_auth_post_route(path:str, request: Request):
 
+    print("\n == CALLED AUTH ROUTE POSTE == \n", flush=True)
     if "HX-Request" in request.headers:        
         return await reverse_proxy_handler("user", "/auth/" + path, request)
     else:
@@ -562,13 +564,10 @@ async def login_page_route(request: Request, path: str = ""):
     # If not authenticated, show login page
     return await reverse_proxy_handler("static_files", "login/", request) """
 
-
 # Add auth-status endpoint for debugging
-@app.get("/auth/status")
+""" @app.get("/auth/status")
 async def auth_status(request: Request):
-    """
     Returns current authentication status - useful for debugging
-    """
     is_auth, user_info = is_authenticated(request)
 
     # Log the cookies for debugging
@@ -603,16 +602,14 @@ async def auth_status(request: Request):
             max_age=60 * 60 * 6,  # 6 hours
         )
 
-    return response
+    return response """
 
 
-@app.api_route("/register/{path:path}", methods=["GET"])
+""" @app.api_route("/register/{path:path}", methods=["GET"])
 @app.api_route("/register", methods=["GET"])
 async def register_page_route(request: Request, path: str = ""):
-    """
     Proxy for serving the register page.
     Redirects to home if user is already authenticated.
-    """
     # Check if user is authenticated
     is_auth, user_info = is_authenticated(request)
 
@@ -637,14 +634,12 @@ async def register_page_route(request: Request, path: str = ""):
 
     # If not authenticated, show login page
     return await reverse_proxy_handler("static_files", "register/", request)
+ """
 
-
-@app.api_route("/auth/register", methods=["POST"])
+""" @app.api_route("/auth/register", methods=["POST"])
 @app.api_route("/auth/register/", methods=["POST"])
 async def register_page_route(request: Request):
-    """
     Extracts form data and passes it to `register_fastAPI`
-    """
     form_data = await request.form()  # Extract form data
 
     first_name = form_data.get("first_name")
@@ -658,6 +653,8 @@ async def register_page_route(request: Request):
     return await register_fastAPI(
         request, response, username, password, email, first_name, last_name
     )
+
+ """
 
 
 @app.api_route("/two-factor-auth/", methods=["GET"])
@@ -833,7 +830,6 @@ async def delete_profile_proxy(request: Request):
             print(f"🗑️ Error processing deletion response: {str(e)}", flush=True)
 
     return response
-
 
 
 # ---------------------------------------------------------------

@@ -1,16 +1,13 @@
 # from django.middleware.csrf import get_token
-from fastapi import APIRouter, Request, Response, HTTPException
-from fastapi.responses import JSONResponse
+import jwt, os
+from django.http import JsonResponse
+from django.http import HttpRequest
 import requests
-import jwt
 import datetime
-import os
 import pyotp
 import re
 import secrets
 import hashlib
-
-router = APIRouter()
 
 # Clé secrète pour signer les JWT
 SECRET_JWT_KEY = os.getenv("JWT_KEY")
@@ -30,11 +27,11 @@ def generate_django_csrf_token():
     hashed_token = hashlib.sha256(secret.encode()).hexdigest()
     return (hashed_token)
 
-
 async def login_api(username: str, password: str):
     """
     Vérifie les identifiants via `databaseAPI`, puis génère un JWT stocké en cookie.
     """
+    
     print(f"🔐 Tentative de connexion pour {username}", flush=True)
 
     # Vérifier les identifiants en appelant `databaseAPI`
@@ -48,7 +45,7 @@ async def login_api(username: str, password: str):
         if db_response.status_code != 200:
             error_message = db_response.json().get("error", "Authentication failed")
             # Return error message to be displayed in the login-result div
-            return JSONResponse(
+            return JsonResponse(
                 content={"success": False, "message": error_message}, status_code=401
             )
 
@@ -57,7 +54,7 @@ async def login_api(username: str, password: str):
 
     except requests.exceptions.RequestException as e:
         # Return error message for connection issues
-        return JSONResponse(
+        return JsonResponse(
             content={"success": False, "message": f"Service unavailable: {str(e)}"},
             status_code=500,
         )
@@ -69,7 +66,7 @@ async def login_api(username: str, password: str):
 
     # If 2FA is enabled, return 2FA connection page
     if check_2fa_response.status_code == 200:
-        return JSONResponse(
+        return JsonResponse(
             content={"success": False, "message": "2FA is enabled"}, status_code=401
         )
 
@@ -104,7 +101,7 @@ async def login_api(username: str, password: str):
     # response.headers["HX-Login-Success"] = "true"
 
     # Create a JSONResponse with success message
-    json_response = JSONResponse(
+    json_response = JsonResponse(
         content={"success": True, "message": "Connexion réussie"}
     )
 
@@ -158,7 +155,7 @@ async def logout_api():
     print("🚪 Logout requested", flush=True)
 
     # Create response
-    response = JSONResponse(content={"success": True, "message": "Déconnexion réussie"})
+    response = JsonResponse(content={"success": True, "message": "Déconnexion réussie"})
 
     # Clear cookies by setting them with empty values and making them expire immediately
     response.delete_cookie(
@@ -182,12 +179,230 @@ async def logout_api():
 
     return (response)
 
+async def register_api(
+    username: str,
+    password: str,
+    email: str,
+    first_name: str,
+    last_name: str,
+):
+    """
+    Register a new user and return a JWT token.
+    """
+    print(f"🔐 Tentative d'inscription pour {username}", flush=True)
+
+    # Regex patterns for input validation
+    name_pattern = r"^(?!.*--)[a-zA-ZÀ-ÿ0-9\-]+$"
+    # == Validate first name == 
+    if not re.match(name_pattern, first_name):
+        return JsonResponse(
+            content={
+                "success": False,
+                "message": "Forbidden characters in first name. Allowed characters: a-z, A-Z, 0-9, -, _",
+            },
+            status_code=400,
+        )
+    # == Validate last name == 
+    if not re.match(name_pattern, last_name):
+        return JsonResponse(
+            content={
+                "success": False,
+                "message": "Forbidden characters in last name. Allowed characters: a-z, A-Z, 0-9, -, _",
+            },
+            status_code=400,
+        )
+    username_pattern = r"^(?!.*--)[a-zA-Z0-9_\-]+$"
+    # == Validate username == 
+    if not re.match(username_pattern, username):
+        return JsonResponse(
+            content={
+                "success": False,
+                "message": "Forbidden characters in username. Allowed characters: a-z, A-Z, 0-9, -, _",
+            },
+            status_code=400,
+        )
+    password_pattern = r"^(?!.*--)[a-zA-Z0-9_\-?!$€%&*()]+$"
+    # == Validate password == 
+    if not re.match(password_pattern, password):
+        return JsonResponse(
+            content={
+                "success": False,
+                "message": "Forbidden characters in password. Allowed characters: a-z, A-Z, 0-9, -, _, !, ?, $, €, %, &, *, (, )",
+            },
+            status_code=400,
+        )
+
+    # Check if username already exists first (industry standard to check one field at a time)
+    try:
+        # == Query for existing users with this username == 
+        # MODIFY WITH CALL TO FAST API
+        check_username_url = "http://ctn_api_gateway:8005/api/player/?username=" + username
+        username_response = requests.get(check_username_url)
+
+        if username_response.status_code == 200:
+            user_data = username_response.json()
+            # Handle case where user_data is a list (checking if username exists)
+            if isinstance(user_data, list) and len(user_data) > 0:
+                return JsonResponse(
+                    content={
+                        "success": False,
+                        "message": "Username already taken.",
+                    },
+                    status_code=400,
+                )
+            # Handle case where user_data is a dict with count key
+            elif isinstance(user_data, dict) and user_data.get("count", 0) > 0:
+                return JsonResponse(
+                    content={
+                        "success": False,
+                        "message": "Username already taken.",
+                    },
+                    status_code=400,
+                )
+
+        # == Then check if email already exists == 
+        check_email_url = "http://ctn_api_gateway:8005/api/player/?email=" + email
+        email_response = requests.get(check_email_url)
+
+        if email_response.status_code == 200:
+            email_data = email_response.json()
+            # Handle case where email_data is a list
+            if isinstance(email_data, list) and len(email_data) > 0:
+                return JsonResponse(
+                    content={
+                        "success": False,
+                        "message": "Email adress already taken.",
+                    },
+                    status_code=400,
+                )
+            # Handle case where email_data is a dict with count key
+            elif isinstance(email_data, dict) and email_data.get("count", 0) > 0:
+                return JsonResponse(
+                    content={
+                        "success": False,
+                        "message": "Email adress already taken.",
+                    },
+                    status_code=400,
+                )
+
+        # == If no duplicates, create the new user == 
+        create_user_url = "http://ctn_api_gateway:8005/api/player/"
+        registration_data = {
+            "username": username,
+            "email": email,
+            "password": password,
+            "first_name": first_name,
+            "last_name": last_name,
+        }
+
+        # Debug info
+        print(f"📝 Sending registration data: {registration_data}", flush=True)
+
+        create_response = requests.post(
+            create_user_url,
+            json=registration_data,
+            headers={"Content-Type": "application/json"},  # Ensure correct content type
+        )
+
+        # == Check if user creation was successful == 
+        if create_response.status_code not in (200, 201):
+            error_message = create_response.json().get("error", "Registration failed")
+            return JsonResponse(
+                content={"success": False, "message": error_message},
+                status_code=create_response.status_code,
+            )
+
+        # == User was created successfully, get user data for JWT == 
+        user_data = create_response.json()
+
+        # Generate JWT tokens like in login
+        expire_access = datetime.datetime.utcnow() + datetime.timedelta(
+            minutes=ACCESS_TOKEN_EXPIRE_MINUTES
+        )
+        expire_refresh = datetime.datetime.utcnow() + datetime.timedelta(
+            days=REFRESH_TOKEN_EXPIRE_DAYS
+        )
+
+        # == Create payloads for tokens ==
+        access_payload = {
+            "user_id": user_data.get("id", 0),
+            "username": username,
+            "exp": expire_access,
+        }
+        refresh_payload = {
+            "user_id": user_data.get("id", 0),
+            "username": username,
+            "exp": expire_refresh,
+        }
+
+        # == Generate tokens == 
+        access_token = jwt.encode(access_payload, SECRET_JWT_KEY, algorithm="HS256")
+        refresh_token = jwt.encode(refresh_payload, SECRET_JWT_KEY, algorithm="HS256")
+
+        # Debug logging
+        print(f"Registration successful for {username}", flush=True)
+        print(f"Access Token: {access_token}...", flush=True)
+        print(f"Refresh Token: {refresh_token}...", flush=True)
+
+        # Set redirect header for HTMX
+        # response.headers["HX-Redirect"] = "/home"
+
+        # == Create the response object == 
+        json_response = JsonResponse(
+            content={"success": True, "message": "Inscription réussie"}
+        )
+
+        # Copy headers from our response to the JSONResponse
+        # for key, value in response.headers.items():
+        #     json_response.headers[key] = value
+
+        # == Set JWT cookies == 
+        # == Set access token ==
+        json_response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,
+            secure=True,
+            samesite="Lax",
+            path="/",
+            max_age=60 * 60 * 6,  # 6 hours
+        )
+        # == Set refresh token ==
+        json_response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            httponly=True,
+            secure=True,
+            samesite="Lax",
+            path="/",
+            max_age=60 * 60 * 24 * 7,  # 7 days
+        )
+
+        # == Generate and set CSRF token == 
+        # csrf_token = secrets.token_urlsafe(64)
+        json_response.set_cookie(
+            key="csrftoken",
+            value=generate_django_csrf_token(),
+            httponly=True,
+            secure=True,
+            samesite="Lax",
+            path="/",
+            max_age=60 * 60 * 6,  # 6 hours, same as access token
+        )
+
+        return json_response
+
+    except requests.exceptions.RequestException as e:
+        # Handle any network or connection errors
+        return JsonResponse(
+            content={"success": False, "message": f"Service unavailable: {str(e)}"},
+            status_code=500,
+        )
 
 
 # Function to verify 2FA code and generate JWT tokens
 async def verify_2fa_and_login(
-    request: Request,
-    response: Response,
+    request: HttpRequest,
     username: str,
     token: str,
 ):
@@ -227,7 +442,7 @@ async def verify_2fa_and_login(
 
         # If still missing after fallback, return error
         if not username or not token:
-            return JSONResponse(
+            return JsonResponse(
                 content={
                     "success": False,
                     "message": "Username and token are required",
@@ -247,7 +462,7 @@ async def verify_2fa_and_login(
                 f"❌ Failed to retrieve user information: {user_response.status_code}",
                 flush=True,
             )
-            return JSONResponse(
+            return JsonResponse(
                 content={
                     "success": False,
                     "message": "Failed to retrieve user information",
@@ -271,7 +486,7 @@ async def verify_2fa_and_login(
             print(f"✅ Found user in paginated response", flush=True)
         else:
             print(f"❌ User not found in response", flush=True)
-            return JSONResponse(
+            return JsonResponse(
                 content={"success": False, "message": "User not found"}, status_code=404
             )
 
@@ -281,7 +496,7 @@ async def verify_2fa_and_login(
         secret = user.get("_two_fa_secret")
         if not secret:
             print(f"❌ 2FA secret not found for user", flush=True)
-            return JSONResponse(
+            return JsonResponse(
                 content={"success": False, "message": "2FA not set up properly"},
                 status_code=400,
             )
@@ -290,7 +505,7 @@ async def verify_2fa_and_login(
         totp = pyotp.TOTP(secret)
         if not totp.verify(token):
             print(f"❌ Invalid 2FA code", flush=True)
-            return JSONResponse(
+            return JsonResponse(
                 content={"success": False, "message": "Invalid 2FA code"},
                 status_code=401,
             )
@@ -327,7 +542,7 @@ async def verify_2fa_and_login(
         print(f"2FA Verified. Refresh Token: {refresh_token[:20]}...", flush=True)
 
         # Create a JSONResponse with success message
-        json_response = JSONResponse(
+        json_response = JsonResponse(
             content={"success": True, "message": "2FA verification successful"}
         )
 
@@ -370,242 +585,17 @@ async def verify_2fa_and_login(
         return json_response
 
     except requests.exceptions.RequestException as e:
-        return JSONResponse(
+        return JsonResponse(
             content={"success": False, "message": f"Service unavailable: {str(e)}"},
             status_code=500,
         )
     except Exception as e:
         print(f"Error in verify_2fa_and_login: {str(e)}", flush=True)
-        return JSONResponse(
+        return JsonResponse(
             content={
                 "success": False,
                 "message": f"Error processing request: {str(e)}",
             },
             status_code=500,
         )
-
-
-async def register_fastAPI(
-    username: str,
-    password: str,
-    email: str,
-    first_name: str,
-    last_name: str,
-):
-    """
-    Register a new user and return a JWT token.
-    """
-    print(f"🔐 Tentative d'inscription pour {username}", flush=True)
-
-    # Regex patterns for input validation
-    name_pattern = r"^(?!.*--)[a-zA-ZÀ-ÿ0-9\-]+$"
-    # Validate first name
-    if not re.match(name_pattern, first_name):
-        return JSONResponse(
-            content={
-                "success": False,
-                "message": "Forbidden characters in first name. Allowed characters: a-z, A-Z, 0-9, -, _",
-            },
-            status_code=400,
-        )
-
-    # Validate last name
-    if not re.match(name_pattern, last_name):
-        return JSONResponse(
-            content={
-                "success": False,
-                "message": "Forbidden characters in last name. Allowed characters: a-z, A-Z, 0-9, -, _",
-            },
-            status_code=400,
-        )
-
-    username_pattern = r"^(?!.*--)[a-zA-Z0-9_\-]+$"
-    # Validate username
-    if not re.match(username_pattern, username):
-        return JSONResponse(
-            content={
-                "success": False,
-                "message": "Forbidden characters in username. Allowed characters: a-z, A-Z, 0-9, -, _",
-            },
-            status_code=400,
-        )
-
-    password_pattern = r"^(?!.*--)[a-zA-Z0-9_\-?!$€%&*()]+$"
-    # Validate password
-    if not re.match(password_pattern, password):
-        return JSONResponse(
-            content={
-                "success": False,
-                "message": "Forbidden characters in password. Allowed characters: a-z, A-Z, 0-9, -, _, !, ?, $, €, %, &, *, (, )",
-            },
-            status_code=400,
-        )
-
-    # Check if username already exists first (industry standard to check one field at a time)
-    try:
-        # Query for existing users with this username
-        check_username_url = "http://databaseapi:8007/api/player/?username=" + username
-        username_response = requests.get(check_username_url)
-
-        if username_response.status_code == 200:
-            user_data = username_response.json()
-            # Handle case where user_data is a list (checking if username exists)
-            if isinstance(user_data, list) and len(user_data) > 0:
-                return JSONResponse(
-                    content={
-                        "success": False,
-                        "message": "Username already taken.",
-                    },
-                    status_code=400,
-                )
-            # Handle case where user_data is a dict with count key
-            elif isinstance(user_data, dict) and user_data.get("count", 0) > 0:
-                return JSONResponse(
-                    content={
-                        "success": False,
-                        "message": "Username already taken.",
-                    },
-                    status_code=400,
-                )
-
-        # Then check if email already exists
-        check_email_url = "http://databaseapi:8007/api/player/?email=" + email
-        email_response = requests.get(check_email_url)
-
-        if email_response.status_code == 200:
-            email_data = email_response.json()
-            # Handle case where email_data is a list
-            if isinstance(email_data, list) and len(email_data) > 0:
-                return JSONResponse(
-                    content={
-                        "success": False,
-                        "message": "Email adress already taken.",
-                    },
-                    status_code=400,
-                )
-            # Handle case where email_data is a dict with count key
-            elif isinstance(email_data, dict) and email_data.get("count", 0) > 0:
-                return JSONResponse(
-                    content={
-                        "success": False,
-                        "message": "Email adress already taken.",
-                    },
-                    status_code=400,
-                )
-
-        # If no duplicates, create the new user
-        create_user_url = "http://databaseapi:8007/api/player/"
-        registration_data = {
-            "username": username,
-            "email": email,
-            "password": password,
-            "first_name": first_name,
-            "last_name": last_name,
-        }
-
-        # Debug info
-        print(f"📝 Sending registration data: {registration_data}", flush=True)
-
-        create_response = requests.post(
-            create_user_url,
-            json=registration_data,
-            headers={"Content-Type": "application/json"},  # Ensure correct content type
-        )
-
-        # Check if user creation was successful
-        if create_response.status_code not in (200, 201):
-            error_message = create_response.json().get("error", "Registration failed")
-            return JSONResponse(
-                content={"success": False, "message": error_message},
-                status_code=create_response.status_code,
-            )
-
-        # User was created successfully, get user data for JWT
-        user_data = create_response.json()
-
-        # Generate JWT tokens like in login
-        expire_access = datetime.datetime.utcnow() + datetime.timedelta(
-            minutes=ACCESS_TOKEN_EXPIRE_MINUTES
-        )
-        expire_refresh = datetime.datetime.utcnow() + datetime.timedelta(
-            days=REFRESH_TOKEN_EXPIRE_DAYS
-        )
-
-        # Create payloads for tokens
-        access_payload = {
-            "user_id": user_data.get("id", 0),
-            "username": username,
-            "exp": expire_access,
-        }
-        refresh_payload = {
-            "user_id": user_data.get("id", 0),
-            "username": username,
-            "exp": expire_refresh,
-        }
-
-        # Generate tokens
-        access_token = jwt.encode(access_payload, SECRET_JWT_KEY, algorithm="HS256")
-        refresh_token = jwt.encode(refresh_payload, SECRET_JWT_KEY, algorithm="HS256")
-
-        # Debug logging
-        print(f"Registration successful for {username}", flush=True)
-        print(f"Access Token: {access_token}...", flush=True)
-        print(f"Refresh Token: {refresh_token}...", flush=True)
-
-        # Set redirect header for HTMX
-        # response.headers["HX-Redirect"] = "/home"
-
-        # Create the response object
-        json_response = JSONResponse(
-            content={"success": True, "message": "Inscription réussie"}
-        )
-
-        # Copy headers from our response to the JSONResponse
-        # for key, value in response.headers.items():
-        #     json_response.headers[key] = value
-
-        # Set JWT cookies
-        json_response.set_cookie(
-            key="access_token",
-            value=access_token,
-            httponly=True,
-            secure=True,
-            samesite="Lax",
-            path="/",
-            max_age=60 * 60 * 6,  # 6 hours
-        )
-
-        json_response.set_cookie(
-            key="refresh_token",
-            value=refresh_token,
-            httponly=True,
-            secure=True,
-            samesite="Lax",
-            path="/",
-            max_age=60 * 60 * 24 * 7,  # 7 days
-        )
-
-        # Generate and set CSRF token
-        # csrf_token = secrets.token_urlsafe(64)
-        json_response.set_cookie(
-            key="csrftoken",
-            value=generate_django_csrf_token(),
-            httponly=True,
-            secure=True,
-            samesite="Lax",
-            path="/",
-            max_age=60 * 60 * 6,  # 6 hours, same as access token
-        )
-
-        return json_response
-
-    except requests.exceptions.RequestException as e:
-        # Handle any network or connection errors
-        return JSONResponse(
-            content={"success": False, "message": f"Service unavailable: {str(e)}"},
-            status_code=500,
-        )
-
-
-
 
