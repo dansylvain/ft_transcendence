@@ -103,10 +103,10 @@ setInterval(actionCooldown, 1000);
 window.tjs_isDragging = false;
 window.tjs_previous_mouse = { x: 0, y: 0 };
 
-window.tjs_radius = window.tjs_radius || 15;
+window.tjs_radius = window.tjs_radius || 50;
 
-window.tjs_theta = window.tjs_theta || 0;         // horizontal angle
-window.tjs_phi = window.tjs_phi || Math.PI / 2;   // vertical angle
+window.tjs_theta = window.tjs_theta || 0;   // horizontal angle
+window.tjs_phi   = window.tjs_phi   || 0;   // vertical angle
 
 window.tjs_container.onmousedown = function (e) {
 	window.tjs_isDragging = true;
