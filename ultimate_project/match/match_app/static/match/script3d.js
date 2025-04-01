@@ -130,11 +130,11 @@ window.tjs_container.onmousemove = function (e) {
 	window.tjs_phi = Math.max(0.1, Math.min(Math.PI - 0.1, window.tjs_phi));
 
 	// calculate new camera position
-	window.tjs_camera.position.x = window.tjs_radius * Math.sin(window.tjs_phi) * Math.sin(window.tjs_theta);
-	window.tjs_camera.position.z = window.tjs_radius * Math.sin(window.tjs_phi) * Math.cos(window.tjs_theta);
+	window.tjs_camera.position.x = window.tjs_radius * Math.sin(window.tjs_phi) * Math.sin(window.tjs_theta) + tjs_camera_offset_x;
+	window.tjs_camera.position.z = window.tjs_radius * Math.sin(window.tjs_phi) * Math.cos(window.tjs_theta) + tjs_camera_offset_z;
 	window.tjs_camera.position.y = window.tjs_radius * Math.cos(window.tjs_phi);
 
-	window.tjs_camera.lookAt(0, 0, 0);
+	window.tjs_camera.lookAt(tjs_camera_offset_x, 0, tjs_camera_offset_z);
 
 	window.tjs_previous_mouse = { x: e.clientX, y: e.clientY };
 };
@@ -144,11 +144,11 @@ window.tjs_container.onwheel = function (e) {
 	window.tjs_radius -= e.deltaY * 0.1;
 	window.tjs_radius = Math.max(10, Math.min(500, window.tjs_radius));
 
-	window.tjs_camera.position.x = window.tjs_radius * Math.sin(window.tjs_phi) * Math.sin(window.tjs_theta);
-	window.tjs_camera.position.z = window.tjs_radius * Math.sin(window.tjs_phi) * Math.cos(window.tjs_theta);
+	window.tjs_camera.position.x = window.tjs_radius * Math.sin(window.tjs_phi) * Math.sin(window.tjs_theta) + tjs_camera_offset_x;
+	window.tjs_camera.position.z = window.tjs_radius * Math.sin(window.tjs_phi) * Math.cos(window.tjs_theta) + tjs_camera_offset_z;
 	window.tjs_camera.position.y = window.tjs_radius * Math.cos(window.tjs_phi);
 
-	window.tjs_camera.lookAt(0, 0, 0);
+	window.tjs_camera.lookAt(tjs_camera_offset_x, 0, tjs_camera_offset_z);
 };
 
 window.tjs_container.addEventListener('wheel', function (event) {
@@ -174,10 +174,13 @@ function animate() {
     window.tjs_renderer.render(window.tjs_scene, window.tjs_camera);
 }
 
-window.tjs_camera.position.x = 50;
+const tjs_camera_offset_x = 50;
+const tjs_camera_offset_z = 30;
+
+window.tjs_camera.position.x = tjs_camera_offset_x;
 window.tjs_camera.position.y = 50;
-window.tjs_camera.position.z = 30;
-window.tjs_camera.lookAt(50, 0, 30);
+window.tjs_camera.position.z = tjs_camera_offset_z;
+window.tjs_camera.lookAt(tjs_camera_offset_x, 0, tjs_camera_offset_z);
 
 animate();
 
