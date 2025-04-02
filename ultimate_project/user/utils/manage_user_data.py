@@ -10,7 +10,7 @@ async def get_user_info_w_username(username):
         async with httpx.AsyncClient() as client:
             
             response = await client.get(
-                f"http://ctn_api_gateway:8005/api/player/?username={username}"
+                f"http://ctn_api_gateway:8005/api-database/player/?username={username}"
             )
 
             response_text = response.text  # For plain text responses
@@ -42,7 +42,7 @@ async def get_if_user_auth_w_username(username):
         async with httpx.AsyncClient() as client:
             
             response = await client.get(
-                f"http://ctn_api_gateway:8005/api/player/?username={username}"
+                f"http://ctn_api_gateway:8005/api-database/player/?username={username}"
             )
 
             response_text = response.text  # For plain text responses
@@ -80,7 +80,7 @@ async def update_user_w_user_id(user_id, data):
             
             # NEED MOD THIS GO THROUGH FAST API
             response = await client.patch(
-                f"http://databaseapi:8007/api/player/{user_id}/",
+                f"http://databaseapi:8007/api-database/player/{user_id}/",
                 json=data,
                 headers=headers,
             )

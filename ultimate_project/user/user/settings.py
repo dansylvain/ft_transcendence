@@ -183,22 +183,22 @@ CORS_ALLOW_ORIGINS = [
     "http://localhost:8003",  # Static files
     "http://localhost:8004",  # User
     "http://localhost:8005",  # FastAPI
-    "http://localhost:8006",  # Authentication
     "http://localhost:8007",  # DatabaseAPI
     "https://localhost:8443"  # For secure HTTPS access
     f"https://{PI_DOMAIN}",  # Production
 ]
+
+CORS_ALLOW_ORIGINS = ["*"]
 CORS_ALLOW_METHODS = ["GET", "POST", "OPTIONS", "PUT", "DELETE"]
-CORS_ALLOW_HEADERS = ["*"]
 
 # Cookie settings
 SESSION_COOKIE_SECURE = True  # Ensures session cookies are only sent over HTTPS
-SESSION_COOKIE_HTTPONLY = True  # Prevents JavaScript access (for security)
-SESSION_COOKIE_SAMESITE = "Lax"  # Allows cookies on same-site navigation, blocks cross-site
+SESSION_COOKIE_HTTPONLY = False
+SESSION_COOKIE_SAMESITE = 'None' # was 'Lax"
 
 CSRF_COOKIE_SECURE = True  # Ensures CSRF cookie is only sent over HTTPS
 CSRF_COOKIE_HTTPONLY = False  # JavaScript needs access to CSRF token
-CSRF_COOKIE_SAMESITE = "Lax"  # Allows CSRF cookie on same-site requests
+CSRF_COOKIE_SAMESITE = "None"  # Allows CSRF cookie on same-site requests
 #CSRF_COOKIE_NAME = "csrf_token"  # Change the CSRF cookie name
 
 # CSRF Middleware settings

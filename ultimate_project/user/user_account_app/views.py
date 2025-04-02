@@ -26,7 +26,7 @@ async def delete_profile_view(request):
     # Get user data from database API
     async with httpx.AsyncClient() as client:
         response = await client.get(
-            f"http://databaseapi:8007/api/player/?username={username}"
+            f"http://databaseapi:8007/api-database/player/?username={username}"
         )
         # ! Should not happen once the route will be locked
         if response.status_code != 200:
@@ -104,7 +104,7 @@ async def delete_profile_view(request):
                 # AT THIS POINT, 2FA HAS BEEN CHECKED CORRECTLY
                 # ! INCORRECT ROUTE
                 password_response = await client.post(
-                    "http://databaseapi:8007/api/verify-credentials/",
+                    "http://databaseapi:8007/api-database/verify-credentials/",
                     data={"username": username, "password": password},
                 )
 
@@ -118,7 +118,7 @@ async def delete_profile_view(request):
 
                 # Delete user
                 delete_response = await client.delete(
-                    f"http://databaseapi:8007/api/player/{user['id']}/"
+                    f"http://databaseapi:8007/api-database/player/{user['id']}/"
                 )
 
                 if delete_response.status_code != 204:

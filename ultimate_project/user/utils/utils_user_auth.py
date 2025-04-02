@@ -1,9 +1,10 @@
 # from django.middleware.csrf import get_token
-import jwt, os
-from django.http import JsonResponse
+import os, jwt, datetime
+from django.http import JsonResponse, HttpResponse
 from django.http import HttpRequest
+import httpx
+import jwt
 import requests
-import datetime
 import pyotp
 import re
 import secrets
@@ -18,71 +19,41 @@ REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 # URL de l'API qui gère la vérification des identifiants
 
-API_VERIFY_CREDENTIALS = "http://ctn_api_gateway:8005/api/verify-credentials/"
-API_CHECK_2FA = "http://ctn_api_gateway:8005/api/check-2fa/"
+API_VERIFY_CREDENTIALS = "http://ctn_api_gateway:8005/api-database/verify-credentials/"
+API_CHECK_2FA = "http://ctn_api_gateway:8005/api-database/check-2fa/"
+API_GATEWAY_LOGIN_COOKIES = "http://ctn_api_gateway:8005/api-gateway/set-cookies/login-cookies/"
 
 
-# IN THE FUTURE NEED A WAY TO BE SURE INTERNAT POST
-# ARE VALID
-""" def create_internal_api_token():
-    payload = {
-        "iss": "internal-service",
-        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1),  # Valid for 1 hour
-        "scope": "internal"
-    }
-    token = jwt.encode(payload, SECRET_JWT_KEY, algorithm="HS256")
-    return token """
-
-async def login_api(username: str, password: str):
+async def login_handler(username: str, password: str):
     """
     Vérifie les identifiants via `databaseAPI`, puis génère un JWT stocké en cookie.
     """
-    
-    print(f"🔐 Tentative de connexion pour {username}", flush=True)
-
-    # Vérifier les identifiants en appelant `databaseAPI`
+    print(f"🔐 Tentative de connexion pour {username} and password: {password}", flush=True)
     try:
-        db_response = requests.post(
-            API_VERIFY_CREDENTIALS,
-            data={"username": username, "password": password},
-        )
-
+        async with httpx.AsyncClient() as client:
+            db_response = await client.post(API_VERIFY_CREDENTIALS,
+                data={"username": username, "password": password},)
         if db_response.status_code != 200:
             error_message = db_response.json().get("error", "Authentication failed")
-            return JsonResponse(
-                data={"success": False, "message": error_message}, 
-                status=401
-            )
-
-        # L'authentification est réussie, récupérer les données utilisateur
+            return JsonResponse(data={"success": False, "message": error_message}, status=401)
         auth_data = db_response.json()
-
-    except requests.exceptions.RequestException as e:
-        return JsonResponse(
-            data={"success": False, "message": f"Service unavailable: {str(e)}"}, 
-            status=500
-        )
-
-    # Handle 2FA check
-    check_2fa_response = requests.post(
-        API_CHECK_2FA, data={"username": username, "password": password}
-    )
-
-    print(f"\n\n == STATUS CODE 2fa: {check_2fa_response.status_code} == \n\n", flush=True)
-    if check_2fa_response.status_code == 200:
-        return JsonResponse(
-            data={"success": False, "message": "2FA is enabled"}, 
-            status=401
-        )
-
-    # Générer les tokens JWT
-    expire_access = datetime.datetime.utcnow() + datetime.timedelta(
-        minutes=ACCESS_TOKEN_EXPIRE_MINUTES
-    )
-    expire_refresh = datetime.datetime.utcnow() + datetime.timedelta(
-        days=REFRESH_TOKEN_EXPIRE_DAYS
-    )
-
+        print(f"🔑 Authentication successful, auth_data: {auth_data}", flush=True)
+    except httpx.RequestError as e:
+        return JsonResponse(data={"success": False, "message": f"Service unavailable during authentication: {str(e)}"}, status=500)
+    # Step 2: Handle 2FA check
+    try:
+        async with httpx.AsyncClient() as client:
+            check_2fa_response = await client.post(API_CHECK_2FA,
+                data={"username": username, "password": password})
+        print(f"\n\n == STATUS CODE 2FA: {check_2fa_response.status_code} == \n\n", flush=True)
+        if check_2fa_response.status_code == 200 and check_2fa_response.json().get("success") == True:
+            return JsonResponse(data={"success": False, "message": "2FA is enabled"}, status=200)
+    except httpx.RequestError as e:
+        return JsonResponse(data={"success": False, "message": f"Error in 2FA check: {str(e)}"}, status=500)
+    # Generate JWT tokens
+    print(f"\n\n == AFTER STATUS CODE == \n\n", flush=True) #remove
+    expire_access = datetime.datetime.utcnow() + datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire_refresh = datetime.datetime.utcnow() + datetime.timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
     access_payload = {
         "user_id": auth_data.get("user_id", 0),
         "username": username,
@@ -93,37 +64,31 @@ async def login_api(username: str, password: str):
         "username": username,
         "exp": expire_refresh,
     }
-
     access_token = jwt.encode(access_payload, SECRET_JWT_KEY, algorithm="HS256")
     refresh_token = jwt.encode(refresh_payload, SECRET_JWT_KEY, algorithm="HS256")
+    # Construct the body to send to the API Gateway to set the cookies 
+    body = {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+    }
+    headers = {'Content-Type': 'application/json'}
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(API_GATEWAY_LOGIN_COOKIES, json=body, headers=headers)
+        if response.status_code == 200:
+            data = {
+                "success": True,
+                "message": "Connexion réussie",
+                }
+            json_response = JsonResponse(data)
+            return json_response
+        else:
+            return JsonResponse(data={"success": False, "message": f"API Gateway returned an error: {response.status_code}"}, status_code=500)
+    except httpx.RequestError as e:
+        return JsonResponse(data={"success": False, "message": f"Error sending data to API gateway: {str(e)}"}, status_code=500)
 
-    # Create a JSONResponse with success message
-    json_response = JsonResponse(
-        data={"success": True, "message": "Connexion réussie"}
-    )
 
-    # Set cookies for JWT and CSRF tokens
-    json_response.set_cookie(
-        key="access_token",
-        value=access_token,
-        httponly=True,
-        secure=True,
-        samesite="Lax",
-        path="/",
-        max_age=60 * 60 * 6,
-    )
-    # Set the refresh token
-    json_response.set_cookie(
-        key="refresh_token",
-        value=refresh_token,
-        httponly=True,
-        secure=True,
-        samesite="Lax",
-        path="/",
-        max_age=60 * 60 * 24 * 7,
-    )
 
-    return json_response
 
 
 
@@ -214,7 +179,7 @@ async def register_api(
     try:
         # == Query for existing users with this username == 
         # MODIFY WITH CALL TO FAST API
-        check_username_url = "http://ctn_api_gateway:8005/api/player/?username=" + username
+        check_username_url = "http://ctn_api_gateway:8005/api-database/player/?username=" + username
         username_response = requests.get(check_username_url)
 
         if username_response.status_code == 200:
@@ -239,7 +204,7 @@ async def register_api(
                 )
 
         # == Then check if email already exists == 
-        check_email_url = "http://ctn_api_gateway:8005/api/player/?email=" + email
+        check_email_url = "http://ctn_api_gateway:8005/api-database/player/?email=" + email
         email_response = requests.get(check_email_url)
 
         if email_response.status_code == 200:
@@ -264,7 +229,7 @@ async def register_api(
                 )
 
         # == If no duplicates, create the new user == 
-        create_user_url = "http://ctn_api_gateway:8005/api/player/"
+        create_user_url = "http://ctn_api_gateway:8005/api-database/player/"
         registration_data = {
             "username": username,
             "email": email,
@@ -364,7 +329,6 @@ async def register_api(
             status_code=500,
         )
 
-
 # Function to verify 2FA code and generate JWT tokens
 async def verify_2fa_and_login(
     request: HttpRequest,
@@ -418,7 +382,8 @@ async def verify_2fa_and_login(
     # Call the database API to verify the 2FA code
     try:
         # Get user data first to retrieve the secret
-        get_user_url = f"http://databaseapi:8007/api/player/?username={username}"
+        #fix called
+        get_user_url = f"http://ctn_api_gateway:8005/api-database/player/?username={username}"
         print(f"🔍 Querying database API for user: {get_user_url}", flush=True)
         user_response = requests.get(get_user_url)
 

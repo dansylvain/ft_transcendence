@@ -10,3 +10,5 @@ itsdangerous
 requests
 python-multipart
 pyotp
+python-dotenv 
+starlette

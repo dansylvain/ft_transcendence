@@ -19,8 +19,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 15
 REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 # URL de l'API qui gère la vérification des identifiants
-DATABASE_API_URL = "http://databaseapi:8007/api/verify-credentials/"
-CHECK_2FA_URL = "http://databaseapi:8007/api/check-2fa/"
+DATABASE_API_URL = "http://databaseapi:8007/api-database/verify-credentials/"
+CHECK_2FA_URL = "http://databaseapi:8007/api-database/check-2fa/"
 
 
 def generate_django_csrf_token():
@@ -183,7 +183,7 @@ async def verify_2fa_and_login(
     # Call the database API to verify the 2FA code
     try:
         # Get user data first to retrieve the secret
-        get_user_url = f"http://databaseapi:8007/api/player/?username={username}"
+        get_user_url = f"http://databaseapi:8007/api-database/player/?username={username}"
         print(f"🔍 Querying database API for user: {get_user_url}", flush=True)
         user_response = requests.get(get_user_url)
 

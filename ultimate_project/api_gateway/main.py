@@ -11,14 +11,17 @@ from starlette.exceptions import HTTPException as StarletteHTTPException  # If y
 import secrets
 import hashlib
 import os
-
-templates = Jinja2Templates(directory="templates")
-
-# from fastapi.middleware.cors import CORSMiddleware
-from utils import auth_helpers, authentication
-
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse, StreamingResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 import json
 
+
+# from fastapi.middleware.cors import CORSMiddleware
+from utils import auth_helpers, authentication, cookies_helpers
+
+# useful ?
+templates = Jinja2Templates(directory="templates")
 
 # ======= 🚀 FastAPI Application Setup for API Gateway 🚀 =======
 
@@ -64,15 +67,11 @@ logger = logging.getLogger(__name__)
 # [Middleware n°1]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for development
-    allow_credentials=True,  # Allow cookies
-    allow_methods=["*"],  # Allow all HTTP methods
-    allow_headers=["*"],  # Allow all headers
-    expose_headers=[
-        "Content-Type",
-        "X-CSRFToken",
-        "Set-Cookie",
-    ],  # Expose these headers
+    allow_origins=["*"],  # Allow only trusted origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["Content-Type", "X-CSRFToken", "Set-Cookie"],
 )
 
 # 🔄 Token Refresh Middleware for HTTP Requests  
@@ -128,7 +127,7 @@ class CSRFMiddleware(BaseHTTPMiddleware):
                 path="/", 
                 max_age=60 * 60 * 6  # 6 hours
             )
-            return response
+            return (response)
         
         # For POST requests, validate the CSRF token
         if request.method == "POST":
@@ -142,7 +141,6 @@ class CSRFMiddleware(BaseHTTPMiddleware):
             print(f"\n == CSRF token from cookie: {csrf_token_from_cookie} == \n", flush=True)
             if not csrf_token_from_header or csrf_token_from_header != csrf_token_from_cookie:
                 raise HTTPException(status_code=403, detail="Forbidden (CSRF token mismatch)") """
-        
         return await call_next(request)
 
     def generate_csrf_token(self):
@@ -153,7 +151,6 @@ class CSRFMiddleware(BaseHTTPMiddleware):
         #return csrf_serializer.dumps({"csrftoken": secrets.token_hex(32)})
 app.add_middleware(CSRFMiddleware)
 
-
 # This middleware is used to debug incoming cookies in FastAPI.
 # It prints the incoming cookies to the console for debugging purposes.
 # [Middleware n°4]
@@ -161,15 +158,31 @@ app.add_middleware(CSRFMiddleware)
 async def debug_cookies_middleware(request: Request, call_next):
     print(f"🔍 Incoming Cookies in FastAPI: {request.cookies}", flush=True)
     response = await call_next(request)
-
-    # Also log outgoing cookies in response headers
     if "set-cookie" in response.headers:
-        print(
-            f"🔍 Outgoing Set-Cookie headers: {response.headers.get('set-cookie')}",
-            flush=True,
-        )
-
+        set_cookie_headers = response.headers.getlist("set-cookie")
+        for cookie in set_cookie_headers:
+            print(f"🔍 Outgoing Set-Cookie header: {cookie}", flush=True)
     return (response)
+
+@app.middleware("http")
+async def debug_full_response_middleware(request: Request, call_next):
+    print(f"🔍 Incoming Request: {request.method} {request.url}", flush=True)
+    response = await call_next(request)
+    # Print full response details (headers, status code, and body)
+    print(f"🔍 Outgoing Response Status: {response.status_code}", flush=True)
+    print(f"🔍 Response Headers: {response.headers}", flush=True)
+    try:
+        if response.headers.get("Content-Type") == "application/json":
+            response_body = await response.json()
+            print(f"🔍 Response Body (JSON): {response_body}", flush=True)
+        else:
+            # Print raw content for non-JSON responses (e.g., HTML or plain text)
+            response_body = await response.body()
+            print(f"🔍 Response Body (Raw): {response_body.decode()}", flush=True)
+    except Exception as e:
+        print(f"🚨 Error parsing response body: {e}", flush=True)
+    return response
+
 
 
 # ===== ⚠️ Exception Handling ⚠️ =====
@@ -181,7 +194,7 @@ async def debug_cookies_middleware(request: Request, call_next):
 # FastAPI, only the first one registered will be used.
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):
-    return await reverse_proxy_handler("static_files", f"error/{exc.status_code}", request)
+    return await reverse_proxy_handler("static_files", f"error/{exc.status_code}/", request)
 
 # ======= 🛠️ Main Function Handling the Reverse Proxy for the Route 🛠️ =======
 
@@ -307,6 +320,23 @@ async def reverse_proxy_handler(target_service: str, incoming_path: str, request
             headers=response_headers,
             media_type=content_type if content_type else None,
         )
+
+
+# 🍪 ====== HANDLING COOKIES 🍪 ======
+
+@app.api_route("/api-gateway/set-cookies/{path:path}/", methods=["POST"])
+async def set_cookies(request: Request, path: str):
+    print(f"🔑 LOGIN COOKIES ROUTE ROUTE ROUTE CALLED ROUTE", flush=True)
+    try:
+        if path == "login-cookies":
+            print(f"🔑 LOGIN COOKIES CALLED ROUTE", flush=True)
+            body = await request.json()
+            return await cookies_helpers.set_login_cookies(body)
+        else:
+            raise HTTPException(status_code=404, detail="Path not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
 
 # ====== 🏠 REDIRECT TO HOME 🏠 ======
 
@@ -512,7 +542,7 @@ async def logout_route(request: Request): """
 
 # ====== 🗂️ API DATABASE PROXY 🗂️ ======
 
-@app.api_route("/api/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
+@app.api_route("/api-database/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
 async def databaseapi_proxy(path: str, request: Request):
     
     """
@@ -521,30 +551,30 @@ async def databaseapi_proxy(path: str, request: Request):
     - **path**: The path to the resource in the database API
 
     ### GET Examples:
-    - **List all players**: GET /api/player/
-    - **Get player by ID**: GET /api/player/1/
-    - **Filter players by username**: GET /api/player/?username=player1
-    - **Filter players by email**: GET /api/player/?email=example
+    - **List all players**: GET /api-database/player/
+    - **Get player by ID**: GET /api-database/player/1/
+    - **Filter players by username**: GET /api-database/player/?username=player1
+    - **Filter players by email**: GET /api-database/player/?email=example
 
-    - **List all tournaments**: GET /api/tournament/
-    - **Get tournament by ID**: GET /api/tournament/1/
+    - **List all tournaments**: GET /api-database/tournament/
+    - **Get tournament by ID**: GET /api-database/tournament/1/
 
-    - **List all matches**: GET /api/match/
-    - **Get match by ID**: GET /api/match/1/
-    - **Filter matches by player**: GET /api/match/?player1=1
-    - **Filter matches by tournament**: GET /api/match/?tournament=1
+    - **List all matches**: GET /api-database/match/
+    - **Get match by ID**: GET /api-database/match/1/
+    - **Filter matches by player**: GET /api-database/match/?player1=1
+    - **Filter matches by tournament**: GET /api-database/match/?tournament=1
 
     ### POST Examples:
-    - **Create a new player**: POST /api/player/
-    - **Create a new tournament**: POST /api/tournament/
-    - **Create a new match**: POST /api/match/
+    - **Create a new player**: POST /api-database/player/
+    - **Create a new tournament**: POST /api-database/tournament/
+    - **Create a new match**: POST /api-database/match/
 
     ### Pagination:
     - All list endpoints are paginated with 10 items per page
-    - **Navigate pages**: GET /api/player/?page=2
+    - **Navigate pages**: GET /api-database/player/?page=2
 
     ### Check 2FA:
-    - **Check 2FA**: POST /api/check-2fa/
+    - **Check 2FA**: POST /api-database/check-2fa/
     - **Body**:
       - `username`: The username of the user
       - `password`: The password of the user
@@ -556,7 +586,7 @@ async def databaseapi_proxy(path: str, request: Request):
     ```json
     {
         "count": 100,
-        "next": "http://localhost:8005/api/player/?page=2",
+        "next": "http://localhost:8005/api-database/player/?page=2",
         "previous": null,
         "results": [
             {
@@ -571,7 +601,6 @@ async def databaseapi_proxy(path: str, request: Request):
     ```
     """
     return await reverse_proxy_handler("databaseapi", f"api/{path}", request)
-
 
 # -----------------------------------------------------------
 # MODIFY TO AHDNLE IN USER MANAGEMENT

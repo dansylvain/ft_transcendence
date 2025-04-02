@@ -11,4 +11,5 @@ itsdangerous
 cryptography
 django-cors-headers
 httpx
+simplejson
 asgiref

@@ -1,4 +1,4 @@
-curl -i -s -X POST http://databaseapi:8007/api/verify-credentials/ \
+curl -i -s -X POST http://databaseapi:8007/api-database/verify-credentials/ \
   -H "Content-Type: application/json" \
   -d '{"username":"user1", "password":"password"}'
 
@@ -25,7 +25,7 @@ def login_view(request):
         # Call the database API to verify credentials
         try:
             response = requests.post(
-                'http://databaseapi:8000/api/verify-credentials/',
+                'http://databaseapi:8000/api-database/verify-credentials/',
                 data={'username': username, 'password': password}
             )
             
