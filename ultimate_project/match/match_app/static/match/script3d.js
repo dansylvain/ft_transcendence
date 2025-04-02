@@ -193,8 +193,8 @@ function animate() {
     window.tjs_renderer.render(window.tjs_scene, window.tjs_camera);
 }
 
-const tjs_camera_offset_x = 50;
-const tjs_camera_offset_z = 30;
+var tjs_camera_offset_x = 50;
+var tjs_camera_offset_z = 30;
 
 actionRestViewUP();
 animate();
