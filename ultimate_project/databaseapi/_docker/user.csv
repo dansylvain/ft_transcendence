@@ -1,20 +1,20 @@
-first_name,last_name,username,email,password,two_fa_enabled,_two_fa_secret
-admin_first_name,admin_last_name,admin,admin@admin.com,admin,False
-Johnnnnny,Haliday,user2,user2@hehe.com,password,False
-Peter,Parker,user3,user3@hehe.com,password,False
-Michael,Scott,user4,user4@hehe.com,password,False
-Thanos,The Titan,user5,user5@hehe.com,password,False
-Bruce,Wayne,user6,user6@hehe.com,password,False
-Clark,Kent,user7,user7@hehe.com,password,False
-Diana,Princess,user8,user8@hehe.com,password,False
-Pablo,Picasso,user9,user9@hehe.com,password,False
-Jean-Marie,Bigard Ma Couillasse,user10,user10@hehe.com,password,False
-Bond,James Bond,user11,user11@hehe.com,password,False
-Genghis,Khan,user12,user12@hehe.com,password,False
-Paris,Hilton,user13,user13@hehe.com,password,False
-test-first_name,test-last_name,test,test@test.com,password,False
-two-fa-first_name,two-fa-last_name,test_2fa,test_2fa@hehe.com,password,True,S3EF2KESUQR45MRTL7MXDSJVI6JQDG4R
-delete-user-fn,delete-user-ln,delete_2fa,delete_2fa@hehe.com,password,True,S3EF2KESUQR45MRTL7MXDSJVI6JQDG42
-delete-std,delete-std,delete_standard,delete-std@hehe.com,password,False
-same-auth,same-auth,same_auth,same_auth@hehe.com,password,False
-same-auth-hehe,same-auth-haha,same_auth_2fa,same_auth_2fa@hehe.com,password,False,9JUF2KESUQR45MRTL7MXDSJVI6JQDG42
+first_name,last_name,username,email,password,two_fa_enabled,language,_two_fa_secret
+admin_first_name,admin_last_name,admin,admin@admin.com,admin,False,en
+Johnnnnny,Haliday,user2,user2@hehe.com,password,False,de
+Peter,Parker,user3,user3@hehe.com,password,False,en
+Michael,Scott,user4,user4@hehe.com,password,False,fr
+Thanos,The Titan,user5,user5@hehe.com,password,False,es
+Bruce,Wayne,user6,user6@hehe.com,password,False,tl
+Clark,Kent,user7,user7@hehe.com,password,False,en
+Diana,Princess,user8,user8@hehe.com,password,False,en
+Pablo,Picasso,user9,user9@hehe.com,password,False,en
+Jean-Marie,Bigard Ma Couillasse,user10,user10@hehe.com,password,False,en
+Bond,James Bond,user11,user11@hehe.com,password,False,en
+Genghis,Khan,user12,user12@hehe.com,password,False,en
+Paris,Hilton,user13,user13@hehe.com,password,False,en
+test-first_name,test-last_name,test,test@test.com,password,False,en
+two-fa-first_name,two-fa-last_name,test_2fa,test_2fa@hehe.com,password,True,en,S3EF2KESUQR45MRTL7MXDSJVI6JQDG4R
+delete-user-fn,delete-user-ln,delete_2fa,delete_2fa@hehe.com,password,True,en,S3EF2KESUQR45MRTL7MXDSJVI6JQDG42
+delete-std,delete-std,delete_standard,delete-std@hehe.com,password,False,en
+same-auth,same-auth,same_auth,same_auth@hehe.com,password,False,en
+same-auth-hehe,same-auth-haha,same_auth_2fa,same_auth_2fa@hehe.com,password,False,en,9JUF2KESUQR45MRTL7MXDSJVI6JQDG42

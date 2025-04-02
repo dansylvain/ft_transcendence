@@ -17,6 +17,7 @@ def create_user(current_user):
     password = current_user["password"]
     two_fa_enabled = current_user["two_fa_enabled"]
     _two_fa_secret = current_user["_two_fa_secret"]
+    language = current_user["language"]
 
     User = get_user_model()
 
@@ -30,6 +31,7 @@ def create_user(current_user):
             last_name=last_name,
             two_fa_enabled=two_fa_enabled,
             _two_fa_secret=_two_fa_secret,
+            language=language
         )
         print(f"⚠️  ✅✅  ⚠️  ADMIN USER created  ⚠️  ✅✅  ⚠️", flush=True)
     else:
@@ -41,6 +43,7 @@ def create_user(current_user):
             last_name=last_name,
             two_fa_enabled=two_fa_enabled,
             _two_fa_secret=_two_fa_secret,
+            language=language
         )
         print(f"✅✅ User {username} created ✅✅", flush=True)
 

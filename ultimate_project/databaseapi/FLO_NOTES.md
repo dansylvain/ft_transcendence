@@ -59,6 +59,34 @@ Besoin d'une date butoire cette semaine pour que je puisse reprendre mon travail
 									TOUDOU
 --------------------------------------------------------------------------------
 
+```python
+
+import requests
+
+url = 'http://databaseapi:8007/api/player/2/'
+data = {
+    'language': 'de',
+}
+
+response = requests.put(url, json=data)
+print(response.status_code)
+print(response.json())
+
+```
+
+
+```python
+
+import requests
+
+url = 'http://databaseapi:8007/api/player/2/'
+
+response = requests.get(url, json=data)
+print(response.status_code)
+print(response.json())
+
+```
+
 
 🟧 
 
