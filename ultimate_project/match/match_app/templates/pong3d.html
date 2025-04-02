@@ -1,38 +1,104 @@
 {% load static %}
 
 
-<div style="display:none">
-<head>
-    <style>
-        #scene-container {
-            width: 80vw;
-            height: 80vh;
-            margin: 0 auto;
-            border: 2px solid white;
-        }
-        .config_buttons {
-            background-color: #4CAF50;            
-        }            
-    </style>
-    <script class="match-script">
-        window.rasp = "{{ rasp }}"; 
-        window.pidom = "{{ pidom }}";
-        window.matchId = "{{ matchId }}"
-        window.playerId = "{{ playerId }}";
-    </script>
-</head>
-</div>
+<link rel="stylesheet" href="{% static 'match/styles.css' %}">
 
-<body>
-    <br>
+<style>
+    #scene-container {
+        width: 80vw;
+        height: 80vh;
+        margin: 0 auto;
+        border: 2px solid white;
+    }
+    .config_buttons {
+        background-color: #4CAF50;            
+    }            
+</style>
+
+<script class="match-script">
+    window.rasp = "{{ rasp }}"; 
+    window.pidom = "{{ pidom }}";
+    window.matchId = "{{ matchId }}";
+    window.playerId = "{{ playerId }}";
+    window.selfName = "{{ playerName }}";
+    window.player2Id = "{{ player2Id }}";
+    window.player2Name = "{{ player2Name }}";
+</script>
+
+
+<div id="match">
+	<!-- <div id="p3"></div> -->
+	<h1 id="spec" style="display: none">Je suis spectateur</h1>	
+
     <button class="config_buttons", onclick="actionRestViewUP()">rest view UP</button>
     <button class="config_buttons", onclick="actionRestViewFPS()">rest view FPS</button>
     <button id="upgrade", class="config_buttons", onclick="actionUpgrade()">upgrade</button>
     <div id="scene-container"></div>
     <script class="match-script" src="{% static 'match/script3d.js' %}"></script>
     <br>
-    <br>
-    <br>
-    <br>
-    <div id="end" style="display:none"></div>
-</body>
+    
+	<div id="waiting">Waiting</div>
+	<div class="loader">
+        <div class="circle"></div>
+        <div class="countdown">3</div>
+    </div>
+	<div id="end-cont" style="display:none">
+	    <div id="end"></div>
+	</div>
+</div>
+<div id="rules-overlay">
+    <div id="score">Score</div>
+    <p id="inst-right">{{ playerName }} <br> keys: ↑ / ↓</p>
+    <p id="inst-left">{{ player2Name }} <br> keys: enter / +</p>
+    <p>Be the first one to score 5 points.</p><button id="quit-match-button" onclick="
+    stopMatch('{{matchId}}');
+    const matchDiv = document.getElementById('match');
+    if (matchDiv)
+        matchDiv.remove();
+    const rulesOverlay = document.getElementById('rules-overlay');
+    if (rulesOverlay)
+        rulesOverlay.style.display = 'none';">EXIT</button>
+</div>
+
+<script>
+    window.addEventListener("DOMContentLoaded", () => {
+        let lastVisitedPage = history.state?.lastVisitedPage || sessionStorage.getItem("lastVisitedPage");
+
+        console.log("Dernière page visitée:", lastVisitedPage);
+        console.log("Page actuelle:", window.location.href);
+
+        // Vérifie si une page précédente existe et si l'URL actuelle n'est pas celle de la page d'erreur
+        if (lastVisitedPage && window.location.href === lastVisitedPage && !sessionStorage.getItem("redirected")) {
+            console.log("Redirection vers la dernière page visitée :", lastVisitedPage);
+            
+            // Marque que la redirection a eu lieu pour éviter la boucle infinie
+            sessionStorage.setItem("redirected", "true");
+
+            sessionStorage.setItem("redirected", "true");
+        } else {
+            sessionStorage.removeItem("redirected");
+            console.log("Aucune page précédente trouvée ou déjà sur la page visitée.");
+        }
+    });
+
+    const countdownElement = document.querySelector('.countdown');
+    const loaderElement = document.querySelector('.loader');
+    const countdownText = ['3', '2', '1', 'GO!'];
+
+    let currentIndex = 0;
+
+    const countdownInterval = setInterval(() => {
+        countdownElement.textContent = countdownText[currentIndex];
+        currentIndex++;
+
+        // Quand "GO!" est affiché, on arrête l'intervalle et cache l'élément loader
+        if (currentIndex === countdownText.length) {
+            clearInterval(countdownInterval); // Arrêter l'intervalle
+            setTimeout(() => {
+                loaderElement.classList.add('no-waiting'); // Ajouter la classe no-waiting pour cacher l'élément
+            }, 1500); // Laisser un petit délai avant de cacher (optionnel)
+        }
+    }, 1000); // Change le texte toutes les 1 seconde
+
+</script>
+

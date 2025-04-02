@@ -1,7 +1,61 @@
-window.tjs_container = window.tjs_container || document.getElementById('scene-container');
+function stopMatch(matchId) {
+	if (!matchId)
+	{
+		console.log("matchID EST NULLE");
+		const oldScripts = document.querySelectorAll("script.match-script");
+		console.log("olscript len", oldScripts.length);			
+		oldScripts.forEach(oldScript =>{console.log("old: ", oldScript.src); oldScript.remove()});
+		return;
+	}
+		
+	if (window.selfMatchId == matchId)
+	{	
+		fetch(`/match/stop-match/${window.selfId}/${matchId}/`)
+		.then(response => {
+			if (!response.ok) 
+				throw new Error(`Error HTTP! Status: ${response.status}`);		  
+			return response.text();
+		})
+		.then(data => console.log(data))
+		.catch(error => console.log(error))
+	}
+	else
+		document.getElementById('match').remove()
+	console.log("YOUHOUHOUHOU");
+	// if (window.selfMatchId != window.matchId)
+	// {
+		console.log("jypigequeuedalle");
+		if (!window.matchSocket)
+			console.log("LE WEBSOCKET ETS NULL.");
+		else 
+		{
+			console.log("je sais pas ce qu eje fou la");
+			if (window.matchSocket.readyState === WebSocket.OPEN)
+			{
+				console.log("je vais envoyer 42");
+				window.stopFlag = true
+				window.matchSocket.close(3666);
+				window.matchSocket2.close(3666);
+			} 
+			else 
+			{
+				console.log("La WebSocket était déjà fermée.");
+			}
+			console.log("je nai pas plante");
+		}
+		console.log("toujours vivant");
+		const oldScripts = document.querySelectorAll("script.match-script");
+		console.log("olscript len", oldScripts.length);			
+		oldScripts.forEach(oldScript =>{console.log("old: ", oldScript.src); oldScript.remove()});
+	// }
+	// else
+	// 	console.log("pas spec!!");
+}
 
-window.tjs_scene = window.tjs_scene || new THREE.Scene();
-window.tjs_camera = window.tjs_camera || new THREE.PerspectiveCamera(75, window.tjs_container.clientWidth / window.tjs_container.clientHeight, 0.1, 1000);
+window.tjs_container = document.getElementById('scene-container');
+
+window.tjs_scene = new THREE.Scene();
+window.tjs_camera = new THREE.PerspectiveCamera(75, window.tjs_container.clientWidth / window.tjs_container.clientHeight, 0.1, 1000);
 window.tjs_renderer = window.tjs_renderer || new THREE.WebGLRenderer({ antialias: true });
 window.tjs_renderer.setSize(window.tjs_container.clientWidth, window.tjs_container.clientHeight);
 window.tjs_container.appendChild(window.tjs_renderer.domElement);
@@ -40,21 +94,28 @@ window.tjs_r2.position.x = 90;
 window.tjs_ball.position.x = -1;
 window.tjs_ball.position.z = -1;
 
-window.tjs_upgrade = window.tjs_upgrade || {
+window.tjs_upgrade = {
     user_lvl: 0,
     points: 0,
     cooldown: 5,
 }
 
 function actionCooldownUpdate() {
+    const u = document.getElementById('upgrade');
+
+    if (!u) 
+        return 0;
+
     // update the html button
     if (!window.tjs_upgrade.cooldown) {
-        document.getElementById("upgrade").innerHTML = `Upgrade (+${window.tjs_upgrade.points})`;
+        u.innerHTML = `Upgrade (+${window.tjs_upgrade.points})`;
     } else if (window.tjs_upgrade.points) {
-        document.getElementById("upgrade").innerHTML = `Upgrade (+${window.tjs_upgrade.points}) ${window.tjs_upgrade.cooldown}s`;
+        u.innerHTML = `Upgrade (+${window.tjs_upgrade.points}) ${window.tjs_upgrade.cooldown}s`;
     } else {
-        document.getElementById("upgrade").innerHTML = `Upgrade ${window.tjs_upgrade.cooldown}s`;
+        u.innerHTML = `Upgrade ${window.tjs_upgrade.cooldown}s`;
     }
+
+    return 1;
 }
 
 // function call on button click
@@ -94,11 +155,12 @@ function actionCooldown() {
     if (window.tjs_upgrade.cooldown == 0) {
         window.tjs_upgrade.points++;
     }
-    actionCooldownUpdate();
+    if (actionCooldownUpdate())
+        setTimeout(actionCooldown, 1000);
 }
 
 actionCooldownUpdate();
-setInterval(actionCooldown, 1000);
+actionCooldown();
 
 function doRotation() {
     window.tjs_phi = Math.max(0.1, Math.min(Math.PI - 0.1, window.tjs_phi));
@@ -246,81 +308,97 @@ function setCommands3D(socket, socket2) {
     });
 }
 
-function onMatchWsMessage3D(event, [waiting, end], waitingState) {
-	const data = JSON.parse(event.data);
+function onMatchWsMessage3D(event, score_div, [waiting, endCont, end], waitingState) {
+    const data = JSON.parse(event.data);
 
     if (data.state == "end")
-    {   
-        end.innerHTML = "the winner is :" + data.winnerId + end.innerHTML;
-        end.classList.add("end");
-    }
-    if (waitingState[0] != data.state) 
     {
-        waitingState[0] = data.state;   
-        if (waiting) 
+        const winnerId = data.winnerId == window.playerId ? window.selfName : window.player2Name;
+
+        end.innerHTML = `The winner is: ${winnerId} <br>
+        Score: ${data.score[0]} : ${data.score[1]}
+                <img src="https://media1.tenor.com/m/Xd5ZJk8TV84AAAAd/christ-cosmique.gif"
+             alt="Winner GIF"
+             class="winner-gif">
+
+             `
+        + end.innerHTML;
+        endCont.classList.add("end-cont");
+    }
+    if (waitingState[0] != data.state)
+    {
+        waitingState[0] = data.state;
+        if (waiting)
         {
-            if (data.state == "waiting")            
+            if (data.state == "waiting")
                 waiting.classList.remove("no-waiting");
-            else            
-                waiting.classList.add("no-waiting");            
-        }           
+            else
+                waiting.classList.add("no-waiting");
+        }
     }
 
     if (data.yp1 !== undefined && data.yp2 !== undefined) {
-        console.log("data.yp1: ", data.yp1);
-
         window.tjs_r1.position.z = (60 / 100) * (data.yp1);
         window.tjs_r2.position.z = (60 / 100) * (data.yp2);
 
         window.tjs_ball.position.x = (100 / 100) * (data.ball[0] - 1);
         window.tjs_ball.position.z = (60 / 100) * (data.ball[1] - 1);
     }
+
+    if (data.score !== undefined) {
+        score_div.innerText = data.score[0] + " | " + data.score[1];
+    }
 }
 
 function sequelInitMatchWs3D(socket) {
-	const [waiting, end] = [		
-		document.getElementById("waiting"),	document.getElementById("end")];	
-	let waitingState = ["waiting"];
+    const [waiting, endCont, end] = [
+        document.getElementById("waiting"),
+        document.getElementById("end-cont"),
+        document.getElementById("end")
+    ];
+    let waitingState = ["waiting"];
 
-	socket.onmessage = event => onMatchWsMessage3D(
-		event, [waiting, end], waitingState);
+    const score_div = document.getElementById("score");
 
-	const spec = document.getElementById("spec")
-	if (spec)
-	{
-		if (window.selfMatchId != window.matchId)
-			spec.style.display = "block";
-		else
-			spec.style.display = "none";
-	}
-	initSecPlayer3D();
-	setCommands3D(socket, window.matchSocket2);
+    socket.onmessage = event => onMatchWsMessage3D(
+        event, score_div, [waiting, endCont, end], waitingState);
+
+    const spec = document.getElementById("spec")
+    if (spec)
+    {
+        if (window.selfMatchId != window.matchId)
+            spec.style.display = "block";
+        else
+            spec.style.display = "none";
+    }
+    initSecPlayer3D();
+    setCommands3D(socket, window.matchSocket2);
 }
 
 function initSecPlayer3D() {
 
     if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
         window.pidom = "localhost:8443";
-	else
-		window.pidom = window.location.hostname + ":8443";
+    else
+        window.pidom = window.location.hostname + ":8443";
 
     window.matchSocket2 = new WebSocket(
         `wss://${window.pidom}/ws/match/${window.matchId}/` +
         `?playerId=${-window.playerId}`);
-	window.matchSocket2.onopen = () => {
-		console.log("Connexion Match établie 2nd Player😊");
-	};
-	window.matchSocket2.onclose = (event) => {
-		console.log("Connexion Match disconnected 😈 2nd Player");
-	};
-	// setCommands3D2(window.matchSocket2);
+    window.matchSocket2.onopen = () => {
+        console.log("Connexion Match établie 2nd Player😊");
+    };
+    window.matchSocket2.onclose = (event) => {
+        console.log("Connexion Match disconnected 😈 2nd Player");
+    };
+    // setCommands3D2(window.matchSocket2);
 }
 
 function initMatchWs3D() {
     if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
         window.pidom = "localhost:8443";
-	else
-		window.pidom = window.location.hostname + ":8443";
+    else
+        window.pidom = window.location.hostname + ":8443";
 
 //si je viens du debut je sui sclosé (et je reviens par boucle) si je viens de onclse je continu normal
     console.log("INIT MATCH 😊😊😊");
@@ -329,29 +407,29 @@ function initMatchWs3D() {
     if (window.matchSocket && window.antiLoop)
         return window.matchSocket.close();
     // if (window.matchSocket)
-	// 	window.matchSocket.close();
-	window.antiLoop = true;
+    //     window.matchSocket.close();
+    window.antiLoop = true;
     window.matchSocket = new WebSocket(
         `wss://${window.pidom}/ws/match/${window.matchId}/` +
         `?playerId=${window.playerId}`);
-	window.matchSocket.onopen = () => {
-		console.log("Connexion Match établie 😊");
-	};
-	window.matchSocket.onclose = (event) => {	
-		console.log("Connexion Match disconnected 😈");		
-		window.antiLoop = false;
-		console.log("CODE: " + event.code);
-		console.log("STOP: " + window.stopFlag);
-		if (event.code !== 3000 && !window.stopFlag)
-		{			
-			console.log("codepas42");
-			initMatchWs3D();	
-		}
-		else
-			console.log("code42");
-		window.stopFlag = false;
-	};
-	sequelInitMatchWs3D(window.matchSocket);
+    window.matchSocket.onopen = () => {
+        console.log("Connexion Match établie 😊");
+    };
+    window.matchSocket.onclose = (event) => {
+        console.log("Connexion Match disconnected 😈");
+        window.antiLoop = false;
+        console.log("CODE: " + event.code);
+        console.log("STOP: " + window.stopFlag);
+        if (event.code !== 3000 && !window.stopFlag)
+        {
+            console.log("codepas42");
+            initMatchWs3D();
+        }
+        else
+            console.log("code42");
+        window.stopFlag = false;
+    };
+    sequelInitMatchWs3D(window.matchSocket);
 }
 
 initMatchWs3D();
