@@ -62,33 +62,51 @@ window.tjs_container.appendChild(window.tjs_renderer.domElement);
 
 window.tjs_textureLoader = window.tjs_textureLoader || new THREE.TextureLoader();
 
-window.tjs_rgeo = window.tjs_rgeo || new THREE.BoxGeometry(10, 10, 40 * (60 / 100));
+window.tjs_rgeo = window.tjs_rgeo || new THREE.BoxGeometry(10, 5, 40 * (60 / 100));
 window.tjs_sgeo = window.tjs_sgeo || new THREE.SphereGeometry(2, 32, 32);
+window.tjs_tgeo = window.tjs_tgeo || new THREE.BoxGeometry(95, 5, 60);
 
 window.tjs_rmat = window.tjs_rmat || [
-    new THREE.MeshBasicMaterial({ map: window.tjs_textureLoader.load('https://threejs.org/examples/textures/crate.gif') }),
-    new THREE.MeshBasicMaterial({ map: window.tjs_textureLoader.load('https://threejs.org/examples/textures/crate.gif') }),
-    new THREE.MeshBasicMaterial({ map: window.tjs_textureLoader.load('https://threejs.org/examples/textures/crate.gif') }),
-    new THREE.MeshBasicMaterial({ map: window.tjs_textureLoader.load('https://threejs.org/examples/textures/crate.gif') }),
-    new THREE.MeshBasicMaterial({ map: window.tjs_textureLoader.load('https://threejs.org/examples/textures/crate.gif') }),
-    new THREE.MeshBasicMaterial({ map: window.tjs_textureLoader.load('https://threejs.org/examples/textures/crate.gif') })
+    new THREE.MeshBasicMaterial({ map: window.tjs_textureLoader.load('https://threejs.org/examples/textures/snellen.png') }),
+    new THREE.MeshBasicMaterial({ map: window.tjs_textureLoader.load('https://threejs.org/examples/textures/snellen.png') }),
+    new THREE.MeshBasicMaterial({ map: window.tjs_textureLoader.load('https://threejs.org/examples/textures/snellen.png') }),
+    new THREE.MeshBasicMaterial({ map: window.tjs_textureLoader.load('https://threejs.org/examples/textures/snellen.png') }),
+    new THREE.MeshBasicMaterial({ map: window.tjs_textureLoader.load('https://threejs.org/examples/textures/snellen.png') }),
+    new THREE.MeshBasicMaterial({ map: window.tjs_textureLoader.load('https://threejs.org/examples/textures/snellen.png') })
 ];
 
-window.tjs_smat = window.tjs_smat || new THREE.MeshBasicMaterial({ map: window.tjs_textureLoader.load('https://threejs.org/examples/textures/crate.gif') });
+window.tjs_tmat = window.tjs_tmat || [
+    new THREE.MeshBasicMaterial({ map: window.tjs_textureLoader.load('https://threejs.org/examples/textures/terrain/grasslight-big.jpg') }),
+    new THREE.MeshBasicMaterial({ map: window.tjs_textureLoader.load('https://threejs.org/examples/textures/terrain/grasslight-big.jpg') }),
+    new THREE.MeshBasicMaterial({ map: window.tjs_textureLoader.load('https://threejs.org/examples/textures/terrain/grasslight-big.jpg') }),
+    new THREE.MeshBasicMaterial({ map: window.tjs_textureLoader.load('https://threejs.org/examples/textures/terrain/grasslight-big.jpg') }),
+    new THREE.MeshBasicMaterial({ map: window.tjs_textureLoader.load('https://threejs.org/examples/textures/terrain/grasslight-big.jpg') }),
+    new THREE.MeshBasicMaterial({ map: window.tjs_textureLoader.load('https://threejs.org/examples/textures/terrain/grasslight-big.jpg') })
+];
+
+window.tjs_smat = window.tjs_smat || new THREE.MeshBasicMaterial({ map: window.tjs_textureLoader.load('https://threejs.org/examples/textures/sprite.png') });
 
 window.tjs_r1 = window.tjs_r1 || new THREE.Mesh(window.tjs_rgeo, window.tjs_rmat);
 window.tjs_r2 = window.tjs_r2 || new THREE.Mesh(window.tjs_rgeo, window.tjs_rmat);
+
+window.tjs_table = window.tjs_table || new THREE.Mesh(window.tjs_tgeo, window.tjs_tmat);
+window.tjs_table.position.x = 47.5;
+window.tjs_table.position.y = -5;
+window.tjs_table.position.z = 30;
 
 window.tjs_ball = window.tjs_ball || new THREE.Mesh(window.tjs_sgeo, window.tjs_smat);
 
 window.tjs_scene.add(window.tjs_ball);
 window.tjs_scene.add(window.tjs_r1);
 window.tjs_scene.add(window.tjs_r2);
+window.tjs_scene.add(window.tjs_table);
 
 window.tjs_r1.position.z = -20;
+window.tjs_r1.position.y = 0;
 window.tjs_r1.position.x = 5;
 
 window.tjs_r2.position.z = -20;
+window.tjs_r2.position.y = 0;
 window.tjs_r2.position.x = 90;
 
 window.tjs_ball.position.x = -1;
