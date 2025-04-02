@@ -16,6 +16,7 @@ class PlayerSerializer(serializers.ModelSerializer):
             "password",
             "two_fa_enabled",
             "_two_fa_secret",
+            "language",
         ]
         extra_kwargs = {"password": {"write_only": True}}
 

@@ -40,6 +40,26 @@ def home(request):
     # Get username from JWT header if available
     username = request.headers.get("X-Username") or request.session.get("username")
 
+
+    # Extract prefered language
+    if username:
+        try:
+            # Remove the trailing slash from the URL
+            response = requests.get(
+                    f"http://databaseapi:8007/api/player/?username={username}"
+            )
+            tmp = response.json()
+            # Check if the response contains any player data
+            if tmp and isinstance(tmp, list) and len(tmp) > 0:
+                pref_language = tmp[0]["language"]
+            else:
+                pref_language = "en"
+        except Exception as e:
+            print(f"Error retrieving language preference: {e}", flush=True)
+            pref_language = "en"
+    else:
+        pref_language = "en"
+
     if (
         request.headers.get("HX-Request")
         and request.headers.get("HX-Login-Success") != "true"
@@ -50,7 +70,7 @@ def home(request):
     # print(f"SERVER_IP: {os.getenv('PATH')}", flush=True)
     # print("#####################################################################", flush=True)
 
-    obj = {"username": username, "page": "partials/home.html"}
+    obj = {"username": username, "page": "partials/home.html", "language" : pref_language}
     return render(request, "index.html", obj)
 
 

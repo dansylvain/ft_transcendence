@@ -43,6 +43,19 @@ class Player(AbstractBaseUser, PermissionsMixin):
     # UUID field
     uuid = models.UUIDField(default=uuid.uuid4, blank=True)
 
+    # Language field
+    language = models.CharField(
+        max_length=2,
+        choices=[
+            ("en", "English"),
+            ("fr", "Francais"),
+            ("de", "Deustch"),
+            ("es", "Espanol"),
+            ("tl", "TlhIngan"),
+        ],
+        default="en",
+    )
+
     # Encrypt and decrypt 2FA secrets
     @property
     def two_fa_secret(self):
