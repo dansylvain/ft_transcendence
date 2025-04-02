@@ -6,6 +6,8 @@
 									LAST DEV WEEK
 --------------------------------------------------------------------------------
 
+🟧 Create a worklofo to delete the DB at 42
+
 🟧 Test and stabilize multi-users connection 
 
 🟧 Write tests about it once merged with Thomas 
@@ -16,39 +18,79 @@
 
 🟧 Lock all the routes
 
+
+
+--------------------------------------------------------------------------------
+									let
+--------------------------------------------------------------------------------
+- Je ne peux pas commencer la derniere etape qui est de securiser le site tant que tu continue a travailler sur l'architecture
+- Je ne peux pas commencer a travailler sur cette partie tant que ces changements sont parfaitement integres a ta partie :
+	1 - JWT avec UUID users
+	2 - 2FA authentication
+	3 - Delete users
+	4 - Le jeu qui est stable
+	5 - La SPA qui est stable
+	6 - Connexion Websockets
+	7 - Register / Login / Logout
+	8 - Back and forwards buttons
+
+- Plus tot je commence ce travail de securisation, plus tot je pourrai t'aider.
+- Plus tard je commence ce travail, moins je pourrai t'aider
+- Moins ces features seront integrees / testees / stabilisees, moins cela nous facilite la tache
+
+On a une maturite sur le projet / archi depuis 3 mois desormais, et tu rebat les regles du jeu a deux semaines du rendu
+
+Meme si tu fais quelquechose de mieux / plus stable,
+et dans l'idee que tout notre travail s'integre parfaitement au tien,
+on va devoir tous passer du temps a comprendre ce que tu as fais,
+
+ALORS que l'idee initiale etait de te faciliter le travail / te paver la route pour que tu puisses APRES avoir fait la feature repenser l'architecture en derniere semaine
+
+VU comment ton travail s'articule, je suis oblige t'attendre que tu ai finit ton travail, de le comprendre, et de m'adapter a la nouvell archi pour pouvoir la securiser, et si et seulement si toutes nos features MODULES comme MANDATORY sont respectees.
+
+DONC si tu arrive a refacto l'archi + integrer toutes nos features, et ainsi qu'on puisse beneficier de ton travail, on est tous preneur ici
+
+Mais si tu n'y arrive pas + que tu ne fais pas les features, tu nous aura tous fait perdre du temps, alors que l'idee initiale etait d'en gagner.
+
+Besoin d'une date butoire cette semaine pour que je puisse reprendre mon travail.
+
+
 --------------------------------------------------------------------------------
 									TOUDOU
 --------------------------------------------------------------------------------
 
-<<<<<<< HEAD
-=======
-
-
-🟧 METTRE LES CHAMPS REQUIRED DANS DELETE-PROFILE.HTMl sur les champs password et otp
->>>>>>> flo_prevent_double_auth
 
 🟧 
 
-🟧 Tester le multi login sur la branche `prevent_double_auth`
+🟧 DELETE LE BASH MIGRATION.DELETE.SH DANS LE MAKEFILE
 
-🟧 TESTER LE WORKLOW : Register -> turn on 2FA -> Logout -> Login -> 2FA -> Disable 2fa -> Logout -> Login -> delete user -> Login
+🟧 LIMITER LA LENGHT DES INPUTS DANS LES FORMULAIRES ==> VOIR AVEC MERGE THOMAS
+
+🟧 SILENCE HEALTHCHECKS 
+
+🟧 Retravailler la securisation des routes dans fastAPI
+
+✅ TODO FOR DELETING THE DATABASE
+
+✅ METTRE LES CHAMPS REQUIRED DANS DELETE-PROFILE.HTMl sur les champs password et otp
+
+✅ Tester le multi login sur la branche `prevent_double_auth`
+
+✅ TESTER LE WORKLOW : Register -> turn on 2FA -> Logout -> Login -> 2FA -> Disable 2fa -> Logout -> Login -> delete user -> Login
 
 ✅ CREER DES TEST AVEC LE CSRF TOKEN	
 
-🟧 LIMITER LA LENGHT DES INPUTS DANS LES FORMULAIRES
-
 ✅ FIX LES TEST DES 2FA QUI PLANTES PARFOIS dans playright
 
-🟧 Retravailler la securisation des routes dans fastAPI
 
 `STABILIZATION`:
 
 ## BASE REQUIREMENTS
 
-🟧 Bouton Back and Forward (notaament dans un match)
+✅ Bouton Back and Forward (notaament dans un match)
 ✅ Pong contre soi-meme
 ✅ Tournoi 
-🟧 Mettre des alias a chaque debut de tournoi
+✅ Mettre des alias a chaque debut de tournoi
 🟧 Injections SQL / XSS
 ✅ HTTPS (wss)
 🟧 Secure routes API
@@ -59,49 +101,6 @@
 `AVATAR CREATION` :
 
 In user creation : create a default image when creating an user
-
-
-
-`POST 2FA`
-
-injections SQL
-CROSS Injection
-
-`LOGIN 2 FIX`
-FORMULAIRE PAS DE FEEDBACK POUR LOGIN + REGISTER
-bugs de console quand on resgiter avec success
-
-AVOIR UN SEUL FICHIER DE TEST pour les deux formulaire et activer des conditionelles 
-
-
-`2FA`
-For Dan => translate 2FA
-
-
-Then try to login with 2FA
-
-
-
-
-
-
-
-
-
-
-========================
-
-Now that I got a functionnal login/logout logic, I need to implement the registration logic following the same pattern accros fastAPI main file, authentication file.
-
-The resgister form is register.html . Note that we're going to username as primary login.
-
-Please add a email field to the register.html.
-
-The request will be a POST request to the route "auth/register". Like login, you'll also create a 
-
-
-
-========================
 
 
 

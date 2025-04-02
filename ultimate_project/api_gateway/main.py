@@ -1,17 +1,13 @@
 from fastapi import FastAPI, Request, HTTPException, Query, Depends
-import httpx
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from starlette.exceptions import HTTPException as StarletteHTTPException
-import logging
-from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-
-templates = Jinja2Templates(directory="templates")
-
-
-from auth_helpers import block_authenticated_users
+import httpx
+import logging
 import json
+
+
 from authentication import (
     login_fastAPI,
     is_authenticated,
@@ -349,6 +345,9 @@ async def match_proxy(
     request: Request,
     matchId: int = Query(None),
     playerId: int = Query(None),
+    playerName: str = Query(None),
+    player2Id: int = Query(None),
+    player2Name: str = Query(None)    
 ):
     """
     Proxy requests to the match microservice.
@@ -362,7 +361,8 @@ async def match_proxy(
       - Returns the content from the match microservice.
     """
     path = (
-        f"match/match2d/?matchId={matchId}&playerId={playerId}"
+        f"match/match2d/?matchId={matchId}&playerId={playerId}&playerName={playerName}&player2Id={player2Id}&player2Name={player2Name}"
+        
         if matchId is not None and playerId is not None
         else "match/"
     )

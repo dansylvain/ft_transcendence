@@ -1,5 +1,4 @@
-# from django.middleware.csrf import get_token
-from fastapi import APIRouter, Request, Response, HTTPException
+from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 import requests
 import jwt

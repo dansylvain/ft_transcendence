@@ -17,12 +17,22 @@
 	<h2 id ="myh1">
 		Je dois choisir un joueur et entrer dans le match!
 	</h2>
-	<h2 id="player">Je suis le joueur ...</h2>
+	<h2 id="player">Je suis {{user_name}}</h2>
 	<label for="dim">Selectionner le nombre de dimension</label>
 	<select id="dim">
 		<option value="2">2D</option>
 		<option value="3">3D</option>
 	</select>
+<input
+	id="match-player-name"
+	type="text"
+	maxlength="50"
+	pattern=".{1,50}"
+	required
+	placeholder="enter a name"
+	oninput="this.value = this.value.replace(/[<>]/g, '');"
+/>
+<button onclick="newMatchPlayer(window.matchSocket)">Create Player</button>
 	<div id="players"></div>
 	<div id="matchs"></div>
 	<div id="overlay-match"></div>
@@ -40,9 +50,6 @@ window.addEventListener("DOMContentLoaded", () => {
         
         // Marque que la redirection a eu lieu pour éviter la boucle infinie
         sessionStorage.setItem("redirected", "true");
-
-        // Redirige vers la dernière page visitée
-        window.location.href = lastVisitedPage;
     } else {
         sessionStorage.removeItem("redirected");
         console.log("Aucune page précédente trouvée ou déjà sur la page visitée.");

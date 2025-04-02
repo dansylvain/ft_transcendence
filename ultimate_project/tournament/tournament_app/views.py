@@ -5,10 +5,20 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from tournament_app.services.tournament_consumer import tournaments
+import requests
 
 def simple_match(request: HttpRequest, user_id):
     
     print(f"dans simple match {user_id}", flush=True)
+    if user_id:
+        response = requests.get(
+                    f"http://databaseapi:8007/api/player/{user_id}/"
+                )
+        tmp = response.json()
+        user_name = tmp["username"]
+    else:
+        user_name = 0
+
     return render(
         request,
         "simple_match.html",
@@ -16,7 +26,8 @@ def simple_match(request: HttpRequest, user_id):
             "rasp": os.getenv("rasp", "false"),
             "pidom": os.getenv("HOST_IP", "localhost:8443"),
             "user_id": user_id,
-            "username": request.headers.get("X-Username"),
+            # "user_name": request.headers.get("X-Username", None),
+            "user_name": user_name,
         },
     )
 
@@ -76,7 +87,17 @@ async def match_result(request: HttpRequest):
 
 def tournament(request: HttpRequest, user_id):
     
-    print(f"dans tournament {user_id}", flush=True) 
+    print(f"dans tournament {user_id}, {request.headers.get('X-Username')}", flush=True) 
+    
+    if user_id:
+        response = requests.get(
+                    f"http://databaseapi:8007/api/player/{user_id}/"
+                )
+        tmp = response.json()
+        user_name = tmp["username"]
+    else:
+        user_name = 0
+    
     return render(
         request,
         "tournament.html",
@@ -84,7 +105,7 @@ def tournament(request: HttpRequest, user_id):
             "rasp": os.getenv("rasp", "false"),
             "pidom": os.getenv("HOST_IP", "localhost:8443"),
             "user_id": user_id,
-            # "username": request.headers.get("X-Username"),
+            "user_name": user_name,
         },
     )
 

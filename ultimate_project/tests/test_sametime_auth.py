@@ -92,8 +92,6 @@ def run(playwright: Playwright) -> None:
         for browser in browsers:
             browser.close()
 
-        # for _ in range(SIMULTANEOUS_USERS):
-        #     contexts[_].close()
 
     def test_reg_users(browsers, contexts, pages, positions, window_sizes):
 
@@ -111,14 +109,14 @@ def run(playwright: Playwright) -> None:
         logout(page1)
         logout(page2)
 
-        time.sleep(10)
+        # time.sleep(10)
         destroy_obj(browsers, contexts)
         pass
 
     def test_2fa_users():
         pass
 
-    # ! =============== KICKSTART TESTER HERE ===============
+    # ! =============== INIT WINDOWS SIZES ===============
     browsers = []
     contexts = []
     pages = []
@@ -127,8 +125,8 @@ def run(playwright: Playwright) -> None:
     screen_width, screen_height = get_screen_size()
 
     # Make windows narrow but tall (vertical shape)
-    window_width = int(screen_width * 0.35)  # 35% of screen width
-    window_height = int(screen_height * 0.9)  # 90% of screen height
+    window_width = int(screen_width * 0.35)
+    window_height = int(screen_height * 0.9)
 
     # Position one window at far left, one at far right
     left_position = 0
@@ -137,15 +135,10 @@ def run(playwright: Playwright) -> None:
     # Position windows at left and right edges with different Y positions
     positions = [(left_position, 20), (right_position, 20)]
 
-    # Better debugging to check what's happening
-    print(f"Screen dimensions: {screen_width}x{screen_height}")
-    print(f"Window size: {window_width}x{window_height}")
-    print(f"Left window position: ({left_position}, 20)")
-    print(f"Right window position: ({right_position}, 20)")
-
     # Set each window to be the same size
     window_sizes = [(window_width, window_height), (window_width, window_height)]
 
+    # ! =============== KICKSTART TESTER HERE ===============
     test_reg_users(browsers, contexts, pages, positions, window_sizes)
 
     test_2fa_users()

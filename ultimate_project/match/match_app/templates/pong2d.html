@@ -6,30 +6,42 @@
 		<script class="match-script">
 			window.rasp = "{{ rasp }}"; 
 			window.pidom = "{{ pidom }}";
-			window.matchId = "{{ matchId }}"
+			window.matchId = "{{ matchId }}";
 			window.playerId = "{{ playerId }}";
+			window.selfName = "{{ playerName }}";
+			window.player2Id = "{{ player2Id }}";
+			window.player2Name = "{{ player2Name }}";
 		</script>
 		<script class="match-script" src="{% static 'match/script.js' %}"
 				onload="initMatchWs()"></script>
 	</head>
 </div>		
 <div id="match">
-	<h1>Match</h1>	
 	<!-- <div id="p3"></div> -->
 	<h1 id="spec" style="display: none">Je suis spectateur</h1>			
-	<div id="score">Score</div>
 	<div id="p1"></div>
 	<div id="ball"></div>
 	<div id="ball2"></div>
 	<div id="p2"></div>
 	<div id="waiting">Waiting</div>
+	<div class="loader">
+        <div class="circle"></div>
+        <div class="countdown">3</div>
+    </div>
 	<div id="end-cont" style="display:none">
 	<div id="end"></div>
 	</div>
-	<button onclick="
-		stopMatch('{{matchId}}');
-		const matchDiv = document.getElementById('match');
-    	if (matchDiv) matchDiv.remove();">Quit Match</button>
+</div>
+<div id="rules-overlay">
+    <div id="score">Score</div>
+    <p id="inst-right">{{ playerName }} <br> keys: ↑ / ↓</p>
+    <p id="inst-left">{{ player2Name }} <br> keys: enter / +</p>
+    <p>Be the first one to score 5 points.</p><button id="quit-match-button" onclick="
+    stopMatch('{{matchId}}');
+    const matchDiv = document.getElementById('match');
+    if (matchDiv) matchDiv.remove();
+    const rulesOverlay = document.getElementById('rules-overlay');
+    if (rulesOverlay) rulesOverlay.style.display = 'none';">EXIT</button>
 </div>
 <script>
     window.addEventListener("DOMContentLoaded", () => {
@@ -45,12 +57,30 @@
         // Marque que la redirection a eu lieu pour éviter la boucle infinie
         sessionStorage.setItem("redirected", "true");
 
-        // Redirige vers la dernière page visitée
-        window.location.href = lastVisitedPage;
         sessionStorage.setItem("redirected", "true");
     } else {
         sessionStorage.removeItem("redirected");
         console.log("Aucune page précédente trouvée ou déjà sur la page visitée.");
     }
 });
+
+    const countdownElement = document.querySelector('.countdown');
+    const loaderElement = document.querySelector('.loader');
+    const countdownText = ['3', '2', '1', 'GO!'];
+
+    let currentIndex = 0;
+
+    const countdownInterval = setInterval(() => {
+        countdownElement.textContent = countdownText[currentIndex];
+        currentIndex++;
+
+        // Quand "GO!" est affiché, on arrête l'intervalle et cache l'élément loader
+        if (currentIndex === countdownText.length) {
+            clearInterval(countdownInterval); // Arrêter l'intervalle
+            setTimeout(() => {
+                loaderElement.classList.add('no-waiting'); // Ajouter la classe no-waiting pour cacher l'élément
+            }, 1500); // Laisser un petit délai avant de cacher (optionnel)
+        }
+    }, 1000); // Change le texte toutes les 1 seconde
+
 </script>

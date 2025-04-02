@@ -18,7 +18,7 @@
 						{% csrf_token %}
                         <div class="form-group">
 							<label>Enter your password:</label>
-							<input id="password" type="password" name="password" class="form-control form-control-user" 
+							<input id="password" type="password" name="password" maxlength="100" class="form-control form-control-user" 
 								placeholder="Enter your password" required>
 						</div>
                         {% if user.two_fa_enabled %}

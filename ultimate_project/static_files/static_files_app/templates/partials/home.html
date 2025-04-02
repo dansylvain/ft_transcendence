@@ -2,9 +2,6 @@
   <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 id="home-page" data-translate="Accueil" class="h3 mb-0 text-gray-800">ACCUEIL</h1>
   </div>
-  <div>
-    server ip address: {{ server_ip }}
-  </div>
   <div class="row justify-content-center">
     <a
       id="field-match"
@@ -29,7 +26,7 @@
       hx-on="htmx:beforeRequest: toggleSidebar(true);"
     >
       <div class="card bg-warning text-white shadow py-5">
-        <div class="card-body" data-translate="Tournoi">> Match</div>
+        <div class="card-body" data-translate="Tournoi">Tournament</div>
       </div>
     </a>
     <a
@@ -42,7 +39,7 @@
       hx-on="htmx:beforeRequest: toggleSidebar(true);"
     >
       <div class="card bg-success text-white shadow py-5">
-        <div class="card-body" data-translate="Profil">> Profil</div>
+        <div class="card-body" data-translate="Profil"> Profile </div>
       </div>
     </a>
     <a
@@ -55,7 +52,7 @@
       hx-on="htmx:beforeRequest: toggleSidebar(true);"
     >
       <div class="card bg-info text-white shadow py-5">
-        <div class="card-body" data-translate="Statistiques">> Stats</div>
+        <div class="card-body" data-translate="Statistiques"> Stats</div>
       </div>
     </a>
   </div>

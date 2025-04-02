@@ -158,7 +158,7 @@ function setCommands(socket, socket2) {
     }
 
     document.addEventListener("keydown", function(event) {
-		event.preventDefault();
+		// event.preventDefault();
         if (!keysPressed[event.key]) { // Empêche d'ajouter plusieurs fois la même touche
             keysPressed[event.key] = true;
         }
@@ -572,9 +572,17 @@ function onMatchWsMessage(event, pads, [waiting, endCont, end], waitingState) {
 	// requestAnimationFrame(() => {
 	const data = JSON.parse(event.data);
 	// console.log("match mesage: ", data);
+	const winnerId = data.winnerId == window.playerId ? window.selfName : window.player2Name;
 	if (data.state == "end")
 	{	
-		end.innerHTML = "the winner is :" + data.winnerId + end.innerHTML;
+        end.innerHTML = `The winner is: ${winnerId} <br> 
+        Score: ${data.score[0]} : ${data.score[1]}
+                <img src="https://media1.tenor.com/m/Xd5ZJk8TV84AAAAd/christ-cosmique.gif" 
+             alt="Winner GIF" 
+             class="winner-gif">
+
+             ` 
+        + end.innerHTML;
 		endCont.classList.add("end-cont");
 	}
 	if (waitingState[0] != data.state) 
@@ -702,7 +710,12 @@ function sequelInitMatchWs(socket) {
 		else
 			spec.style.display = "none";
 	}
-	initSecPlayer();
+	console.log("BEFORE INIT SEC !!!!!! ", window.player2Id, typeof(window.player2Id) );
+	if (window.player2Id != 0)
+	{
+		console.log("INIT SEC !!!!!! ", window.player2Id);
+		initSecPlayer();
+	}
 	setCommands(socket, window.matchSocket2);
 }
 
@@ -715,7 +728,7 @@ function initSecPlayer() {
 
     window.matchSocket2 = new WebSocket(
         `wss://${window.pidom}/ws/match/${window.matchId}/` +
-        `?playerId=${-window.playerId}`);
+        `?playerId=${window.player2Id}`);
 	window.matchSocket2.onopen = () => {
 		console.log("Connexion Match établie 2nd Player😊");
 	};

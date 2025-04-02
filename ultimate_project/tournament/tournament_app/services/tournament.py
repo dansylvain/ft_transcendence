@@ -39,15 +39,19 @@ class Tournament():
 	async def launchTournament(self):
 
 		self.launch = True
-		await self.start_match(self.players[0].id, self.players[1].id, "m2")
-		await self.start_match(self.players[2].id, self.players[3].id, "m3")
+		p1 = (self.players[0].id, self.players[0].name)
+		p2 = (self.players[1].id, self.players[1].name)
+		p3 = (self.players[2].id, self.players[2].name)
+		p4 = (self.players[3].id, self.players[3].name)
+		await self.start_match(p1, p2, "m2")
+		await self.start_match(p3, p4, "m3")
 
-	async def start_match(self, p1_id, p2_id, local_match_id):
+	async def start_match(self, p1, p2, local_match_id):
 
-		print(f"START MATCH p1:{p1_id} p2:{p2_id} lmt:{local_match_id}", flush=True)
+		print(f"START MATCH p1:{p1[0]} {p1[1]} p2:{p2[0]} {p2[1]} lmt:{local_match_id}", flush=True)
 		async with aiohttp.ClientSession() as session:
 			async with session.get(				
-    				f"http://match:8002/match/new-match/?p1={p1_id}&p2={p2_id}"
+    				f"http://match:8002/match/new-match/?p1={p1[0]}&p2={p2[0]}"
 				) as response:
 				if response.status == 201:
 					data = await response.json()
@@ -57,8 +61,8 @@ class Tournament():
 						"tournamentId": self.id,
 						"localMatchId": local_match_id,			
 						"matchId": match_id,
-						"p1Id": p1_id,
-						"p2Id": p2_id
+						"p1Id": p1[0], "p2Id": p2[0],
+						"p1Name": p1[1], "p2Name": p2[1],
 					}
 					match = {
 						"matchId": match_id,						
@@ -75,6 +79,9 @@ class Tournament():
 	async def match_result(self, match_id, winner_id, looser_id):
 
 		print(f"winner is {winner_id}, and looser is {looser_id}", flush=True)
+
+		winner = next((p for p in self.players if p.id == winner_id), None)
+		looser = next((p for p in self.players if p.id == looser_id), None)	
 		self.n_match += 1
 		match = next(
 			(m for m in self.matchs if m.get('matchId') == match_id), None)
@@ -87,24 +94,30 @@ class Tournament():
 				"p1Id": match.get('linkMatch', {}).get('p1Id'),
 				"p2Id": match.get('linkMatch', {}).get('p2Id'),
 				"winnerId": winner_id,
-				"looserId": looser_id			
+				"looserId": looser_id,
+				"winnerName": winner.name,
+				"looserName": looser.name			
 			}
 			match['matchResult'] = match_result
 			match['matchPlayersUpdate'] = None
-		print(self.matchs, flush=True)
+		await self.workflow(match_result)
+	
+	async def workflow(self, match_result):
+
 		if self.n_match == 1:
 			await self.send_match_result(match_result)
 		elif self.n_match == 2:
-			link_match = await self.start_match(
-				self.matchs[0].get('matchResult', {}).get('winnerId'),
-				self.matchs[1].get('matchResult', {}).get('winnerId'), "m1")			
+			p1 = (self.matchs[0].get('matchResult', {}).get('winnerId'),
+				self.matchs[0].get('matchResult', {}).get('winnerName'))
+			p2 = (self.matchs[1].get('matchResult', {}).get('winnerId'),
+				self.matchs[1].get('matchResult', {}).get('winnerName'))
+			link_match = await self.start_match(p1, p2, "m1")			
 			await self.send_match_result(match_result)
 			await self.send_link_match(link_match)
 		elif self.n_match == 3:
-			print(f"THE FINAL WINNER IS :{winner_id}", flush=True)
 			await self.send_match_result(match_result)
 			self.launch = False
-		
+
 	async def send_link_match(self, link_match):
 
 		print(f"SENDLINKMATCH {link_match}", flush=True)	

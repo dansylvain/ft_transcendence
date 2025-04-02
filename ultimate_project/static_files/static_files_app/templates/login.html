@@ -29,8 +29,9 @@
                       name="username"
                       autocomplete="username"
                       placeholder="Enter Username..."
+					  maxlength="100"
                       required
-                    />
+					  />
                   </div>
                   <div class="form-group">
                     <input
@@ -40,6 +41,7 @@
                       name="password"
                       autocomplete="password"
                       placeholder="Password"
+					  maxlength="100"
                       required
                     />
                   </div>
@@ -74,20 +76,18 @@
                 <hr />
 				
 				<!-- ! Link towards register  -->
-                <div
-					id="register-link"
+                <div class="text-center small" style="font-size: larger;">
+				<a	id="register-link"
                   hx-boost="false"
                   hx-trigger="click"
                   hx-push-url="true"
                   hx-get="/register/"
                   hx-target="body"
-                  class="text-center small"
                   href=""
                   data-translate="Create an Account!"
-                >
-                  Create an Account!
-                </div>
-              </div>
+                > Create an Account! </a>
+				</div>
+			</div>
             </div>
           </div>
         </div>

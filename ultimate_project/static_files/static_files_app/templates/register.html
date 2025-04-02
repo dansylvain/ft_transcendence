@@ -28,16 +28,18 @@
                     id="first_name"
                     name="first_name"
                     placeholder="First Name"
+					maxlength="100"
                     required
-                  />
+					/>
                 </div>
                 <div class="col-sm-6">
                   <input
-                    type="text"
-                    class="form-control form-control-user"
-                    id="last_name"
-                    name="last_name"
-                    placeholder="Last Name"
+				  type="text"
+				  class="form-control form-control-user"
+				  id="last_name"
+				  name="last_name"
+				  placeholder="Last Name"
+				  maxlength="100"
                     required
                   />
                 </div>
@@ -52,8 +54,9 @@
                     id="username"
                     name="username"
                     placeholder="Username"
+					maxlength="100"
                     required
-                  />
+					/>
                 </div>
                 <div class="col-sm-6">
                   <input
@@ -63,8 +66,9 @@
                     name="email"
 					autocomplete="email"
                     placeholder="Email"
+					maxlength="100"
                     required
-                  />
+					/>
                 </div>
               </div>
 
@@ -78,8 +82,9 @@
                     name="password"
 					autocomplete="password"
                     placeholder="Password"
+					maxlength="100"
                     required
-                  />
+					/>
                   
 				  <!-- ! Password strength indicator -->
                   <div class="mt-2">
@@ -88,7 +93,7 @@
                     </div>
                     <small id="password-strength-text" class="form-text mt-1">Password strength: Not entered</small>
                   </div>
-
+				  
                 </div>
                 <div class="col-sm-6">
                   <input
@@ -98,6 +103,7 @@
                     name="repeat_password"
 					autocomplete="password"
                     placeholder="Repeat Password"
+					maxlength="100"
                     required
 					/>
 
@@ -152,19 +158,17 @@
 			<hr />
 			
 			<!-- ! Link towards login  -->
-            <div
-			id="login-link"
-            hx-boost="false"
-            hx-trigger="click"
-            hx-push-url="true"
-            hx-get="/login/"
-            hx-target="body"
-            class="text-center small"
-            href=""
-            data-translate="Already have an account? Login!"
-            >
-              Already have an account? Login!
-            </div>
+            <div class="text-center small" style="font-size: larger;">
+				<a id="login-link"
+				hx-boost="false"
+				hx-trigger="click"
+				hx-push-url="true"
+				hx-get="/login/"
+				hx-target="body"
+				href=""
+				data-translate="Already have an account? Login!"
+				> Already have an account? Login! </a>
+			</div>
           </div>
         </div>
       </div>

@@ -5,7 +5,6 @@ import pyotp
 import qrcode
 import io
 import base64
-import json
 import httpx
 
 # import os
