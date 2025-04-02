@@ -99,7 +99,20 @@ def run(playwright: Playwright) -> None:
 
     # ! =============== KICKSTART TESTER HERE ===============
 
-    test_language(USER_EN, EN, ES)
+    test_language(USER_DE, DE, ES)
+    test_language(USER_DE, ES, DE)
+
+    test_language(USER_EN, EN, FR)
+    test_language(USER_EN, FR, EN)
+    
+    test_language(USER_FR, FR, TL)
+    test_language(USER_FR, TL, FR)
+    
+    test_language(USER_ES, ES, DE)
+    test_language(USER_ES, DE, ES)
+    
+    test_language(USER_TL, TL, EN)
+    test_language(USER_TL, EN, TL)
 
     print(f"✅ LANGUAGE TESTS ✅")
 
