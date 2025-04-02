@@ -1,5 +1,5 @@
 {% load static %}
-<div class="container-fluid">
+<div class="container-fluid" id="user-profile">
   <!-- Page Heading -->
   <h1 data-translate="Profil" class="h3 mb-2 text-gray-800">Profile</h1>
 
@@ -50,7 +50,8 @@
                     class="form-control form-control-user"
                     id="exampleFirstName"
                     data-translate-placeholder="first name"
-                    placeholder="First Name"
+                    placeholder="{{user.first_name}}"
+                    value="{{user.first_name}}"
                   />
                 </div>
                 <div class="col-sm-6">
@@ -59,7 +60,8 @@
                     class="form-control form-control-user"
                     id="exampleLastName"
                     data-translate-placeholder="last name"
-                    placeholder="Last Name"
+                    placeholder="{{user.last_name}}"
+                    value="{{user.last_name}}"
                   />
                 </div>
               </div>
@@ -69,8 +71,8 @@
                     type="text"
                     class="form-control form-control-user"
                     id="exampleFirstName"
-                    data-translate-placeholder="Display Name"
-                    placeholder="Display Name"
+                    data-translate-placeholder="{{user.username}}"
+                    placeholder="{{user.username}}"
                   />
                 </div>
               </div>
@@ -79,8 +81,8 @@
                   type="email"
                   class="form-control form-control-user"
                   id="exampleInputEmail"
-                  data-translate-placeholder="Email Address"
-                  placeholder="Email Address"
+                  data-translate-placeholder="{{user.email}}"
+                  placeholder="{{user.email}}"
                 />
               </div>
             </form>
@@ -197,6 +199,14 @@
     </div>
   </div>
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const navProfile = document.getElementById("nav-profile");
+        if (navProfile) {
+        navProfile.click();
+        }
+    });
+</script>
 <!-- <script>
     window.addEventListener("DOMContentLoaded", () => {
         let lastVisitedPage = history.state?.lastVisitedPage || sessionStorage.getItem("lastVisitedPage");
