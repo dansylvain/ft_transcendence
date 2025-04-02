@@ -3,14 +3,30 @@ from collections import Counter
 import time
 
 # USERS
-DE = "user2"
-EN = "user3"
-FR = "user4"
-ES = "user5"
-TL = "user6"
+USER_DE = "user2"
+USER_EN = "user3"
+USER_FR = "user4"
+USER_ES = "user5"
+USER_TL = "user6"
+
+DE = "de"
+EN = "en"
+FR = "fr"
+ES = "es"
+TL = "tl"
+
+STATS = [
+    DE, "Statistiken",
+    EN, "Statistics",
+    FR, "Statistiques",
+    ES, "Estadísticas",
+    TL, "vItlhutlhmey",
+]
+
 PASSWORD = "password"
 
 BASE_URL = "https://localhost:8443"
+
 
 def run(playwright: Playwright) -> None:
     browser = playwright.chromium.launch(headless=False)
@@ -39,34 +55,53 @@ def run(playwright: Playwright) -> None:
         modalLogoutButton.click()
         expect(page).to_have_url(f"{BASE_URL}/login/")
 
-    def test_language(cur_login):
+    def check_selector(lang):
+        selector = page.locator("#language-selector").input_value()
+
+        print(f"SELECTOR VALUE = {selector}")
+        assert selector == lang, "WRONG SELECTOR VALUE"
+        # assert selector == 'en', "WRONG SELECTOR VALUE"
+
+    def change_selector(target):
+        selector = page.locator("#language-selector")
+
+        selector.select_option(target)
+
+        page.wait_for_timeout(500)
+
+        check_selector(target)
+
+    def check_ids(lang):
+        # Check ID navbar
+        time.sleep(0.5)
+
+        page_stats = page.locator("#stats-test").text_content().strip()
+        dict_stats = STATS[STATS.index(lang) + 1].strip()
+        
+        assert page_stats == dict_stats, "WRONG ID STATS"
+
+
+
+    def test_language(user, base_lang, target_lang):
         page.goto(f"{BASE_URL}/login/")
 
-        login()
+        login(user)
 
-        # page.locator(f"#{locator}").click()
+        check_selector(base_lang)
 
-        # # Extract username
-        # username = page.locator("#player").text_content().removeprefix("Je suis ")
+        check_ids(base_lang)
 
-        # # Assertion on the first try
-        # assert username == LOGIN_REG
+        change_selector(target_lang)
 
-        # page.reload()
-        # assert username == LOGIN_REG
-        
-        # time.sleep(1)
-        
-        # page.reload()
-        # assert username == LOGIN_REG
+        check_ids(target_lang)
 
         logout()
 
     # ! =============== KICKSTART TESTER HERE ===============
 
-    test_language(LOGIN_DEUTCH)
+    test_language(USER_EN, EN, ES)
 
-    print(f"✅ USERNAME PASSED INTO MATCH / TOURNAMENT ✅")
+    print(f"✅ LANGUAGE TESTS ✅")
 
     context.close()
     browser.close()
