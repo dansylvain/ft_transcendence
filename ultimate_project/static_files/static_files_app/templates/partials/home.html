@@ -16,7 +16,8 @@
         <div class="card-body" data-translate="Match simple">Match simple</div>
       </div>
     </a>
-	{{ language }}
+    <div id="set-lang">{{language}}</div>
+	
     <a
       id="field-tournoi"
       class="col-lg-5 mb-4"
@@ -58,3 +59,10 @@
     </a>
   </div>
 </div>
+<script>
+    var lang2 = "{{ language }}";  // var permet d'écraser la variable sans erreur
+    localStorage.setItem('preferred_language', lang2);
+    if ("{{ language }}")
+        document.getElementById('language-selector').value = "{{ language }}";
+    loadTranslations(lang2);
+</script>

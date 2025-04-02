@@ -53,6 +53,8 @@ window.onload = function() {
 };
 
 async function loadTranslations(lang) {
+    if (!lang)
+        return;
     try {
         const response = await fetch(`/translations/${lang}.json`);
         let translations = await response.json();
