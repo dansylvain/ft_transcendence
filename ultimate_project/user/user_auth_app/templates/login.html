@@ -50,7 +50,7 @@
                       type="submit"
                       id="loginButton"
                       hx-push-url="true"
-                      class="btn btn-primary btn-user btn-block"
+                      class="btn btn-primary btn-user btn-block btn-lg"
                       value="Login"
                     />
                   </div>
@@ -71,20 +71,20 @@
                 <!-- ! Horizontal Line Separator -->
                 <hr />
 
-                <!-- ! Link towards register -->
-                <div
-                  id="register-link"
-                  hx-boost="false"
-                  hx-trigger="click"
-                  hx-push-url="true"
-                  hx-get="/auth/register/"
-                  hx-target="body"
-                  class="text-center small"
-                  href=""
-                  data-translate="Create an Account!"
-                >
-                  Create an Account
-                </div>
+                 <div
+                    id="register-link"
+                    hx-boost="false"
+                    hx-trigger="click"
+                    hx-push-url="true"
+                    hx-get="/auth/register/"
+                    hx-target="body"
+                    class="text-center"
+                    style="cursor: text;"
+                  >
+                    <span class="btn btn-primary btn-user btn-block btn-lg">
+                      <strong>Create an Account</strong>
+                    </span>
+                  </div>
               </div>
             </div>
           </div>
@@ -93,58 +93,118 @@
     </div>
   </div>
 </div>
+
+<style>
+/* Reserve space for error messages */
+#login-form {
+    height: 30px; /* Ensures the layout doesn’t shift */
+    display: block;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+/* When an error occurs, show the message */
+#login-form.show-error {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Prevent login image from resizing */
+.bg-login-image {
+    max-height: 100%;
+    object-fit: cover;
+    flex-grow: 0; /* Prevents it from expanding */
+}
+
+/* Prevents column from growing */
+.col-lg-6 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex-grow: 0; /* Prevents unwanted resizing */
+}
+</style>
 <script>
   document.addEventListener("htmx:beforeSwap", function (evt) {
       console.log("✨ Login form event detected.");
-      if (evt.detail.target.id === "login-form") {
-          try {
-              console.log("📩 Response received:", evt.detail.xhr.responseText);
-              const response = JSON.parse(evt.detail.xhr.responseText);
-              if (evt.detail.xhr.status === 401) {
-                console.log("❌ Wrong password detected.");
-                document.getElementById("login-error").textContent = response.message || "Wrong password.";
-                evt.detail.shouldSwap = false;
-              }
-              if (response.success) {
-                  console.log("✅ SUCCESS: Login successful!");
-                  evt.detail.shouldSwap = false;
-                  document.getElementById("login-form").innerHTML = "Login successful!";
-                  setTimeout(function () {
-                  window.location.href = "/home/";  // Redirect to home page or dashboard
-                  }, 1000); 
-                  //window.location.href = "/home/";
-              } else if (response.requires_2fa) {
-                  console.log("➡️ 2FA required, redirecting...");
-                  const usernameInput = document.getElementById("username");
-                  if (usernameInput && usernameInput.value) {
-                      const usernameValue = usernameInput.value;
-                      sessionStorage.setItem("2fa_username", usernameValue);
-                      window.twoFAUsername = usernameValue;
-                      evt.detail.shouldSwap = false;
-                      htmx.ajax("GET", `/two-factor-auth/?username=${encodeURIComponent(usernameValue)}`, {
-                          target: "body",
-                          swap: "outerHTML",
-                      }).then(() => {
-                          console.log("🔐 2FA page loaded, updating history.");
-                          history.pushState(null, "", "/two-factor-auth/");
-                      });
-                  } else {
-                      console.error("❌ Username input not found or empty.");
-                  }
-              } else {
-                  console.log("❌ Login failed:", response.message);
-                  const messageElement = document.getElementById("login-form");
-                  if (messageElement) {
-                      const sanitizedMessage = DOMPurify.sanitize(response.message);
-                      messageElement.textContent = sanitizedMessage;
-                  } else {
-                      console.error("🚨 Error: Login form element not found.");
-                  }
-              }
-          } catch (error) {
-              console.error("🚨 Error processing response:", error);
+      
+      const loginFormMessage = document.getElementById("login-form");
+
+      if (!loginFormMessage) {
+          console.error("🚨 Error: #login-form element not found.");
+          return;
+      }
+
+      try {
+          console.log("📩 Response received:", evt.detail.xhr.responseText);
+          const response = JSON.parse(evt.detail.xhr.responseText);
+
+          // Handle 401 Unauthorized (Incorrect username or password)
+          if (evt.detail.xhr.status === 401) {
+              console.log("❌ Incorrect username or password.");
+              loginFormMessage.innerHTML = `
+                <div class="alert alert-danger" role="alert">
+                  Unable to connect. Please verify your username and password.
+                </div>
+              `;
+              loginFormMessage.classList.add("show-error");
+              evt.detail.shouldSwap = false; // Prevent HTMX from replacing the content
           }
+          
+          // Handle successful login
+          else if (response.success) {
+              console.log("✅ SUCCESS: Login successful!");
+              loginFormMessage.innerHTML = `
+                <div class="alert alert-success" role="alert">
+                  Login successful! Redirecting...
+                </div>
+              `;
+              loginFormMessage.classList.remove("show-error"); // Remove error styles
+              setTimeout(() => { window.location.href = "/home/"; }, 1000);
+              evt.detail.shouldSwap = false;
+          }
+          
+          // Handle 2FA required case
+          else if (response.requires_2fa) {
+              console.log("➡️ 2FA required, redirecting...");
+              const usernameInput = document.getElementById("username");
+              if (usernameInput && usernameInput.value) {
+                  const usernameValue = usernameInput.value;
+                  sessionStorage.setItem("2fa_username", usernameValue);
+                  window.twoFAUsername = usernameValue;
+                  evt.detail.shouldSwap = false;
+                  htmx.ajax("GET", `/two-factor-auth/?username=${encodeURIComponent(usernameValue)}`, {
+                      target: "body",
+                      swap: "outerHTML",
+                  }).then(() => {
+                      console.log("🔐 2FA page loaded, updating history.");
+                      history.pushState(null, "", "/two-factor-auth/");
+                  });
+              } else {
+                  console.error("❌ Username input not found or empty.");
+              }
+          }
+          
+          // Handle other failures
+          else {
+              console.log("❌ Login failed:", response.message);
+              loginFormMessage.innerHTML = `
+                <div class="alert alert-danger" role="alert">
+                  ${response.message || "An unexpected error occurred."}
+                </div>
+              `;
+              loginFormMessage.classList.add("show-error");
+              evt.detail.shouldSwap = false;
+          }
+      } catch (error) {
+          console.error("🚨 Error processing response:", error);
+          loginFormMessage.innerHTML = `
+            <div class="alert alert-danger" role="alert">
+              An error occurred. Please try again later.
+            </div>
+          `;
+          loginFormMessage.classList.add("show-error");
       }
   });
 </script>
-

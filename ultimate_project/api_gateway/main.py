@@ -195,6 +195,15 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
 
 # ======= 🛠️ Main Function Handling the Reverse Proxy for the Route 🛠️ =======
 
+INTERNAL_TOKEN = os.getenv("INTERNAL_TOKEN")
+
+def validate_internal_token(request: Request) -> bool:
+    internal_token = request.headers.get("X-Internal-Token")
+    print(f"\n\n VALIDATE TOKEN: {internal_token}\n\n", flush=True)
+    if not internal_token:
+        return None
+    return internal_token == INTERNAL_TOKEN
+
 async def reverse_proxy_handler(target_service: str, incoming_path: str, request: Request,
             serve_from_static: bool = False, static_service_name: str = None,
             is_full_page: bool = False):
@@ -234,7 +243,6 @@ async def reverse_proxy_handler(target_service: str, incoming_path: str, request
         # Handle query parameters
         query_params = request.query_params
         query_string = f"?{query_params}" if query_params else ""
-
         if target_service == static_service_name:
             print("⚠️ Request is for the static service, but it's specified to \
                 be served by the same static service directly. Default \
@@ -244,7 +252,6 @@ async def reverse_proxy_handler(target_service: str, incoming_path: str, request
             key: value for key, value in request.headers.items() if key.lower() != "host"
         }
         forwarded_headers["Host"] = "localhost"
-        
         # Construct request URL
         # If serve_from_static is enabled and the requested service is not 
         # already the static service,the request will be routed through the 
@@ -288,29 +295,41 @@ async def reverse_proxy_handler(target_service: str, incoming_path: str, request
         # need to add a try here
         request_body = await request.body()
         request_cookies = request.cookies
+        
+        response = await client.request(
+                request_method, final_url, headers=forwarded_headers, 
+                content=request_body, cookies=request_cookies
+        )
+        # becasue probelm if reposne with status error will build an excpetion
+        """  
         try:
             response = await client.request(
                 request_method, final_url, headers=forwarded_headers, 
                 content=request_body, cookies=request_cookies
             )
-            # ONLY RAISED ERROR IF METHOD GET BECASUE PB WITH
-            # POST METHOD FOR DB THAT FAILED BCASUE ISNETAD OF RETUNING ERROR 
-            # TO BROSER WAS JUST TRY TO FIND A 401 ERROR
-            """ if base_service_url != services["databaseapi"]:
-                response.raise_for_status() """
-            response.raise_for_status()
-               
+            print("\n\n========== RESPONSE DEBUG ==========\n", flush=True)
+            print(f"🔗 Final URL: {final_url}", flush=True)
+            print(f"🔄 Status Code: {response.status_code}", flush=True)
+            print(f"📩 Headers:\n{response.headers}", flush=True)
+            print("\n====================================\n", flush=True)
+            response.raise_for_status()     
         except httpx.HTTPStatusError as exc:
             logger.error(f"❌ Request failed with status code {exc.response.status_code}")
             raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text)
         except httpx.RequestError as exc:
             logger.error(f"❌ Request error: {exc}")
-            raise HTTPException(status_code=500, detail="Internal Server Error")
+            raise HTTPException(status_code=500, detail="Internal Server Error") """
+    """
     # Prepare response headers (excluding Set-Cookie) 
-    """ response_headers = {
+    response_headers = {
         key: value for key, value in response.headers.items() if key.lower() != "set-cookie"
-    } """
-    response_headers = {key: value for key, value in response.headers.items()}
+    } 
+    """
+    response_headers = {
+        key: value 
+        for key, value in response.headers.items() 
+        if key.lower() != "x-internal-token"
+    }
     response_headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     # Set response content type
     content_type = response.headers.get("Content-Type", "").split(";")[0].strip()

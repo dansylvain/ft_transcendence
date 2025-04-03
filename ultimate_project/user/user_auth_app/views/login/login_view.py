@@ -8,6 +8,8 @@ from django.http import HttpRequest, JsonResponse
 from django.views.decorators.cache import never_cache
 from utils import utils_user_auth
 
+INTERNAL_TOKEN = os.getenv("INTERNAL_TOKEN")
+
 @never_cache
 async def login_view(request: HttpRequest):
     """
@@ -26,6 +28,13 @@ async def login_view(request: HttpRequest):
         # Handle case if username or password is missing
         """ if not username or not password:
             return HttpResponseForbidden("Username or password missing") """
-        response = await utils_user_auth.login_handler(username, password) 
-        return (response)    
+        response = await utils_user_auth.login_handler(username, password)
+        return (response)
+        
+        """ if isinstance(response, JsonResponse):
+            # Load the original data
+            data = json.loads(response.content)  # Extract JSON content
+            new_response = JsonResponse(data, status=response.status_code)
+            new_response["X-Internal-Token"] = INTERNAL_TOKEN  
+            return new_response   """
 

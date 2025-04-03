@@ -23,40 +23,49 @@ API_VERIFY_CREDENTIALS = "http://ctn_api_gateway:8005/api-database/verify-creden
 API_CHECK_2FA = "http://ctn_api_gateway:8005/api-database/check-2fa/"
 API_GATEWAY_LOGIN_COOKIES = "http://ctn_api_gateway:8005/api-gateway/set-cookies/login-cookies/"
 
-from django.http import JsonResponse
-from http.cookies import SimpleCookie
+INTERNAL_TOKEN = os.getenv("INTERNAL_TOKEN")
 
-async def login_handler(username: str, password: str):
+from django.http import JsonResponse
+
+async def login_handler(username: str, password: str) -> JsonResponse:
     """
     Vérifie les identifiants via `databaseAPI`, puis génère un JWT stocké en cookie.
     """
-    print(f"🔐 Tentative de connexion pour {username}", flush=True)
+    print(f"\n\n == 🔐 Tentative de connexion pour {username} and token: {INTERNAL_TOKEN} \n\n", flush=True)
 
     try:
         async with httpx.AsyncClient() as client:
-            db_response = await client.post(API_VERIFY_CREDENTIALS, 
-                json={"username": username, "password": password})
+            db_response = await client.post(
+                API_VERIFY_CREDENTIALS, 
+                json={"username": username, "password": password},
+                headers={"X-Internal-Token": INTERNAL_TOKEN}
+            )
         print(f"\n\n == STATUS CODE DB {db_response.status_code} == \n\n", flush=True)
         if not db_response.content.strip():
             print("🚨 Empty response received from authentication service", flush=True)
-            return JsonResponse({"success": False, "message": "Empty response from authentication service"}, status=500)
+            return JsonResponse({"success": False, 
+                "message": "Empty response from authentication service",}, status=500)
         if db_response.status_code != 200:
             print(f"❌ Authentication failed: Invalid credentials", flush=True)
-            return JsonResponse(data={"success": False, "message": "Invalid credentials"}, status=401)
+            return JsonResponse({"success": False, "message": "Invalid credentials",}, status=401)
         # Case 3: Check if the response is valid JSON
         try:
             response_json = db_response.json()
         except ValueError:
             print("🚨 Invalid JSON received from authentication service", flush=True)
-            return JsonResponse({"success": False, "message": "Invalid response from authentication service"}, status=500)
+            print(f"Response content: {db_response.content}", flush=True)
+            return JsonResponse({"success": False, 
+                "message": "Invalid response from authentication service"}, status=200)
         # Case 4: If response is valid and authentication is successful
         if db_response.status_code == 200:
             print(f"✅ Authentication successful for {username}", flush=True)
             # Step 2: Handle 2FA check if authentication is successful
             try:
                 async with httpx.AsyncClient() as client:
-                    check_2fa_response = await client.post(API_CHECK_2FA,
-                        data={"username": username, "password": password})
+                    check_2fa_response = await client.post(
+                        API_CHECK_2FA, 
+                        json={"username": username, "password": password},
+                        headers={"X-Internal-Token": INTERNAL_TOKEN})
                 print(f"\n\n == STATUS CODE 2FA: {check_2fa_response.status_code} == \n\n", flush=True)
                 if check_2fa_response.status_code == 200 and check_2fa_response.json().get("success") == True:
                     return JsonResponse(data={"success": True, "message": "2FA is enabled"}, status=200)

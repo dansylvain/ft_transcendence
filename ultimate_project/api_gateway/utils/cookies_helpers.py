@@ -5,13 +5,13 @@ import json
 
 async def set_auth_cookies(response):
     # Validate response is not None
+    if response.status_code >= 400:
+        return response 
     if response is None:
         raise HTTPException(status_code=400, detail="Response object is missing")
-
     # Ensure response has a body
     if not hasattr(response, "body") or response.body is None:
         raise HTTPException(status_code=400, detail="Response body is missing")
-
     # Decode the response body to string
     try:
         response_text = response.body.decode('utf-8').strip()
@@ -46,7 +46,7 @@ async def set_auth_cookies(response):
         value=access_token,
         httponly=True,
         secure=True,
-        samesite="None",
+        samesite="Lax",
         path="/",
         max_age=60 * 60 * 6  # 6 hours
     )
@@ -55,7 +55,7 @@ async def set_auth_cookies(response):
         value=refresh_token,
         httponly=True,
         secure=True,
-        samesite="None",
+        samesite="Lax",
         path="/",
         max_age=60 * 60 * 24 * 7  # 7 days
     )
@@ -69,8 +69,24 @@ async def clear_auth_cookies(response: Response):
     Clears authentication cookies (access_token and refresh_token) from the response.
     This will set the cookies' max_age to 0 and expires to a past date, effectively deleting them.
     """
-    print("🔑 CLEAR AUTH COOKIE cleared", flush=True)
-    response.delete_cookie("access_token", path="/")
-    response.delete_cookie("refresh_token", path="/")
+    response = JSONResponse(content={"success": True, "message": "Déconnexion réussie"})
+    # Clear cookies by setting them with empty values and making them expire immediately
+    response.delete_cookie(
+        key="access_token",
+        path="/",  # Must match how it was set
+        httponly=True,  # Must match how it was set
+        samesite="Lax",  # Must match how it was set
+    )
+    response.delete_cookie(
+        key="refresh_token",
+        path="/",  # Must match how it was set
+        httponly=True,  # Must match how it was set
+        samesite="Lax",  # Must match how it was set
+    )
+
+    # Add a header for HTMX to redirect to login page
+    response.headers["HX-Location"] = "/auth/login/"
+    # Log for debugging
+    print("🔑 JWT Cookies cleared", flush=True)
+    return response
     
-    return HTMLResponse(status_code=200)
