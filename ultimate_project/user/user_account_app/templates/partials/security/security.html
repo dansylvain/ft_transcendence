@@ -1,0 +1,71 @@
+{% load static %}
+<div class="container">
+  <h1 class="h3 mb-4 text-gray-800">Security Settings</h1>
+
+  <!-- Setup 2FA Button -->
+  <div class="card mb-3 shadow">
+    <div class="card-body text-center">
+      <h5 class="card-title">Two-Factor Authentication (2FA)</h5>
+      <p class="card-text">Enhance your account security by enabling 2FA.</p>
+      {% if user.two_fa_enabled %}
+      <a
+        href="#"
+        class="btn btn-danger"
+        hx-get="/user/disable-2fa/"
+        hx-target="#main_div"
+        hx-headers='{"HX-Request": "true"}'
+        id="disable_2fa"
+      >
+        Disable 2FA
+      </a>
+      {% else %}
+      <a
+        href="#"
+        class="btn btn-success"
+        hx-get="/user/setup-2fa/"
+        hx-target="#main_div"
+        hx-headers='{"HX-Request": "true"}'
+        id="setup_2fa"
+      >
+        Set Up 2FA
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Change Password Button -->
+  <div class="card mb-3 shadow">
+    <div class="card-body text-center">
+      <h5 class="card-title">Change Password</h5>
+      <p class="card-text">Use a strong, unique password to secure your account.</p>
+      <a
+        href="#"
+        class="btn btn-warning"
+        hx-get="/user/change-password/"
+        hx-target="#main_div"
+        hx-headers='{"HX-Request": "true"}'
+        id="change_password"
+      >
+        Change Password
+      </a>
+    </div>
+  </div>
+
+  <!-- Delete Account Button -->
+  <div class="card shadow">
+    <div class="card-body text-center">
+      <h5 class="card-title text-danger">Delete Account</h5>
+      <p class="card-text">This action is irreversible. Proceed with caution.</p>
+      <a
+        href="#"
+        class="btn btn-danger"
+        hx-get="/user/delete-profile/"
+        hx-target="#main_div"
+        hx-headers='{"HX-Request": "true"}'
+        id="delete_profile"
+      >
+        Delete Account
+      </a>
+    </div>
+  </div>
+</div>

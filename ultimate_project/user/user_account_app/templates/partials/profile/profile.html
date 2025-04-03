@@ -1,6 +1,5 @@
 {% load static %}
 <div class="container-fluid">
-
   <!-- Page Heading -->
   <h1 data-translate="Profile" class="h3 mb-2 text-gray-800">Profile</h1>
 
@@ -8,26 +7,17 @@
     <div class="card-body p-0">
       <!-- Nested Row within Card Body -->
       <div class="row">
-        <div
-          class="col-lg-3 my-5 align-items-center 
-          justify-content-center bg-register-image">
+        <div class="col-lg-3 my-5 align-items-center justify-content-center bg-register-image">
           <div class="card shadow mb-4">
             <div class="card-header py-3">
-              <h6
-                data-translate="Avatar"
-                class="m-0 font-weight-bold text-primary"
-              >
-                Avatar
-              </h6>
+              <h6 data-translate="Avatar" class="m-0 font-weight-bold text-primary">Avatar</h6>
             </div>
             <div class="card-body">
               <div class="text-center">
-                <img
-                  class="img-fluid px-3 px-sm-4 mt-3 mb-4"
-                  style="width: 25rem"
-                  src="{% static 'static_files/img/undraw_posting_photo.svg' %}"
-                  alt="..."
-                />
+                <img class="img-fluid px-3 px-sm-4 mt-3 mb-4"
+                     style="width: 25rem"
+                     src="{% static 'static_files/img/undraw_posting_photo.svg' %}"
+                     alt="Profile Picture"/>
               </div>
               <p data-translate="Add your picture here">
                 {{ user.username }}'s Profile Picture
@@ -43,153 +33,154 @@
                 <span data-translate="My account">Profile</span>
               </h1>
             </div>
+
             <form class="user">
+              <!-- First Name -->
               <div class="form-group row">
-                <div class="col-sm-6 mb-3 mb-sm-0">
-                  <input
-                    type="text"
-                    class="form-control form-control-user"
-                    id="exampleFirstName"
-                    data-translate-placeholder="first name"
-                    placeholder="First Name"
-                    value="{{ user.first_name|default:'' }}"
-                  />
+                <div class="col-sm-6 mb-3 mb-sm-0 d-flex align-items-center">
+                  <input type="text"
+                         class="form-control form-control-user"
+                         id="exampleFirstName"
+                         placeholder="First Name"
+                         value="{{ user.first_name|default:'' }}"
+                         readonly />
+                  <button type="button"
+                          class="btn btn-light btn-sm ml-2 edit-btn"
+                          hx-get="/user/edit-field/?field=first_name"
+                          hx-target="#exampleFirstName"
+                          hx-swap="outerHTML">
+                    <i class="fas fa-edit"></i>
+                  </button>
                 </div>
-                <div class="col-sm-6">
-                  <input
-                    type="text"
-                    class="form-control form-control-user"
-                    id="exampleLastName"
-                    data-translate-placeholder="last name"
-                    placeholder="Last Name"
-                    value="{{ user.last_name|default:'' }}"
-                  />
+
+                <!-- Last Name -->
+                <div class="col-sm-6 d-flex align-items-center">
+                  <input type="text"
+                         class="form-control form-control-user"
+                         id="exampleLastName"
+                         placeholder="Last Name"
+                         value="{{ user.last_name|default:'' }}"
+                         readonly />
+                  <button type="button"
+                          class="btn btn-light btn-sm ml-2 edit-btn"
+                          hx-get="/user/edit-field/?field=last_name"
+                          hx-target="#exampleLastName"
+                          hx-swap="outerHTML">
+                    <i class="fas fa-edit"></i>
+                  </button>
                 </div>
               </div>
 
+              <!-- Username -->
               <div class="form-group row">
-                <div class="col-sm-6 mb-3 mb-sm-0">
-                  <input
-                    type="text"
-                    class="form-control form-control-user"
-                    id="exampleDisplayName"
-                    data-translate-placeholder="Display Name"
-                    placeholder="Display Name"
-                    value="{{ user.username|default:'' }}"
-                  />
+                <div class="col-sm-6 mb-3 mb-sm-0 d-flex align-items-center">
+                  <input type="text"
+                         class="form-control form-control-user"
+                         id="exampleDisplayName"
+                         placeholder="Username"
+                         value="{{ user.username|default:'' }}"
+                         readonly />
+                  <button type="button"
+                          class="btn btn-light btn-sm ml-2 edit-btn"
+                          hx-get="/user/edit-field/?field=username"
+                          hx-target="#exampleDisplayName"
+                          hx-swap="outerHTML">
+                    <i class="fas fa-edit"></i>
+                  </button>
                 </div>
               </div>
 
-              <div class="form-group">
-                <input
-                  type="email"
-                  class="form-control form-control-user"
-                  id="exampleInputEmail"
-                  data-translate-placeholder="Email Address"
-                  placeholder="Email Address"
-                  value="{{ user.email|default:'' }}"
-                />
+              <!-- Email Address -->
+              <div class="form-group d-flex align-items-center">
+                <input type="email"
+                       class="form-control form-control-user"
+                       id="exampleInputEmail"
+                       placeholder="Email Address"
+                       value="{{ user.email|default:'' }}"
+                       readonly />
+                <button type="button"
+                        class="btn btn-light btn-sm ml-2 edit-btn"
+                        hx-get="/user/edit-field/?field=email"
+                        hx-target="#exampleInputEmail"
+                        hx-swap="outerHTML">
+                  <i class="fas fa-edit"></i>
+                </button>
               </div>
-
             </form>
-            <a href="#" class="btn btn-primary btn-icon-split float-right">
-              <span class="icon text-white-50">
-                <i class="fa-solid fa-arrow-rotate-right"></i>
-              </span>
-              <span data-translate="Update profile" class="text">Update profile</span>
-            </a>
 
-            <a
-              class="nav-link collapsed"
-              href="#"
-              data-toggle="collapse"
-              data-target="#collapseTwo"
-              aria-expanded="true"
-              aria-controls="collapseTwo">
-              <i class="fas fa-fw fa-heart"></i>
-              <span data-translate="Friends">Friends</span>
-            </a>
-            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo">
-              <div class="card-body">
-                <div class="table-responsive">
-                  <table
-                    class="table table-bordered"
-                    id="dataTable"
-                    width="100%"
-                    cellspacing="0">
-                    <thead>
-                      <tr>
-                        <th>Name</th>
-                        <th>Score</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tfoot>
-                      <tr>
-                        <th>Name</th>
-                        <th>Score</th>
-                        <th>Status</th>
-                      </tr>
-                    </tfoot>
-                    <tbody>
-                      {% for friend in user.friends %}
-                      <tr>
-                        <td>{{ friend.name }}</td>
-                        <td>{{ friend.score }}</td>
-                        <td>{{ friend.status }}</td>
-                        <td>play!</td>
-                      </tr>
-                      {% empty %}
-                      <tr>
-                        <td colspan="4" class="text-center">No friends found</td>
-                      </tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
+            <hr />
+
+            <!-- Friends List -->
+            <div>
+              <a class="nav-link collapsed"
+                 href="#"
+                 data-toggle="collapse"
+                 data-target="#collapseTwo"
+                 aria-expanded="true"
+                 aria-controls="collapseTwo">
+                <i class="fas fa-fw fa-heart"></i>
+                <span data-translate="Friends">Friends</span>
+              </a>
+              <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo">
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Score</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for friend in user.friends %}
+                        <tr>
+                          <td>{{ friend.name }}</td>
+                          <td>{{ friend.score }}</td>
+                          <td>{{ friend.status }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                          <td colspan="4" class="text-center">No friends found</td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
 
-            
-			<!-- ! 2FA buttons with conditional display -->
-            {% if user.two_fa_enabled %}
-            <a href="#" class="btn btn-danger btn-icon-split float-right" 
-               hx-get="/user/disable-2fa/" 
-               hx-target="#main_div"
-               hx-headers='{"HX-Request": "true"}'
-			   id="disable_2fa"
-			   name="disable_2fa">
-              <span class="icon text-white-50">
-                <i class="fas fa-shield-alt"></i>
-              </span>
-              <span data-translate="Disable 2FA" class="text">Disable 2FA</span>
-            </a>
-            {% else %}
-            <a href="#" class="btn btn-success btn-icon-split float-right" 
-               hx-get="/user/setup-2fa/" 
-               hx-target="#main_div"
-               hx-headers='{"HX-Request": "true"}'
-			   id="setup_2fa"
-			   name="setup_2fa">
-              <span class="icon text-white-50">
-                <i class="fas fa-shield-alt"></i>
-              </span>
-              <span data-translate="Set Up 2FA" class="text">Set Up 2FA</span>
-            </a>
-            {% endif %}
-            
-			<!-- ! DELETE BUTTON PROFILE  -->
-            <a	href="#" class="btn btn-danger btn-icon-split float-right"
-				hx-get="/user/delete-profile/" 
-            	hx-target="#main_div"
-            	hx-headers='{"HX-Request": "true"}'
-				id="delete_profile">
-              <span class="icon text-white-50">
-                <i class="fas fa-trash"></i>
-              </span>
-              <span data-translate="Delete profile" class="text">Delete Profile</span>
-            </a>
+            <!-- Profile Controls -->
+            <div class="mt-3">
+              <!-- 2FA Toggle -->
+              {% if user.two_fa_enabled %}
+              <a href="#"
+                 class="btn btn-danger btn-icon-split float-right"
+                 hx-get="/user/disable-2fa/"
+                 hx-target="#main_div">
+                <span class="icon text-white-50"><i class="fas fa-shield-alt"></i></span>
+                <span class="text">Disable 2FA</span>
+              </a>
+              {% else %}
+              <a href="#"
+                 class="btn btn-success btn-icon-split float-right"
+                 hx-get="/user/setup-2fa/"
+                 hx-target="#main_div">
+                <span class="icon text-white-50"><i class="fas fa-shield-alt"></i></span>
+                <span class="text">Set Up 2FA</span>
+              </a>
+              {% endif %}
 
+              <!-- Delete Profile -->
+              <a href="#"
+                 class="btn btn-danger btn-icon-split float-right mr-2"
+                 hx-get="/user/delete-profile/"
+                 hx-target="#main_div">
+                <span class="icon text-white-50"><i class="fas fa-trash"></i></span>
+                <span class="text">Delete Profile</span>
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -197,6 +188,22 @@
   </div>
 </div>
 
+<!-- Styles for Edit Buttons -->
+<style>
+  .edit-btn {
+    border: none;
+    background: transparent;
+    color: #4e73df;
+    cursor: pointer;
+  }
+
+  .edit-btn:hover {
+    color: #2e59d9;
+  }
+</style>
+
+<!-- Include HTMX -->
+<script src="https://unpkg.com/htmx.org@1.9.6/dist/htmx.min.js"></script>
 
 
 <!-- <script>

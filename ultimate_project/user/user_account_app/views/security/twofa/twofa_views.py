@@ -29,10 +29,8 @@ async def setup_2fa(request: HttpRequest):
         # Get user from database API
         user = await manage_user_data.get_user_info_w_username(username)
         print(f"User data retrieved: {user}", flush=True)
-
         if not user:
             return render(request, "twofa_app/error.html", {"error": "User not found"})
-
         # Check if 2FA is already verified
         if user.get("two_fa_enabled"):
             return render(
@@ -44,11 +42,9 @@ async def setup_2fa(request: HttpRequest):
         # Generate a new secret for 2FA
         secret = pyotp.random_base32()
         print(f"Generated new 2FA secret: {secret}", flush=True)
-
         # Save the secret to the user via API
         update_data = {"_two_fa_secret": secret}
         update_result = await manage_user_data.update_user_w_user_id(user["id"], update_data)
-
         if not update_result:
             return render(
                 request,
@@ -62,25 +58,21 @@ async def setup_2fa(request: HttpRequest):
                 name=username, issuer_name="Transcendence"
             )
             print(f"Generated OTP URI: {otp_uri}", flush=True)
-
             # Generate QR code image
             qr = qrcode.make(otp_uri)
             img_io = io.BytesIO()
             qr.save(img_io, format="PNG")
             img_io.seek(0)
-
             # Convert to base64 for embedding in HTML
             qr_code_data = base64.b64encode(img_io.getvalue()).decode("utf-8")
             qr_code_img = f"data:image/png;base64,{qr_code_data}"
             print("QR code image generated successfully", flush=True)
-
             # Create context with the QR code and user info
             context = {
                 "username": username,
                 "qr_code": qr_code_img,
                 "secret": secret,
             }
-
             return render(request, "twofa_app/setup2fa.html", context)
         except Exception as e:
             print(f"Error generating QR code: {str(e)}", flush=True)

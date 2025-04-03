@@ -1,85 +1,69 @@
-<!-- {% load static %} -->
+{% load static %}
 <div class="container-fluid">
     <div class="row">
         <!-- Sidebar -->
         <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar p-3 shadow-sm">
-            <div class="sidebar-sticky">
+            <div class="sidebar-sticky text-center">
+                <!-- Account Settings Title -->
+                <h1 class="h3 mb-3 text-gray-800">Account Settings</h1>
+
                 <ul class="nav flex-column">
                     <!-- Profile Section -->
-                    <li class="nav-item mb-2">
-                        <a class="nav-link d-flex align-items-center p-3 rounded hover-bg-primary" 
+                    <li class="nav-item mb-3">
+                        <a class="nav-link btn btn-outline-primary btn-sm rounded-pill w-100 d-flex align-items-center justify-content-center sidebar-btn"
                            href="#" 
                            hx-get="/account/profile/" 
                            hx-target="#account-content" 
-                           hx-swap="innerHTML" 
+                           hx-swap="innerHTML"
                            hx-push-url="true"
                            hx-headers='{"X-Inner-Content": "true"}'>
-                            <i class="fas fa-user-circle me-2"></i> <!-- Icon for Profile -->
-                            Profile
+                            <i class="fas fa-user-circle me-2"></i> Profile
                         </a>
                     </li>
-                    <li class="nav-item mb-2">
-                        <a class="nav-link d-flex align-items-center p-3 rounded hover-bg-primary" 
+
+                    <li class="nav-item mb-3">
+                        <a class="nav-link btn btn-outline-primary btn-sm rounded-pill w-100 d-flex align-items-center justify-content-center sidebar-btn"
                            href="#" 
                            hx-get="/account/game-stats/" 
                            hx-target="#account-content" 
                            hx-swap="innerHTML"
                            hx-push-url="true"
                            hx-headers='{"X-Inner-Content": "true"}'>
-                            <i class="fas fa-trophy me-2"></i> <!-- Icon for Game Stats -->
-                            Game Stats
+                            <i class="fas fa-trophy me-2"></i> Game Stats
                         </a>
                     </li>
 
-                    <!-- Security Section -->
-                    <li class="nav-item mt-4">
-                        <h6 class="sidebar-heading text-muted">Security</h6>
-                    </li>
-                    <li class="nav-item mb-2">
-                        <a class="nav-link d-flex align-items-center p-3 rounded hover-bg-danger" 
+                    <!-- Security Button (Replaces Password & 2FA) -->
+                    <li class="nav-item mb-3">
+                        <a class="nav-link btn btn-outline-primary btn-sm rounded-pill w-100 d-flex align-items-center justify-content-center sidebar-btn"
                            href="#" 
-                           hx-get="/account/change-password/" 
+                           hx-get="/account/security-options/" 
                            hx-target="#account-content" 
                            hx-swap="innerHTML"
                            hx-push-url="true"
                            hx-headers='{"X-Inner-Content": "true"}'>
-                            <i class="fas fa-key me-2"></i> <!-- Icon for Change Password -->
-                            Change Password
+                            <i class="fas fa-shield-alt me-2"></i> Security
                         </a>
                     </li>
-                    <li class="nav-item mb-2">
-                        <a class="nav-link d-flex align-items-center p-3 rounded hover-bg-warning" 
+
+                    <!-- Confidentiality Button -->
+                    <li class="nav-item mb-3">
+                        <a class="nav-link btn btn-outline-primary btn-sm rounded-pill w-100 d-flex align-items-center justify-content-center sidebar-btn"
                            href="#" 
-                           hx-get="/account/two-factor-auth/" 
+                           hx-get="/account/confidentiality/" 
                            hx-target="#account-content" 
                            hx-swap="innerHTML"
                            hx-push-url="true"
                            hx-headers='{"X-Inner-Content": "true"}'>
-                            <i class="fas fa-lock me-2"></i> <!-- Icon for Two-Factor Authentication -->
-                            Two-Factor Authentication
+                            <i class="fas fa-user-shield me-2"></i> Confidentiality
                         </a>
                     </li>
-                    <li class="nav-item mb-2">
-                        <a class="nav-link d-flex align-items-center p-3 rounded hover-bg-info" 
-                           href="#" 
-                           hx-get="/account/security-logs/" 
-                           hx-target="#account-content" 
-                           hx-swap="innerHTML"
-                           hx-push-url="true"
-                           hx-headers='{"X-Inner-Content": "true"}'>
-                            <i class="fas fa-history me-2"></i> <!-- Icon for Security Logs -->
-                            Security Logs
-                        </a>
-                    </li>
-                    <!-- Add more links here if needed -->
                 </ul>
             </div>
         </nav>
 
         <!-- Main Content -->
         <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
-            <h1 class="h3 mb-3 text-gray-800">Account Settings</h1>
-            
             <!-- Content dynamically loaded here -->
             <div id="account-content">
                 {% if page %}
@@ -92,5 +76,59 @@
     </div>
 </div>
 
-<!-- Add Bootstrap Icons and FontAwesome for better icons -->
+
+<!-- Add FontAwesome Icons -->
 <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+<style>
+    /* Sidebar Button Styles */
+    .sidebar-btn {
+        font-size: 0.85rem; /* Slightly smaller font */
+        padding: 0.5rem 1rem; /* Smaller padding */
+        border-width: 2px;
+        transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    }
+    /* When clicked, fill with color */
+    .sidebar-btn.active, .sidebar-btn:focus {
+        color: white !important;
+    }
+
+    /* Outline with Blue Border */
+    .btn-outline-primary {
+        border-color: #007bff;
+        color: #007bff;
+    }
+    /* When active, the button background changes to blue */
+    .btn-outline-primary.active, .btn-outline-primary:focus {
+        background-color: #007bff !important;
+        border-color: #007bff !important;
+    }
+    /* When hovering, the button gets a darker blue */
+    .sidebar-btn:hover {
+        background-color: #007bff;
+        color: white;
+        border-color: #0056b3;
+    }
+    /* Sidebar Styling: Reduce sidebar width for better content presentation */
+    .sidebar {
+        width: 250px; /* Adjust width */
+    }
+    /* Main content area should have space beside it */
+    main {
+        margin-left: 260px; /* Add some space for the sidebar */
+    }
+</style>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const buttons = document.querySelectorAll(".sidebar-btn");
+
+        buttons.forEach(button => {
+            button.addEventListener("click", function () {
+                // Remove active class from all buttons
+                buttons.forEach(btn => btn.classList.remove("active"));
+
+                // Add active class to the clicked button
+                this.classList.add("active");
+            });
+        });
+    });
+</script>
