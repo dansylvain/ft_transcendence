@@ -8,8 +8,7 @@
       <!-- Nested Row within Card Body -->
       <div class="row">
         <div
-          class="col-lg-3 my-5 align-items-center 
-          justify-content-center bg-register-image"
+          class="col-lg-3 my-5 align-items-center justify-content-center bg-register-image"
         >
           <div class="card shadow mb-4">
             <div class="card-header py-3">
@@ -42,13 +41,14 @@
                 <span data-translate="Profil">Profile</span>!
               </h1>
             </div>
-            <form class="user">
+            <form id="profile-form" class="user">
               <div class="form-group row">
                 <div class="col-sm-6 mb-3 mb-sm-0">
                   <input
                     type="text"
                     class="form-control form-control-user"
-                    id="exampleFirstName"
+                    id="first_name"
+                    name="first_name"
                     data-translate-placeholder="first name"
                     placeholder="{{user.first_name}}"
                     value="{{user.first_name}}"
@@ -58,7 +58,8 @@
                   <input
                     type="text"
                     class="form-control form-control-user"
-                    id="exampleLastName"
+                    id="last_name"
+                    name="last_name"
                     data-translate-placeholder="last name"
                     placeholder="{{user.last_name}}"
                     value="{{user.last_name}}"
@@ -70,9 +71,11 @@
                   <input
                     type="text"
                     class="form-control form-control-user"
-                    id="exampleFirstName"
-                    data-translate-placeholder="{{user.username}}"
+                    id="username"
+                    name="username"
+                    data-translate-placeholder="Username"
                     placeholder="{{user.username}}"
+                    value="{{user.username}}"
                   />
                 </div>
               </div>
@@ -80,20 +83,22 @@
                 <input
                   type="email"
                   class="form-control form-control-user"
-                  id="exampleInputEmail"
-                  data-translate-placeholder="{{user.email}}"
+                  id="email"
+                  name="email"
+                  data-translate-placeholder="E-mail"
                   placeholder="{{user.email}}"
+                  value="{{user.email}}"
                 />
               </div>
             </form>
-            <a href="" class="btn btn-primary btn-icon-split float-right">
+            <button id="update-profile-btn" class="btn btn-primary btn-icon-split float-right">
               <span class="icon text-white-50">
                 <i class="fa-solid fa-arrow-rotate-right"></i>
               </span>
               <span data-translate="Update profile" class="text"
                 >Update profile</span
               >
-            </a>
+            </button>
             <a
               class="nav-link collapsed"
               href=""
@@ -152,40 +157,49 @@
                 </div>
               </div>
             </div>
-            
-			<!-- ! 2FA buttons with conditional display -->
+
+            <!-- ! 2FA buttons with conditional display -->
             {% if user.two_fa_enabled %}
-            <a href="#" class="btn btn-danger btn-icon-split float-right" 
-               hx-get="/user/disable-2fa/" 
-               hx-target="#main_div"
-               hx-headers='{"HX-Request": "true"}'
-			   id="disable_2fa"
-			   name="disable_2fa">
+            <a
+              href="#"
+              class="btn btn-danger btn-icon-split float-right"
+              hx-get="/user/disable-2fa/"
+              hx-target="#main_div"
+              hx-headers='{"HX-Request": "true"}'
+              id="disable_2fa"
+              name="disable_2fa"
+            >
               <span class="icon text-white-50">
                 <i class="fas fa-shield-alt"></i>
               </span>
               <span data-translate="Disable 2FA" class="text">Disable 2FA</span>
             </a>
             {% else %}
-            <a href="#" class="btn btn-success btn-icon-split float-right" 
-               hx-get="/user/setup-2fa/" 
-               hx-target="#main_div"
-               hx-headers='{"HX-Request": "true"}'
-			   id="setup_2fa"
-			   name="setup_2fa">
+            <a
+              href="#"
+              class="btn btn-success btn-icon-split float-right"
+              hx-get="/user/setup-2fa/"
+              hx-target="#main_div"
+              hx-headers='{"HX-Request": "true"}'
+              id="setup_2fa"
+              name="setup_2fa"
+            >
               <span class="icon text-white-50">
                 <i class="fas fa-shield-alt"></i>
               </span>
               <span data-translate="Set Up 2FA" class="text">Set Up 2FA</span>
             </a>
             {% endif %}
-            
-			<!-- ! DELETE BUTTON PROFILE  -->
-            <a	href="#" class="btn btn-danger btn-icon-split float-right"
-				hx-get="/user/delete-profile/" 
-            	hx-target="#main_div"
-            	hx-headers='{"HX-Request": "true"}'
-				id="delete_profile">
+
+            <!-- ! DELETE BUTTON PROFILE  -->
+            <a
+              href="#"
+              class="btn btn-danger btn-icon-split float-right"
+              hx-get="/user/delete-profile/"
+              hx-target="#main_div"
+              hx-headers='{"HX-Request": "true"}'
+              id="delete_profile"
+            >
               <span class="icon text-white-50">
                 <i class="fas fa-trash"></i>
               </span>
@@ -200,12 +214,58 @@
   </div>
 </div>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const navProfile = document.getElementById("nav-profile");
-        if (navProfile) {
-        navProfile.click();
-        }
-    });
+  document.addEventListener("DOMContentLoaded", function () {
+    const navProfile = document.getElementById("nav-profile");
+    if (navProfile) {
+      navProfile.click();
+    }
+  });
+
+
+  document.querySelector("#update-profile-btn").addEventListener("click", async function () {
+    const form = document.querySelector("#profile-form");
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries()); // Convertit en objet JS
+
+    try {
+      const response = await fetch("https://jsonplaceholder.typicode.com/posts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) throw new Error("Erreur lors de la mise à jour");
+
+      const result = await response.json();
+      console.log("Profil mis à jour :", result); // Affiche la réponse du backend
+
+    } catch (error) {
+      console.error("Erreur :", error);
+    }
+  });
+
+
+// DEV
+document.querySelector(".btn-primary").addEventListener("click", function () {
+    const form = document.querySelector("#profile-form");
+    const formData = new FormData(form);
+
+    // Convertir FormData en objet JS
+    const data = Object.fromEntries(formData.entries());
+
+    console.log(data); // Affiche l’objet contenant les données du formulaire
+  });
+
+
+
+
+
+
+
+
+
 </script>
 <!-- <script>
     window.addEventListener("DOMContentLoaded", () => {
