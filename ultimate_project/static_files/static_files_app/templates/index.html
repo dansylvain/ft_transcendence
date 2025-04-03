@@ -9,12 +9,12 @@
     
         <!-- display single pages conditions -->
          
-        {% if page == "register.html" or page == "forgot-password.html" %}
-            {% include page %}
-        {% elif page == "login.html" or page == "two-factor-auth.html" %}
-            {% include page %}
-        {% elif page == "error.html" %}
-            {% include page %}
+        {% if page_name == "register.html" or page_name == "forgot-password.html" %}
+            {{ page|safe }}
+        {% elif page_name == "login.html" or page_name == "two-factor-auth.html" %}
+            {{ page|safe }} 
+        {% elif page_name == "error.html" %}
+            {{ page|safe }}
         {% else %}
 
         <div id="wrapper">  <!-- template suff - DO NOT TOUCH -->
@@ -45,18 +45,31 @@
                     </div> <!-- template suff - DO NOT TOUCH -->
                 
                     {% include "partials/footer.html" %}
-                    
-                    {% include "partials/logout_modal.html" %}
-                
                     {% endif %}
                 
                 </div> <!-- template suff - DO NOT TOUCH -->
     
                 <!-- include scripts at the end! -->
                 
-
             </div>
         </div>
+        <div id="modal-container"></div> 
+        <script>
+            document.body.addEventListener('htmx:afterSwap', function(event) {
+              if (event.target.id === 'modal-container') {
+                console.log("HTMX swapped in modal."); // Debugging log
+          
+                let modalElement = document.getElementById('logoutModal');
+                if (modalElement) {
+                  let modalInstance = new bootstrap.Modal(modalElement);
+                  modalInstance.show();
+                  console.log("Modal is now visible."); // Debugging log
+                } else {
+                  console.error("Modal element not found!");
+                }
+              }
+            });
+          </script>                                
     </body>
 </html>
 

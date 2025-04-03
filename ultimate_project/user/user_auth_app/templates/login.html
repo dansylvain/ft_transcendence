@@ -13,8 +13,7 @@
                 <div class="text-center">
                   <h1 class="h4 text-gray-900 mb-4">Login</h1>
                 </div>
-
-                <!-- Formulaire de connexion HTMX -->
+                <!-- Formulaire de connexion HTMX   hx-post="/auth/login/"-->
                 <form
                   class="user"
                   hx-post="/auth/login/"
@@ -25,7 +24,6 @@
                     "HX-Request": "true",
                     "X-CSRFToken": "{{ csrftoken }}"
                   }'
-                  enctype="application/x-www-form-urlencoded"
                 >
                   <div class="form-group">
                     <input
@@ -97,46 +95,56 @@
 </div>
 <script>
   document.addEventListener("htmx:beforeSwap", function (evt) {
-    console.log("✨ Login form listening.");
-    if (evt.detail.target.id === "login-form") {
-        try {
-            console.log("Response:", evt.detail.xhr.responseText);
-            const response = JSON.parse(evt.detail.xhr.responseText);
-
-            if (response.success) {
-                console.log("✅ SUCCESS: Login successful !");
-                // Prevent HTMX swap (we don't need to swap the form after successful login)
+      console.log("✨ Login form event detected.");
+      if (evt.detail.target.id === "login-form") {
+          try {
+              console.log("📩 Response received:", evt.detail.xhr.responseText);
+              const response = JSON.parse(evt.detail.xhr.responseText);
+              if (evt.detail.xhr.status === 401) {
+                console.log("❌ Wrong password detected.");
+                document.getElementById("login-error").textContent = response.message || "Wrong password.";
                 evt.detail.shouldSwap = false;
-                document.getElementById('login-form').innerHTML = 'Login successful!';
-                // window.location.href = "/home/";
-            } else if (response.message === "2FA is enabled") {
-                console.log("➡️ 2FA required, redirecting...");
-                const usernameInput = document.getElementById("username");
-                if (usernameInput) {
-                    const usernameValue = usernameInput.value;
-                    sessionStorage.setItem("2fa_username", usernameValue);
-                    window.twoFAUsername = usernameValue;
-                } else {
-                    console.error("❌ Username input element not found.");
-                }
-                evt.detail.shouldSwap = false;
-                htmx.ajax("GET", `/two-factor-auth/?username=${encodeURIComponent(usernameInput.value)}`, {
-                    target: "body",
-                    swap: "outerHTML",
-                }).then(() => {
-                    console.log("🔐 2FA page loaded, updating history.");
-                    history.pushState(null, "", "/two-factor-auth/");
-                });
-            } else {
-                console.log("❌ Login failed: ", response.message);
-                const messageElement = document.getElementById("login-form");
-                const sanitizedMessage = DOMPurify.sanitize(response.message);
-                messageElement.textContent = sanitizedMessage;
-            }
-        } catch (e) {
-            console.error("🚨 Error processing response: ", e);
-        }
-    }
+              }
+              if (response.success) {
+                  console.log("✅ SUCCESS: Login successful!");
+                  evt.detail.shouldSwap = false;
+                  document.getElementById("login-form").innerHTML = "Login successful!";
+                  setTimeout(function () {
+                  window.location.href = "/home/";  // Redirect to home page or dashboard
+                  }, 1000); 
+                  //window.location.href = "/home/";
+              } else if (response.requires_2fa) {
+                  console.log("➡️ 2FA required, redirecting...");
+                  const usernameInput = document.getElementById("username");
+                  if (usernameInput && usernameInput.value) {
+                      const usernameValue = usernameInput.value;
+                      sessionStorage.setItem("2fa_username", usernameValue);
+                      window.twoFAUsername = usernameValue;
+                      evt.detail.shouldSwap = false;
+                      htmx.ajax("GET", `/two-factor-auth/?username=${encodeURIComponent(usernameValue)}`, {
+                          target: "body",
+                          swap: "outerHTML",
+                      }).then(() => {
+                          console.log("🔐 2FA page loaded, updating history.");
+                          history.pushState(null, "", "/two-factor-auth/");
+                      });
+                  } else {
+                      console.error("❌ Username input not found or empty.");
+                  }
+              } else {
+                  console.log("❌ Login failed:", response.message);
+                  const messageElement = document.getElementById("login-form");
+                  if (messageElement) {
+                      const sanitizedMessage = DOMPurify.sanitize(response.message);
+                      messageElement.textContent = sanitizedMessage;
+                  } else {
+                      console.error("🚨 Error: Login form element not found.");
+                  }
+              }
+          } catch (error) {
+              console.error("🚨 Error processing response:", error);
+          }
+      }
   });
 </script>
 

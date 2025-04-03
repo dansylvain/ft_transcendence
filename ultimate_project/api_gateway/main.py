@@ -115,7 +115,7 @@ class CSRFMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         # If it's a GET request, we generate a CSRF token and set the cookie
         # If it's a GET request and no token exists, generate a new one
-        if request.method == "GET" and "csrftoken" not in request.cookies:
+        if "csrftoken" not in request.cookies:
             csrf_token = self.generate_csrf_token()
             response = await call_next(request)
             response.set_cookie(
@@ -123,7 +123,7 @@ class CSRFMiddleware(BaseHTTPMiddleware):
                 value=csrf_token, 
                 httponly=True, 
                 secure=True, 
-                samesite="Lax", 
+                samesite="None", 
                 path="/", 
                 max_age=60 * 60 * 6  # 6 hours
             )
@@ -148,7 +148,6 @@ class CSRFMiddleware(BaseHTTPMiddleware):
         secret = secrets.token_hex(32)  # 32-byte secret key
         hashed_token = hashlib.sha256(secret.encode()).hexdigest()
         return hashed_token
-        #return csrf_serializer.dumps({"csrftoken": secrets.token_hex(32)})
 app.add_middleware(CSRFMiddleware)
 
 # This middleware is used to debug incoming cookies in FastAPI.
@@ -164,7 +163,7 @@ async def debug_cookies_middleware(request: Request, call_next):
             print(f"🔍 Outgoing Set-Cookie header: {cookie}", flush=True)
     return (response)
 
-@app.middleware("http")
+""" @app.middleware("http")
 async def debug_full_response_middleware(request: Request, call_next):
     print(f"🔍 Incoming Request: {request.method} {request.url}", flush=True)
     response = await call_next(request)
@@ -181,9 +180,7 @@ async def debug_full_response_middleware(request: Request, call_next):
             print(f"🔍 Response Body (Raw): {response_body.decode()}", flush=True)
     except Exception as e:
         print(f"🚨 Error parsing response body: {e}", flush=True)
-    return response
-
-
+    return response """
 
 # ===== ⚠️ Exception Handling ⚠️ =====
 
@@ -199,7 +196,8 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
 # ======= 🛠️ Main Function Handling the Reverse Proxy for the Route 🛠️ =======
 
 async def reverse_proxy_handler(target_service: str, incoming_path: str, request: Request,
-            serve_from_static: bool = False, static_service_name: str = None):
+            serve_from_static: bool = False, static_service_name: str = None,
+            is_full_page: bool = False):
     """
     Proxies a request either directly to a target service container or through  
     a static service container, which then serves the content.  
@@ -233,7 +231,6 @@ async def reverse_proxy_handler(target_service: str, incoming_path: str, request
     async with httpx.AsyncClient(follow_redirects=True) as client:
         base_service_url = services[target_service].rstrip("/")
         normalized_path = incoming_path.lstrip("/")
-
         # Handle query parameters
         query_params = request.query_params
         query_string = f"?{query_params}" if query_params else ""
@@ -247,6 +244,7 @@ async def reverse_proxy_handler(target_service: str, incoming_path: str, request
             key: value for key, value in request.headers.items() if key.lower() != "host"
         }
         forwarded_headers["Host"] = "localhost"
+        
         # Construct request URL
         # If serve_from_static is enabled and the requested service is not 
         # already the static service,the request will be routed through the 
@@ -257,6 +255,8 @@ async def reverse_proxy_handler(target_service: str, incoming_path: str, request
             forwarded_headers["X-Url-To-Reload"] = f"{base_service_url}/{normalized_path}{query_string}"
         else:
             final_url = f"{base_service_url}/{normalized_path}{query_string}"
+        if is_full_page:
+            forwarded_headers["X-Is-Full-Page"] = "True"
 
         # Debug logging
         print("\n" + "=" * 50)
@@ -268,8 +268,6 @@ async def reverse_proxy_handler(target_service: str, incoming_path: str, request
         print(f"🛡️ HX-Request Present: {'✅ Yes' if 'HX-Request' in request.headers else '❌ No'}")
         print(f"📦 Using Static container for reload: {'✅ Yes' if serve_from_static else '❌ No'}")
         print("=" * 50 + "\n", flush=True)
-
-        # Forward headers (excluding 'host')
             
         # Check user authentication and attach user info headers
         is_authenticated_user, user_info = authentication.is_authenticated(request)
@@ -289,54 +287,39 @@ async def reverse_proxy_handler(target_service: str, incoming_path: str, request
         request_method = request.method
         # need to add a try here
         request_body = await request.body()
-        
         request_cookies = request.cookies
-
         try:
             response = await client.request(
                 request_method, final_url, headers=forwarded_headers, 
                 content=request_body, cookies=request_cookies
             )
+            # ONLY RAISED ERROR IF METHOD GET BECASUE PB WITH
+            # POST METHOD FOR DB THAT FAILED BCASUE ISNETAD OF RETUNING ERROR 
+            # TO BROSER WAS JUST TRY TO FIND A 401 ERROR
+            """ if base_service_url != services["databaseapi"]:
+                response.raise_for_status() """
             response.raise_for_status()
+               
         except httpx.HTTPStatusError as exc:
             logger.error(f"❌ Request failed with status code {exc.response.status_code}")
             raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text)
         except httpx.RequestError as exc:
             logger.error(f"❌ Request error: {exc}")
             raise HTTPException(status_code=500, detail="Internal Server Error")
-
-        # Prepare response headers (excluding Set-Cookie)
-        response_headers = {
-            key: value for key, value in response.headers.items() if key.lower() != "set-cookie"
-        }
-        response_headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-
-        # Set response content type
-        content_type = response.headers.get("Content-Type", "").split(";")[0].strip()
-
-        return Response(
-            content=response.content,
-            status_code=response.status_code,
-            headers=response_headers,
-            media_type=content_type if content_type else None,
-        )
-
-
-# 🍪 ====== HANDLING COOKIES 🍪 ======
-
-@app.api_route("/api-gateway/set-cookies/{path:path}/", methods=["POST"])
-async def set_cookies(request: Request, path: str):
-    print(f"🔑 LOGIN COOKIES ROUTE ROUTE ROUTE CALLED ROUTE", flush=True)
-    try:
-        if path == "login-cookies":
-            print(f"🔑 LOGIN COOKIES CALLED ROUTE", flush=True)
-            body = await request.json()
-            return await cookies_helpers.set_login_cookies(body)
-        else:
-            raise HTTPException(status_code=404, detail="Path not found")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    
+    # Prepare response headers (excluding Set-Cookie) 
+    """ response_headers = {
+        key: value for key, value in response.headers.items() if key.lower() != "set-cookie"
+    } """
+    response_headers = {key: value for key, value in response.headers.items()}
+    response_headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    # Set response content type
+    content_type = response.headers.get("Content-Type", "").split(";")[0].strip()
+    return Response(
+        content=response.content,
+        status_code=response.status_code,
+        headers=response_headers,
+        media_type=content_type if content_type else None,
+    ) 
 
 # ====== 🏠 REDIRECT TO HOME 🏠 ======
 
@@ -494,50 +477,35 @@ async def user_account_route(path: str, request: Request):
 async def user_auth_get_route(path:str, request: Request):
     
     # get will only be for login and register becaus e the resta re post
+    print(f"\n == ROUTE AUTH WITH GET CALLED for path: {path} \n", flush=True)
+    """   
     response = await auth_helpers.block_and_redir_auth_users()(request)
     if response:
-        return response
-    print("\ROUTE AUTH WITH GET CALLED\n", flush=True)
-    if "HX-Request" in request.headers:        
-        return await reverse_proxy_handler("user", "/auth/" + path, request)
-    else:
-        return await reverse_proxy_handler("user", "/auth/" + path, request, 
-            serve_from_static=True, static_service_name="static_files", )
-
-@app.api_route("/auth/{path:path}", methods=["POST"])
-async def user_auth_post_route(path:str, request: Request):
-
-    print("\n == CALLED AUTH ROUTE POSTE == \n", flush=True)
+        return response """
     if "HX-Request" in request.headers:
         return await reverse_proxy_handler("user", "/auth/" + path, request)
     else:
         return await reverse_proxy_handler("user", "/auth/" + path, request, 
-            serve_from_static=True, static_service_name="static_files")
+            serve_from_static=True, static_service_name="static_files", is_full_page=True)
 
+@app.api_route("/auth/{path:path}", methods=["POST"])
+async def user_auth_post_route(path:str, request: Request):
 
-""" @app.api_route("/auth/login", methods=["POST"])
-@app.api_route("/auth/login/", methods=["POST"]) """
-""" async def login_page_route(request: Request): """
-""" 
-    Extracts form data and passes it to `login_fastAPI`
-    form_data = await request.form()  # Extract form data
-    username = form_data.get("username")
-    password = form_data.get("password")
-
-    # Create a new response object
-    response = Response()
-
-    return await login_fastAPI(request, response, username, password)
- """
-
-# Add logout endpoint
-""" @app.api_route("/auth/logout", methods=["POST"])
-@app.api_route("/auth/logout/", methods=["POST"])
-async def logout_route(request: Request): """
-"""
-    Handles user logout by clearing JWT cookies
-    return await logout_fastAPI(request)
-"""
+    print(f"\n == CALLED AUTH ROUTE POSTE for path {path} == \n", flush=True)
+    response = await reverse_proxy_handler("user", "/auth/" + path, request)
+    if path == "login/":
+        try:
+            return await cookies_helpers.set_auth_cookies(response)  # Call cookie helper
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error setting login cookies: {str(e)}")
+    elif path == "logout/":
+        try:
+            print("\n\n == LOGOUT AUTH ROUTE POST CALLED == \n\n", flush=True)
+            return await cookies_helpers.clear_auth_cookies(response)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error clearing authentication cookies: {str(e)}") 
+    else:
+        return HTTPException(status_code=404, detail="Path not found")
 
 
 # ====== 🗂️ API DATABASE PROXY 🗂️ ======
@@ -888,7 +856,6 @@ async def delete_profile_proxy(request: Request):
 
 
 # ---------------------------------------------------------------
-
 
 
 @app.api_route("/{path:path}", methods=["GET"])

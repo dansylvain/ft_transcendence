@@ -5,7 +5,12 @@ from django.conf import settings
 
 urlpatterns = [
     path("", views.index, name="index"),
-    path("login/", views.login, name="login"),
+    #path("login/", views.login, name="login"),
+    #path("register/", views.register, name="register"),
+    #path("forgot-password/", views.forgotPassword, name="forgot-password"),
+    #path("login/", views.forgotPassword, name="login"),
+    #path("two-factor-auth/", views.twoFactorAuth, name="login"),
+    
     path("home/", views.home, name="home"),
     path("error/<int:code>/", views.error, name="error"),
     
@@ -26,10 +31,7 @@ urlpatterns = [
     ),
     
     path("translations/<str:lang>.json", views.translations, name="translations"),
-    path("register/", views.register, name="register"),
-    path("forgot-password/", views.forgotPassword, name="forgot-password"),
-    path("login/", views.forgotPassword, name="login"),
-    path("two-factor-auth/", views.twoFactorAuth, name="login"),
+    
     path('favicon.ico', RedirectView.as_view(url=settings.STATIC_URL + 'favicon.ico', permanent=True)),
 
 ]

@@ -14,37 +14,64 @@ def verify_credentials(request):
     Verify username and password without creating a session.
     Returns user info and token on success.
     """
-    username = request.data.get("username")
-    password = request.data.get("password")
-
-    # print("=========== DEBUGGING DATABASE===========", flush=True)
-    # print(f"username: {username}, password: {password}", flush=True)
-    # print("=========== DEBUGGING DATABASE===========", flush=True)
-
-    if not username or not password:
+    if not request.content_type or "application/json" not in request.content_type:
         return Response(
-            {"error": "Please provide both username and password"},
+            {"success": False, "error": "Invalid content type. Expected application/json."},
             status=status.HTTP_400_BAD_REQUEST,
+            content_type="application/json",
         )
 
-    # Authententicate the user within the database system
-    # ! IMPORTANT : Authenticate does not login the user 
-    user = authenticate(username=username, password=password)
+    try:
+        request_data = request.data
+        if not isinstance(request_data, dict):
+            raise ValueError("Request data must be a valid JSON object")
+        username = request_data.get("username")
+        password = request_data.get("password")
 
-    if user:
+        if not username or not password:
+            return Response(
+                {"success": False, "error": "Please provide both username and password"},
+                status=status.HTTP_400_BAD_REQUEST,
+                content_type="application/json",
+            )
+
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            return Response(
+                {
+                    "success": True,
+                    "user_id": user.id,
+                    "username": user.first_name,
+                },
+                status=status.HTTP_200_OK,
+                content_type="application/json",
+            )
+        else:
+            return Response(
+                {"success": False, "error": "Invalid credentials"},
+                status=status.HTTP_401_UNAUTHORIZED,
+                content_type="application/json",
+            )
+    except ValueError as ve:
         return Response(
-            {
-                "success": True, # returs a 200 code
-                # returning extra info, see if pertinent in the login workflow
-                "user_id": user.id,
-                "username": user.first_name,
-            }
+            {"success": False, "error": str(ve)},
+            status=status.HTTP_400_BAD_REQUEST,
+            content_type="application/json",
         )
-    else:
+    except Exception as e:
         return Response(
-            {"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED
+            {"success": False, "error": "Internal server error"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content_type="application/json",
         )
-    
+
+
+
+
+
+
+
+
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def check_2fa(request):

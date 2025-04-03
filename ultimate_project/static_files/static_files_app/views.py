@@ -16,26 +16,12 @@ from django.http import JsonResponse
 def index(request):
     # Get username from JWT header if available
     username = request.headers.get("X-Username")
-
+    
+    #page_name = request.headers.get("X-Page-Name", None)
+    # print(f"\n\n INDEX VIEW CALLED  {page_name} \n\n", flush=True)
     if "HX-Request" not in request.headers:
         return redirect("/home/")
     obj = {"username": username, "request": request}
-    return render(request, "index.html", obj)
-
-
-# !!      OLD LOGIN PATH AND FORMS
-@never_cache
-def login_form(request):
-    # csrf_token = csrf.get_token(request)
-    return render(request, "landing_page.html")
-
-
-# !!      OLD LOGIN PATH AND FORMS
-@never_cache
-def login(request):
-    # For login page, we don't need to try to get the username from JWT
-    # since this page is for unauthenticated users
-    obj = {"username": "", "page": "login.html"}
     return render(request, "index.html", obj)
 
 
@@ -43,45 +29,18 @@ def login(request):
 def home(request):
     # Get username from JWT header if available
     username = request.headers.get("X-Username") or request.session.get("username")
-
+    #page_name = request.headers.get("X-Page-Name", None)
+    
     if (
         request.headers.get("HX-Request")
         and request.headers.get("HX-Login-Success") != "true"
     ):
         return render(request, "partials/home.html", {"username": username})
-
     obj = {"username": username, "page": "partials/home.html"}
     return render(request, "index.html", obj)
 
 
 # --------------- USER PARTIAL VIEW ----------------
-
-# this two are useless ????? 
-@never_cache
-def account(request):
-    # Get username from JWT header if available
-    username = request.headers.get("X-Username") or request.session.get("username")
-
-    if request.headers.get("HX-Request"):
-        print("********************\nHTMX REQUEST\n********************", flush=True)
-        return render(request, "partials/profile.html", {"username": username})
-    print("********************\nNORMAL REQUEST\n********************", flush=True)
-    obj = {"username": username, "page": "partials/profile.html"}
-    return render(request, "index.html", obj)
-
-@never_cache
-def stats(request):
-    # Get username from JWT header if available
-    username = request.headers.get("X-Username") or request.session.get("username")
-
-    if request.headers.get("HX-Request"):
-        print("********************\nHTMX REQUEST\n********************", flush=True)
-        return render(request, "partials/stats.html", {"username": username})
-
-    print("********************\nNORMAL REQUEST\n********************", flush=True)
-    obj = {"username": username, "page": "partials/stats.html"}
-    return render(request, "index.html", obj)
-
 
 @never_cache
 def match_simple_template(request, user_id):
@@ -139,28 +98,31 @@ def reload_template(request):
     
     """
     headers = {key: value for key, value in request.headers.items()}
-
     url = headers["X-Url-To-Reload"]
-    print(f"\n\nprint URL IN RELOAD TEMPLATE {url}\n\n", flush=True)
-    page_html = requests.get(url, headers=headers).text
-    
-    print(f"\n\nprint URL IN RELOAD TEMPLATE {url}\n\n", flush=True)
-
+    response = requests.get(url, headers=headers)
+    page_html = response.text
+    is_full_page = headers.get("X-Is-Full-Page", None)
+    if is_full_page:
+        p_name = response.headers.get("X-Page-Name", None) # Extracts the filename from the URL
+    else:
+        p_name = None
+    p_name = str(p_name) if p_name else ""
+    print(f"\n\n ===== page name is {p_name} ======== \n\n", flush=True)
     # Get username from JWT header if available
     username = request.headers.get("X-Username") or request.session.get("username")
     
     print("********************\nTEMPLATE REQUEST\n********************", flush=True)
 
-    return render(
-        request,
-        "index.html",
+    return render(request, "index.html",
         {
             "username": username,
             "rasp": os.getenv("rasp", "false"),
             "pidom": os.getenv("pi_domain", "localhost:8443"),
             "page": page_html,
-        },
+            "page_name": p_name
+        }
     )
+    
 
 
 @never_cache
@@ -179,25 +141,25 @@ def translations(request, lang):
         return JsonResponse({"error": "File not found"}, status=404)
 
 
-@never_cache
+""" @never_cache
 def register(request):
     # Get username from JWT header if available
     username = request.headers.get("X-Username") or request.session.get("username")
 
     obj = {"username": username, "page": "register.html"}
-    return render(request, "index.html", obj)
+    return render(request, "index.html", obj) """
 
 
-@never_cache
+""" @never_cache
 def forgotPassword(request):
     # Get username from JWT header if available
     username = request.headers.get("X-Username") or request.session.get("username")
 
     obj = {"username": username, "page": "forgot-password.html"}
     return render(request, "index.html", obj)
+ """
 
-
-@never_cache
+""" @never_cache
 def twoFactorAuth(request):
     # Try to get username from multiple sources
     username = request.headers.get("X-Username") or request.session.get("username")
@@ -217,10 +179,11 @@ def twoFactorAuth(request):
     # Otherwise render the full page
     obj = {"username": username, "page": "two-factor-auth.html"}
     return render(request, "index.html", obj)
+ """
 
 @csrf_exempt    
 @never_cache
 def error(request, code=404):  # Code 404 par défaut
     username = request.session.get("username")
-    obj = {"username": username, "status_code": code, "page": "error.html"}
+    obj = {"username": username, "status_code": code, "page_name": "error.html"}
     return render(request, "index.html", obj)

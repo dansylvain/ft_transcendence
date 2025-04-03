@@ -23,104 +23,93 @@ API_VERIFY_CREDENTIALS = "http://ctn_api_gateway:8005/api-database/verify-creden
 API_CHECK_2FA = "http://ctn_api_gateway:8005/api-database/check-2fa/"
 API_GATEWAY_LOGIN_COOKIES = "http://ctn_api_gateway:8005/api-gateway/set-cookies/login-cookies/"
 
+from django.http import JsonResponse
+from http.cookies import SimpleCookie
 
 async def login_handler(username: str, password: str):
     """
     Vérifie les identifiants via `databaseAPI`, puis génère un JWT stocké en cookie.
     """
-    print(f"🔐 Tentative de connexion pour {username} and password: {password}", flush=True)
+    print(f"🔐 Tentative de connexion pour {username}", flush=True)
+
     try:
         async with httpx.AsyncClient() as client:
-            db_response = await client.post(API_VERIFY_CREDENTIALS,
-                data={"username": username, "password": password},)
+            db_response = await client.post(API_VERIFY_CREDENTIALS, 
+                json={"username": username, "password": password})
+        print(f"\n\n == STATUS CODE DB {db_response.status_code} == \n\n", flush=True)
+        if not db_response.content.strip():
+            print("🚨 Empty response received from authentication service", flush=True)
+            return JsonResponse({"success": False, "message": "Empty response from authentication service"}, status=500)
         if db_response.status_code != 200:
-            error_message = db_response.json().get("error", "Authentication failed")
-            return JsonResponse(data={"success": False, "message": error_message}, status=401)
-        auth_data = db_response.json()
-        print(f"🔑 Authentication successful, auth_data: {auth_data}", flush=True)
-    except httpx.RequestError as e:
-        return JsonResponse(data={"success": False, "message": f"Service unavailable during authentication: {str(e)}"}, status=500)
-    # Step 2: Handle 2FA check
-    try:
-        async with httpx.AsyncClient() as client:
-            check_2fa_response = await client.post(API_CHECK_2FA,
-                data={"username": username, "password": password})
-        print(f"\n\n == STATUS CODE 2FA: {check_2fa_response.status_code} == \n\n", flush=True)
-        if check_2fa_response.status_code == 200 and check_2fa_response.json().get("success") == True:
-            return JsonResponse(data={"success": False, "message": "2FA is enabled"}, status=200)
-    except httpx.RequestError as e:
-        return JsonResponse(data={"success": False, "message": f"Error in 2FA check: {str(e)}"}, status=500)
-    # Generate JWT tokens
-    print(f"\n\n == AFTER STATUS CODE == \n\n", flush=True) #remove
-    expire_access = datetime.datetime.utcnow() + datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    expire_refresh = datetime.datetime.utcnow() + datetime.timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
-    access_payload = {
-        "user_id": auth_data.get("user_id", 0),
-        "username": username,
-        "exp": expire_access,
-    }
-    refresh_payload = {
-        "user_id": auth_data.get("user_id", 0),
-        "username": username,
-        "exp": expire_refresh,
-    }
-    access_token = jwt.encode(access_payload, SECRET_JWT_KEY, algorithm="HS256")
-    refresh_token = jwt.encode(refresh_payload, SECRET_JWT_KEY, algorithm="HS256")
-    # Construct the body to send to the API Gateway to set the cookies 
-    body = {
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-    }
-    headers = {'Content-Type': 'application/json'}
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.post(API_GATEWAY_LOGIN_COOKIES, json=body, headers=headers)
-        if response.status_code == 200:
+            print(f"❌ Authentication failed: Invalid credentials", flush=True)
+            return JsonResponse(data={"success": False, "message": "Invalid credentials"}, status=401)
+        # Case 3: Check if the response is valid JSON
+        try:
+            response_json = db_response.json()
+        except ValueError:
+            print("🚨 Invalid JSON received from authentication service", flush=True)
+            return JsonResponse({"success": False, "message": "Invalid response from authentication service"}, status=500)
+        # Case 4: If response is valid and authentication is successful
+        if db_response.status_code == 200:
+            print(f"✅ Authentication successful for {username}", flush=True)
+            # Step 2: Handle 2FA check if authentication is successful
+            try:
+                async with httpx.AsyncClient() as client:
+                    check_2fa_response = await client.post(API_CHECK_2FA,
+                        data={"username": username, "password": password})
+                print(f"\n\n == STATUS CODE 2FA: {check_2fa_response.status_code} == \n\n", flush=True)
+                if check_2fa_response.status_code == 200 and check_2fa_response.json().get("success") == True:
+                    return JsonResponse(data={"success": True, "message": "2FA is enabled"}, status=200)
+            except httpx.RequestError as e:
+                return JsonResponse(data={"success": False, "message": f"Error in 2FA check: {str(e)}"}, status=500)
+            # Generate JWT tokens if authentication is successful and 2FA check is passed
+            print(f"\n\n == AFTER STATUS CODE == \n\n", flush=True)  # remove
+            expire_access = datetime.datetime.utcnow() + datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+            expire_refresh = datetime.datetime.utcnow() + datetime.timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+            access_payload = {
+                "user_id": response_json.get("user_id", 0),
+                "username": username,
+                "exp": expire_access,
+            }
+            refresh_payload = {
+                "user_id": response_json.get("user_id", 0),
+                "username": username,
+                "exp": expire_refresh,
+            }
+            access_token = jwt.encode(access_payload, SECRET_JWT_KEY, algorithm="HS256")
+            refresh_token = jwt.encode(refresh_payload, SECRET_JWT_KEY, algorithm="HS256")
             data = {
                 "success": True,
-                "message": "Connexion réussie",
-                }
-            json_response = JsonResponse(data)
-            return json_response
-        else:
-            return JsonResponse(data={"success": False, "message": f"API Gateway returned an error: {response.status_code}"}, status_code=500)
+                "message": "Authentication successful",
+                "access_token": access_token,
+                "refresh_token": refresh_token
+            }
+            response = JsonResponse(data=data, status=200)
+            return (response)
+        # Default case: unexpected status code
+        print(f"🚨 Unexpected status code {db_response.status_code} received", flush=True)
+        return JsonResponse({"success": False, "message": f"Unexpected response code: {db_response.status_code}"}, status=500)
     except httpx.RequestError as e:
-        return JsonResponse(data={"success": False, "message": f"Error sending data to API gateway: {str(e)}"}, status_code=500)
-
-
-
-
-
+        # Handle network or service unavailability
+        print(f"🚨 Authentication service unavailable: {str(e)}", flush=True)
+        return JsonResponse(data={"success": False, "message": f"Service unavailable: {str(e)}"}, status=500)
 
 # Function to handle user logout
-async def logout_api():
-    
-    print("🚪 Logout requested", flush=True)
+async def logout_handler():
+    try:
+        print("🚪 Logout requested", flush=True)
+        response = JsonResponse(
+            {"success": True, "message": "Déconnexion réussie"}, status=200)
+        print("🔑 JWT Cookies cleared", flush=True)
+        return (response)
+    except Exception as e:
+        print(f"❌ Logout error: {str(e)}", flush=True)
+        return JsonResponse(
+            {"success": False, "message": "Error during logout"},
+            status=500
+        )
 
-    # Create response
-    response = JsonResponse(content={"success": True, "message": "Déconnexion réussie"})
 
-    # Clear cookies by setting them with empty values and making them expire immediately
-    response.delete_cookie(
-        key="access_token",
-        path="/",  # Must match how it was set
-        httponly=True,  # Must match how it was set
-        samesite="Lax",  # Must match how it was set
-    )
-
-    response.delete_cookie(
-        key="refresh_token",
-        path="/",  # Must match how it was set
-        httponly=True,  # Must match how it was set
-        samesite="Lax",  # Must match how it was set
-    )
-
-    # Add a header for HTMX to redirect to login page
-    # response.headers["HX-Redirect"] = "/login"
-    # Log for debugging
-    print("🔑 JWT Cookies cleared", flush=True)
-
-    return (response)
 
 async def register_api(
     username: str,

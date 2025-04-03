@@ -184,10 +184,10 @@
         />
       </a>
       <!-- Dropdown - User Information -->
-      <div
+        <div
         class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
         aria-labelledby="userDropdown"
-      >
+        >
         <a
           id="pre-modal-profile"
           class="dropdown-item"
@@ -202,16 +202,18 @@
         </a>
         <div class="dropdown-divider"></div>
         <a
-          id="pre-modal-logout"
-          class="dropdown-item"
-          href="#"
-          data-toggle="modal"
-          data-target="#logoutModal"
-        >
-          <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-          <span id="logoutButton" data-translate="Logout"> Logout </span>
-        </a>
-      </div>
+            id="pre-modal-logout"
+            class="dropdown-item"
+            href="#"
+            hx-get="/auth/logout/"
+            hx-target="#modal-container"
+            hx-trigger="click"
+            hx-swap="innerHTML"
+          >
+            <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+            <span id="logoutButton" data-translate="Logout"> Logout </span>
+          </a>
+        </div>
     </li>
   </ul>
 </nav>

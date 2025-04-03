@@ -2,7 +2,6 @@ import jwt, os
 from fastapi import Request
 from fastapi.responses import RedirectResponse
 
-from utils.authentication import is_authenticated
 
 JWT_SECRET_KEY = os.getenv("JWT_KEY")
 

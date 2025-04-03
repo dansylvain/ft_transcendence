@@ -176,7 +176,7 @@ LOGGING = {
 }
 
 CORS_ALLOW_CREDENTIALS = True  # 🔥 Allow cookies in requests
-CORS_ALLOW_ORIGINS = [
+""" CORS_ALLOW_ORIGINS = [
     "http://localhost:8000",  # Basic
     "http://localhost:8001",  # Tournament
     "http://localhost:8002",  # Match
@@ -186,15 +186,14 @@ CORS_ALLOW_ORIGINS = [
     "http://localhost:8007",  # DatabaseAPI
     "https://localhost:8443"  # For secure HTTPS access
     f"https://{PI_DOMAIN}",  # Production
-]
-
-CORS_ALLOW_ORIGINS = ["*"]
+] """
+CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_METHODS = ["GET", "POST", "OPTIONS", "PUT", "DELETE"]
 
 # Cookie settings
 SESSION_COOKIE_SECURE = True  # Ensures session cookies are only sent over HTTPS
 SESSION_COOKIE_HTTPONLY = False
-SESSION_COOKIE_SAMESITE = 'None' # was 'Lax"
+SESSION_COOKIE_SAMESITE = "None" # was 'Lax"
 
 CSRF_COOKIE_SECURE = True  # Ensures CSRF cookie is only sent over HTTPS
 CSRF_COOKIE_HTTPONLY = False  # JavaScript needs access to CSRF token
