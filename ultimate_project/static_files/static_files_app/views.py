@@ -142,15 +142,6 @@ def translations(request, lang):
 
 
 """ @never_cache
-def register(request):
-    # Get username from JWT header if available
-    username = request.headers.get("X-Username") or request.session.get("username")
-
-    obj = {"username": username, "page": "register.html"}
-    return render(request, "index.html", obj) """
-
-
-""" @never_cache
 def forgotPassword(request):
     # Get username from JWT header if available
     username = request.headers.get("X-Username") or request.session.get("username")

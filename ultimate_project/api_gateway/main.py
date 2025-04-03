@@ -198,15 +198,12 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
 INTERNAL_TOKEN = os.getenv("INTERNAL_TOKEN")
 def validate_response_internal_token(response: Response) -> bool:
     internal_token = response.headers.get("x-internal-token")
-    print(f"\n\n INETRNATL TOEKN : {internal_token}\n\n", flush=True)
     if not internal_token:
         return None
     return internal_token == INTERNAL_TOKEN
 
 def validate_internal_token(internal_tok_v: str, header: str) -> bool:
-    print(f"\n\n INETRNATL TOEKN HEADER : {header}\n\n", flush=True)
     return header is not None and internal_tok_v == header
-
 
 async def reverse_proxy_handler(target_service: str, incoming_path: str, request: Request,
             serve_from_static: bool = False, static_service_name: str = None,
@@ -264,7 +261,6 @@ async def reverse_proxy_handler(target_service: str, incoming_path: str, request
             final_url = f"{base_service_url}/{normalized_path}{query_string}"
         if is_full_page:
             forwarded_headers["X-Is-Full-Page"] = "True"
-
         # Debug logging
         print("\n" + "=" * 50)
         print(f"🔁 PROXY REQUEST INITIATED 🔁")
@@ -292,12 +288,6 @@ async def reverse_proxy_handler(target_service: str, incoming_path: str, request
         # need to add a try here
         request_body = await request.body()
         request_cookies = request.cookies
-        
-        """ response = await client.request(
-                request_method, final_url, headers=forwarded_headers, 
-                content=request_body, cookies=request_cookies
-        ) """
-        # becasue probelm if reposne with status error will build an excpetion  
         try:
             response = await client.request(
                 request_method, final_url, headers=forwarded_headers, 
@@ -596,20 +586,6 @@ async def databaseapi_proxy(path: str, request: Request):
 # -----------------------------------------------------------
 # MODIFY TO AHDNLE IN USER MANAGEMENT
 
-""" @app.api_route("/login/{path:path}", methods=["GET"])
-@app.api_route("/login", methods=["GET"])
-async def login_page_route(request: Request, path: str = ""):
-
-    Proxy for serving the login page.
-    Redirects to home if user is already authenticated.
-
-    # Check if user is authenticated
-    response = refresh_access_token_and_redirect(request)
-    if response:
-        return respons
-    # If not authenticated, show login page
-    return await reverse_proxy_handler("static_files", "login/", request) """
-
 # Add auth-status endpoint for debugging
 """ @app.get("/auth/status")
 async def auth_status(request: Request):
@@ -651,40 +627,7 @@ async def auth_status(request: Request):
     return response """
 
 
-""" @app.api_route("/register/{path:path}", methods=["GET"])
-@app.api_route("/register", methods=["GET"])
-async def register_page_route(request: Request, path: str = ""):
-    Proxy for serving the register page.
-    Redirects to home if user is already authenticated.
-    # Check if user is authenticated
-    is_auth, user_info = is_authenticated(request)
-
-    if is_auth:
-        # If authenticated, redirect to home
-        response = RedirectResponse(url="/home")
-
-        # If token refresh is needed, set the new access token cookie
-        if user_info and user_info.get("refresh_needed"):
-            print("🔄 Setting refreshed access token during login redirect", flush=True)
-            response.set_cookie(
-                key="access_token",
-                value=user_info.get("new_access_token"),
-                httponly=True,
-                secure=True,
-                samesite="Lax",
-                path="/",
-                max_age=60 * 60 * 6,  # 6 hours
-            )
-
-        return response
-
-    # If not authenticated, show login page
-    return await reverse_proxy_handler("static_files", "register/", request)
- """
-
-
-
-
+""""""
 @app.api_route("/two-factor-auth/", methods=["GET"])
 async def two_factor_auth_proxy(request: Request):
     """

@@ -17,7 +17,6 @@ async def logout_view(request: HttpRequest):
         response["X-Page-Name"] = "logout.html"
         return response
 
-    print("\n\n\nLOUGOUT VIEW CALLLLED\n\n\n", flush=True)
     if request.method == 'POST':
         response = await utils_user_auth.logout_handler()
         return response
