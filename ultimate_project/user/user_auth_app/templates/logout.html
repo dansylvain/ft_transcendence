@@ -1,53 +1,63 @@
 <!-- Logout Modal -->
-<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-	<div class="modal-dialog" role="document">
-	  <div class="modal-content">
-		<div class="modal-header">
-		  <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
-		  <button class="close" type="button" data-bs-dismiss="modal" aria-label="Close">
-			<span aria-hidden="true">×</span>
-		  </button>
-		</div>
-		<div class="modal-body">
-		  Select "Logout" below if you are ready to end your current session.
-		</div>
-		<div class="modal-footer">
-		  <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
-		  <button
-			id="logoutButton"
-			class="btn btn-primary"
-			hx-post="/auth/logout/"
-			hx-target="body"
-			hx-swap="outerHTML"
-			hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-			hx-on="htmx:afterSwap: handleLogoutSuccess(event)"
-			data-bs-dismiss="modal"
-		  >
-			Logout
-		  </button>
-		</div>
-	  </div>
-	</div>
+<div
+  class="modal fade"
+  id="logoutModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="exampleModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+        <button
+          class="close"
+          type="button"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Select "Logout" below if you are ready to end your current session.
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">
+          Cancel
+        </button>
+        <button
+          id="logoutButton"
+          class="btn btn-primary"
+          hx-post="/auth/logout/"
+          hx-target="body"
+          hx-swap="outerHTML"
+          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+          hx-on="htmx:afterSwap: handleLogoutSuccess(event)"
+          data-bs-dismiss="modal"
+        >
+          Logout
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
-
 <script>
-	function handleLogoutSuccess(event) {
-	  // Log the event to check if the event handler is fired
-	  console.log("HTMX Swap Completed", event);
-  
-	  // Check if the request was successful (HTTP status 200)
-	  if (event.detail.xhr.status === 200) {
-		console.log("Logout successful. Redirecting...");
-		
-		// Delay the redirect
-		setTimeout(function() {
-		  window.location.href = "/auth/login/";
-		}, 500);  // Adjust the delay time (in milliseconds)
-	  } else {
-		console.error('Logout failed:', event.detail.xhr.responseText);
-	  }
-	}
-</script>
-  
+  function handleLogoutSuccess(event) {
+    // Log the event to check if the event handler is fired
+    console.log("HTMX Swap Completed", event);
 
-  
+    // Check if the request was successful (HTTP status 200)
+    if (event.detail.xhr.status === 200) {
+      console.log("Logout successful. Redirecting...");
+
+      // Delay the redirect
+      setTimeout(function () {
+        window.location.href = "/auth/login/";
+      }, 500); // Adjust the delay time (in milliseconds)
+    } else {
+      console.error("Logout failed:", event.detail.xhr.responseText);
+    }
+  }
+</script>

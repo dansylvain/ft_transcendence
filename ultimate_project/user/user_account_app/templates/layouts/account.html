@@ -2,31 +2,76 @@
 <div class="container-fluid">
     <div class="row">
         <!-- Sidebar -->
-        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar p-3 shadow-sm">
             <div class="sidebar-sticky">
                 <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link" 
-                        href="#" 
-                        hx-get="/account/profile/" 
-                        hx-target="#account-content" 
-                        hx-swap="innerHTML" 
-                        hx-push-url="true"
-                        hx-headers='{"X-Inner-Content": "true"}'>
-                        Profile
+                    <!-- Profile Section -->
+                    <li class="nav-item mb-2">
+                        <a class="nav-link d-flex align-items-center p-3 rounded hover-bg-primary" 
+                           href="#" 
+                           hx-get="/account/profile/" 
+                           hx-target="#account-content" 
+                           hx-swap="innerHTML" 
+                           hx-push-url="true"
+                           hx-headers='{"X-Inner-Content": "true"}'>
+                            <i class="fas fa-user-circle me-2"></i> <!-- Icon for Profile -->
+                            Profile
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" 
-                        href="#" 
-                        hx-get="/account/game-stats/" 
-                        hx-target="#account-content" 
-                        hx-swap="innerHTML"
-                        hx-push-url="true"
-                        hx-headers='{"X-Inner-Content": "true"}'>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link d-flex align-items-center p-3 rounded hover-bg-primary" 
+                           href="#" 
+                           hx-get="/account/game-stats/" 
+                           hx-target="#account-content" 
+                           hx-swap="innerHTML"
+                           hx-push-url="true"
+                           hx-headers='{"X-Inner-Content": "true"}'>
+                            <i class="fas fa-trophy me-2"></i> <!-- Icon for Game Stats -->
                             Game Stats
                         </a>
                     </li>
+
+                    <!-- Security Section -->
+                    <li class="nav-item mt-4">
+                        <h6 class="sidebar-heading text-muted">Security</h6>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link d-flex align-items-center p-3 rounded hover-bg-danger" 
+                           href="#" 
+                           hx-get="/account/change-password/" 
+                           hx-target="#account-content" 
+                           hx-swap="innerHTML"
+                           hx-push-url="true"
+                           hx-headers='{"X-Inner-Content": "true"}'>
+                            <i class="fas fa-key me-2"></i> <!-- Icon for Change Password -->
+                            Change Password
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link d-flex align-items-center p-3 rounded hover-bg-warning" 
+                           href="#" 
+                           hx-get="/account/two-factor-auth/" 
+                           hx-target="#account-content" 
+                           hx-swap="innerHTML"
+                           hx-push-url="true"
+                           hx-headers='{"X-Inner-Content": "true"}'>
+                            <i class="fas fa-lock me-2"></i> <!-- Icon for Two-Factor Authentication -->
+                            Two-Factor Authentication
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link d-flex align-items-center p-3 rounded hover-bg-info" 
+                           href="#" 
+                           hx-get="/account/security-logs/" 
+                           hx-target="#account-content" 
+                           hx-swap="innerHTML"
+                           hx-push-url="true"
+                           hx-headers='{"X-Inner-Content": "true"}'>
+                            <i class="fas fa-history me-2"></i> <!-- Icon for Security Logs -->
+                            Security Logs
+                        </a>
+                    </li>
+                    <!-- Add more links here if needed -->
                 </ul>
             </div>
         </nav>
@@ -46,3 +91,6 @@
         </main>
     </div>
 </div>
+
+<!-- Add Bootstrap Icons and FontAwesome for better icons -->
+<script src="https://kit.fontawesome.com/a076d05399.js"></script>

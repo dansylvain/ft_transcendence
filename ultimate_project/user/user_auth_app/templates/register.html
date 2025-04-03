@@ -8,7 +8,7 @@
         <div class="col-lg-7">
           <div class="p-5">
             <div class="text-center">
-              <h1 class="h4 text-gray-900 mb-4">Create an Account!</h1>
+              <h1 class="h4 text-gray-900 mb-4">Create an Account</h1>
             </div>
             <!-- Formulaire de création de compte HTMX -->
             <form
@@ -17,8 +17,11 @@
               hx-target="#register-form"
               hx-swap="outerHTML"
               hx-indicator="#loading-spinner"
+              hx-headers='{
+                "HX-Request": "true",
+                "X-CSRFToken": "{{ csrf_token }}"
+              }'
             >
-
               <!-- First Name et Last Name -->
               <div class="form-group row">
                 <div class="col-sm-6 mb-3 mb-sm-0">
@@ -78,15 +81,28 @@
                     placeholder="Password"
                     required
                   />
-                  
-				  <!-- ! Password strength indicator -->
-                  <div class="mt-2">
-					  <div id="password-strength-meter" class="progress" style="height: 5px;">
-                      <div id="password-strength-bar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <small id="password-strength-text" class="form-text mt-1">Password strength: Not entered</small>
-                  </div>
 
+                  <!-- ! Password strength indicator -->
+                  <div class="mt-2">
+                    <div
+                      id="password-strength-meter"
+                      class="progress"
+                      style="height: 5px"
+                    >
+                      <div
+                        id="password-strength-bar"
+                        class="progress-bar"
+                        role="progressbar"
+                        style="width: 0%"
+                        aria-valuenow="0"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                      ></div>
+                    </div>
+                    <small id="password-strength-text" class="form-text mt-1"
+                      >Password strength: Not entered</small
+                    >
+                  </div>
                 </div>
                 <div class="col-sm-6">
                   <input
@@ -96,9 +112,9 @@
                     name="repeat_password"
                     placeholder="Repeat Password"
                     required
-					/>
+                  />
 
-				<!-- ! Password do not match indicator -->
+                  <!-- ! Password do not match indicator -->
                   <div
                     id="password-error"
                     class="text-danger small mt-1"
@@ -106,8 +122,7 @@
                   >
                     Passwords do not match
                   </div>
-                
-				</div>
+                </div>
               </div>
 
               <!-- ! Email error feedback -->
@@ -119,46 +134,43 @@
                 Please enter a valid email address
               </div>
 
-			<div class="form-group">
-				<input
-				type="submit"
-				id="register-button"
-				hx-push-url="true"
-				class="btn btn-primary btn-user btn-block"
-				value="Register"
-				/>
-			</div>
-			
-			<!-- ! END FORM  -->
-			</form>
+              <div class="form-group">
+                <input
+                  type="submit"
+                  id="register-button"
+                  hx-push-url="true"
+                  class="btn btn-primary btn-user btn-block btn-lg"
+                  value="Register"
+                />
+              </div>
 
-			<!-- ! Feedback error from the backend -->
-			<div
-				id="register-form"
-				class="text-center text-danger mt-2"
-			></div>
+              <!-- ! END FORM  -->
+            </form>
 
-			<!-- ! Spinning button  -->
-			<div id="loading-spinner" class="htmx-indicator text-center my-2">
-				<div class="spinner-border text-primary" role="status">
-				<span class="sr-only">Loading...</span>
-				</div>
-			</div>
+            <!-- ! Feedback error from the backend -->
+            <div id="register-form" class="text-center text-danger mt-2"></div>
 
-			<!-- ! Horizontal Line Separator -->
-			<hr />
-			
-			<!-- ! Link towards login  -->
+            <!-- ! Spinning button  -->
+            <div id="loading-spinner" class="htmx-indicator text-center my-2">
+              <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
+            </div>
+
+            <!-- ! Horizontal Line Separator -->
+            <hr />
+
+            <!-- ! Link towards login  -->
             <div
-			id="login-link"
-            hx-boost="false"
-            hx-trigger="click"
-            hx-push-url="true"
-            hx-get="/auth/login/"
-            hx-target="body"
-            class="text-center small"
-            href=""
-            data-translate="Already have an account? Login!"
+              id="login-link"
+              hx-boost="false"
+              hx-trigger="click"
+              hx-push-url="true"
+              hx-get="/auth/login/"
+              hx-target="body"
+              class="text-center small"
+              href=""
+              data-translate="Already have an account? Login!"
             >
               Already have an account? Login!
             </div>
@@ -169,28 +181,48 @@
   </div>
 </div>
 
-
 <style>
+  #image-container {
+    height: 30px; /* Reserve a space for the image or error message */
+    display: block;
+    visibility: hidden; /* Hide initially */
+    opacity: 0; /* Initially set the opacity to 0 to make it invisible */
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out; /* Smooth transition for visibility */
+  }
+
+  /* When the image or content becomes visible */
+  #image-container.visible {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+  }
+
+  /* Ensuring image sizing */
+  #image-container img {
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
   /* Custom validation styles */
   .is-invalid {
     border-color: #dc3545 !important;
     box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
   }
-  
+
   /* Make password error more visible */
   #password-error {
     color: #dc3545;
     font-size: 0.875rem;
     margin-top: 0.25rem;
   }
-  
+
   /* Make email error more visible */
   #email-error {
     color: #dc3545;
     font-size: 0.875rem;
     margin-bottom: 0.5rem;
   }
-  
+
   /* Style the password strength indicator */
   #password-strength-meter {
     width: 100%;
@@ -198,187 +230,230 @@
     border-radius: 4px;
     margin-top: 5px;
   }
-  
   #password-strength-text {
     font-weight: 500;
+  }
+  /* Style for the login link */
+  #login-link {
+    color: #007bff;
+    cursor: pointer;
+  }
+  #login-link:hover {
+    color: #0056b3;
+    text-decoration: underline;
+  }
+  /* Make the register button consistent with the login button */
+  #register-button {
+    background-color: #4e73df; /* Same as login button */
+    border-color: #4e73df; /* Same as login button */
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
+    padding: 1rem 1.25rem;
+    text-transform: uppercase;
+    border-radius: 30px;
+  }
+  #register-button:hover {
+    background-color: #2e59d9; /* Darker on hover */
+    border-color: #2e59d9;
+  }
+  /* Ensure the register button and login button are uniform */
+  #register-button,
+  #login-button {
+    width: 100%;
+    display: block;
+    margin: 0 auto;
+  }
+  /* Add focus style for better accessibility */
+  #register-button:focus {
+    box-shadow: 0 0 0 0.2rem rgba(72, 131, 255, 0.5);
   }
 </style>
 
 <script>
-	// document.addEventListener("DOMContentLoaded", function () {
-	initScript();
-	function initScript() {
-		const firstNameInput = document.getElementById("first_name");
-		const lastNameInput = document.getElementById("last_name");
-		const usernameInput = document.getElementById("username");
-		const emailInput = document.getElementById("email");
-		const passwordInput = document.getElementById("password");
-		const repeatPasswordInput = document.getElementById("repeat_password");
-		const emailError = document.getElementById("email-error");
-		const passwordError = document.getElementById("password-error");
-		const registerButton = document.getElementById("register-button");
-		const form = document.querySelector("form.user");
-		const strengthBar = document.getElementById("password-strength-bar");
-		const strengthText = document.getElementById("password-strength-text");
+  // document.addEventListener("DOMContentLoaded", function () {
+  initScript();
+  function initScript() {
+    const firstNameInput = document.getElementById("first_name");
+    const lastNameInput = document.getElementById("last_name");
+    const usernameInput = document.getElementById("username");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const repeatPasswordInput = document.getElementById("repeat_password");
+    const emailError = document.getElementById("email-error");
+    const passwordError = document.getElementById("password-error");
+    const registerButton = document.getElementById("register-button");
+    const form = document.querySelector("form.user");
+    const strengthBar = document.getElementById("password-strength-bar");
+    const strengthText = document.getElementById("password-strength-text");
 
-	  // Email validation function
-	function validateEmail(email) {
-		const re =
-		/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-		return re.test(String(email).toLowerCase());
-	}
-	// Password strength evaluation function
-	function evaluatePasswordStrength(password) {
-		if (!password) return { score: 0, message: "Not entered", percentage: 0 };
-		let score = 0;
-		const messages = ["Very weak", "Weak", "Medium", "Strong", "Very strong"];
-		// Length check
-		if (password.length > 7) score += 1;
-		if (password.length > 10) score += 1;
-		// Character diversity checks
-		if (/[a-z]/.test(password)) score += 1; // lowercase
-		if (/[A-Z]/.test(password)) score += 1; // uppercase
-		if (/[0-9]/.test(password)) score += 1; // numbers
-		if (/[^a-zA-Z0-9]/.test(password)) score += 1; // special chars
-		// Cap the score at 4
-		score = Math.min(4, score);
-		// Map score to percentage for the progress bar
-		const percentage = (score / 4) * 100;
-		return {
-			score: score,
-			percentage: percentage,
-			message: messages[score]
-		};
-	}
-	// Update password strength indicator
-	function updatePasswordStrength() {
-		const password = passwordInput.value;
-		const strength = evaluatePasswordStrength(password);
-		// Update the progress bar
-		strengthBar.style.width = strength.percentage + "%";
-		strengthBar.setAttribute("aria-valuenow", strength.percentage);
-		// Update color based on strength
-		strengthBar.className = "progress-bar";
-		if (password === "") {
-		  // When password is empty, ensure the bar is completely empty
-			strengthBar.style.width = "0%";
-			strengthBar.setAttribute("aria-valuenow", 0);
-		} else if (strength.score === 0) {
-			strengthBar.classList.add("bg-secondary");
-		} else if (strength.score === 1) {
-			strengthBar.classList.add("bg-danger");
-		} else if (strength.score === 2) {
-			strengthBar.classList.add("bg-warning");
-		} else if (strength.score === 3) {
-			strengthBar.classList.add("bg-info");
-		} else {
-			strengthBar.classList.add("bg-success");
-		}
-		
-		// Update text
-		strengthText.textContent = "Password strength: " + strength.message;
-	}
-	
-	  // Check if passwords match
-	function checkPasswords() {
-		if (passwordInput.value && repeatPasswordInput.value) {
-			if (passwordInput.value !== repeatPasswordInput.value) {
-				passwordError.style.display = "block";
-				return false;
-			} else {
-				passwordError.style.display = "none";
-				return true;
-			}
-		}
-		return passwordInput.value === repeatPasswordInput.value;
-	}
-	
-	  // Validate the entire form and enable/disable the register button
-	function validateForm() {
-		const isFirstNameValid = firstNameInput.value.trim() !== "";
-		const isLastNameValid = lastNameInput.value.trim() !== "";
-		const isUsernameValid = usernameInput.value.trim() !== "";
-		const isEmailValid = emailInput.value && validateEmail(emailInput.value);
-		const isPasswordValid = passwordInput.value.trim() !== "";
-		const doPasswordsMatch = checkPasswords();
+    // Email validation function
+    function validateEmail(email) {
+      const re =
+        /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      return re.test(String(email).toLowerCase());
+    }
 
-		// Update email validation visual state
-		if (emailInput.value && !isEmailValid) {
-			emailInput.classList.add("is-invalid");
-		} else {
-			emailInput.classList.remove("is-invalid");
-		}
+    // Password strength evaluation function
+    function evaluatePasswordStrength(password) {
+      if (!password) return { score: 0, message: "Not entered", percentage: 0 };
+      let score = 0;
+      const messages = ["Very weak", "Weak", "Medium", "Strong", "Very strong"];
+      // Length check
+      if (password.length > 7) score += 1;
+      if (password.length > 10) score += 1;
+      // Character diversity checks
+      if (/[a-z]/.test(password)) score += 1; // lowercase
+      if (/[A-Z]/.test(password)) score += 1; // uppercase
+      if (/[0-9]/.test(password)) score += 1; // numbers
+      if (/[^a-zA-Z0-9]/.test(password)) score += 1; // special chars
+      // Cap the score at 4
+      score = Math.min(4, score);
+      // Map score to percentage for the progress bar
+      const percentage = (score / 4) * 100;
+      return {
+        score: score,
+        percentage: percentage,
+        message: messages[score],
+      };
+    }
 
-		const isFormValid =
-			isFirstNameValid &&
-			isLastNameValid &&
-			isUsernameValid &&
-			isEmailValid &&
-			isPasswordValid &&
-			doPasswordsMatch;
-		
-		// Disable the register button is the full form is not valid
-		registerButton.disabled = !isFormValid;
-		return isFormValid;
-	}
-	
-	// Add input event listeners to all required fields
-		firstNameInput.addEventListener("input", validateForm);
-		lastNameInput.addEventListener("input", validateForm);
-		usernameInput.addEventListener("input", validateForm);
-		emailInput.addEventListener("input", function () {
-		if (emailInput.value && !validateEmail(emailInput.value)) {
-			emailError.style.display = "block";
-			emailInput.classList.add("is-invalid");
-		} else {
-			emailError.style.display = "none";
-			emailInput.classList.remove("is-invalid");
-		}
-		validateForm();
-	});
-	
-	passwordInput.addEventListener("input", function () {
-		updatePasswordStrength();
-		checkPasswords();
-		validateForm();
-	});
-	repeatPasswordInput.addEventListener("input", function () {
-		checkPasswords();
-		validateForm();
-	});
+    // Update password strength indicator
+    function updatePasswordStrength() {
+      const password = passwordInput.value;
+      const strength = evaluatePasswordStrength(password);
+      // Update the progress bar
+      strengthBar.style.width = strength.percentage + "%";
+      strengthBar.setAttribute("aria-valuenow", strength.percentage);
+      // Update color based on strength
+      strengthBar.className = "progress-bar";
+      if (password === "") {
+        // When password is empty, ensure the bar is completely empty
+        strengthBar.style.width = "0%";
+        strengthBar.setAttribute("aria-valuenow", 0);
+      } else if (strength.score === 0) {
+        strengthBar.classList.add("bg-secondary");
+      } else if (strength.score === 1) {
+        strengthBar.classList.add("bg-danger");
+      } else if (strength.score === 2) {
+        strengthBar.classList.add("bg-warning");
+      } else if (strength.score === 3) {
+        strengthBar.classList.add("bg-info");
+      } else {
+        strengthBar.classList.add("bg-success");
+      }
 
-	
-	document.addEventListener("htmx:beforeSwap", function (evt) {
-		console.log("REGISTER FORM LISTENNING");
-		console.log(evt.detail.target.id);
+      // Update text
+      strengthText.textContent = "Password strength: " + strength.message;
+    }
 
-		if (evt.detail.target.id === "register-form") {
-		try {
-			console.log("Réponse brute:", evt.detail.xhr.responseText); // 🔍 Debug
-			const response = JSON.parse(evt.detail.xhr.responseText);
-			
-			if (response.success) {
-				evt.detail.shouldSwap = false;
+    // Check if passwords match
+    function checkPasswords() {
+      if (passwordInput.value && repeatPasswordInput.value) {
+        if (passwordInput.value !== repeatPasswordInput.value) {
+          passwordError.style.display = "block";
+          return false;
+        } else {
+          passwordError.style.display = "none";
+          return true;
+        }
+      }
+      return passwordInput.value === repeatPasswordInput.value;
+    }
 
-				htmx
-				.ajax("GET", "/home/", {
-					target: "body",
-					swap: "outerHTML",
-					headers: { "HX-Login-Success": "true" },
-				})
-				.then(function () {
-					history.pushState(null, "", "/home/");
-				});
-			} else {
-				const messageElement = document.getElementById("register-form");
-				const sanitizedMessage = DOMPurify.sanitize(response.message);
-				messageElement.textContent = sanitizedMessage;
-			}
-		} catch (e) {
-			console.error("Erreur de traitement de la réponse:", e);
-		}
-	}
-});
-}; // End Checking Script
+    // Validate the entire form and enable/disable the register button
+    function validateForm() {
+      const isFirstNameValid = firstNameInput.value.trim() !== "";
+      const isLastNameValid = lastNameInput.value.trim() !== "";
+      const isUsernameValid = usernameInput.value.trim() !== "";
+      const isEmailValid = emailInput.value && validateEmail(emailInput.value);
+      const isPasswordValid = passwordInput.value.trim() !== "";
+      const doPasswordsMatch = checkPasswords();
+      // Update email validation visual state
+      if (emailInput.value && !isEmailValid) {
+        emailInput.classList.add("is-invalid");
+      } else {
+        emailInput.classList.remove("is-invalid");
+      }
+      const isFormValid =
+        isFirstNameValid &&
+        isLastNameValid &&
+        isUsernameValid &&
+        isEmailValid &&
+        isPasswordValid &&
+        doPasswordsMatch;
+      // Disable the register button if the full form is not valid
+      registerButton.disabled = !isFormValid;
+      return isFormValid;
+    }
 
+    // Add input event listeners to all required fields
+    firstNameInput.addEventListener("input", validateForm);
+    lastNameInput.addEventListener("input", validateForm);
+    usernameInput.addEventListener("input", validateForm);
+    emailInput.addEventListener("input", function () {
+      if (emailInput.value && !validateEmail(emailInput.value)) {
+        emailError.style.display = "block";
+        emailInput.classList.add("is-invalid");
+      } else {
+        emailError.style.display = "none";
+        emailInput.classList.remove("is-invalid");
+      }
+      validateForm();
+    });
+    passwordInput.addEventListener("input", function () {
+      updatePasswordStrength();
+      checkPasswords();
+      validateForm();
+    });
+    repeatPasswordInput.addEventListener("input", function () {
+      checkPasswords();
+      validateForm();
+    });
+
+    // Allow resending the form after error
+    document.addEventListener("htmx:beforeSwap", function (evt) {
+      console.log("REGISTER FORM LISTENING");
+      console.log(evt.detail.target.id);
+
+      if (evt.detail.target.id === "register-form") {
+        try {
+          let response;
+          try {
+            // Try parsing the response as JSON
+            response = JSON.parse(evt.detail.xhr.responseText);
+          } catch (e) {
+            // If the response isn't valid JSON, log the error and handle the non-JSON response
+            console.error("Error parsing JSON response:", e);
+            evt.detail.shouldSwap = false; // Prevent swapping of content
+            return;
+          }
+
+          if (response.success) {
+            // If registration is successful, redirect to home page
+            evt.detail.shouldSwap = false;
+            htmx
+              .ajax("GET", "/home/", {
+                target: "body",
+                swap: "outerHTML",
+                headers: { "HX-Login-Success": "true" },
+              })
+              .then(function () {
+                history.pushState(null, "", "/home/");
+              });
+          } else {
+            // If an error occurs, show the error message and re-enable the form
+            const messageElement = document.getElementById("register-form");
+            const sanitizedMessage = DOMPurify.sanitize(response.message);
+            messageElement.textContent = sanitizedMessage;
+
+            // Enable the register button again for resubmission
+            registerButton.disabled = false;
+          }
+        } catch (e) {
+          console.error("Error processing response:", e);
+        }
+      }
+    });
+  } // End Checking Script
 </script>

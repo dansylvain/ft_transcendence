@@ -55,6 +55,17 @@
         </div>
         <div id="modal-container"></div> 
         <script>
+            // Check if the target element of the swap exists in the current document
+            document.addEventListener("htmx:beforeSwap", function (evt) {
+            let responseText = evt.detail.xhr.responseText.trim();
+            if (responseText.startsWith("<!DOCTYPE html") || responseText.startsWith("<html")
+            || responseText.startsWith("<div")) {
+                console.warn("🚨 Full-page response detected, preventing HTMX swap.");
+                evt.detail.shouldSwap = false; // Prevent HTMX from replacing content
+                window.location.href = evt.detail.pathInfo.requestPath; // Redirect to the full page
+                }
+            });
+
             document.body.addEventListener('htmx:afterSwap', function(event) {
               if (event.target.id === 'modal-container') {
                 console.log("HTMX swapped in modal."); // Debugging log

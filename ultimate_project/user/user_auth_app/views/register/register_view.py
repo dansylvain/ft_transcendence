@@ -2,12 +2,11 @@ from django.shortcuts import render
 import json
 import os
 from itsdangerous import URLSafeTimedSerializer
-# from django.http import HttpResponseBadRequest
 from django.http import HttpRequest, JsonResponse
-from django.views.decorators.cache import never_cache
 from utils import utils_user_auth
 
-from utils import utils_user_auth
+
+INTERNAL_TOKEN = os.getenv("INTERNAL_TOKEN")
 
 async def register_view(request: HttpRequest):
     
@@ -18,11 +17,13 @@ async def register_view(request: HttpRequest):
         return response
     
     if request.method == 'POST':
-        first_name = request.POST.get("first_name")
-        last_name = request.POST.get("last_name")
-        username = request.POST.get("username")
-        password = request.POST.get("password")
-        email = request.POST.get("email")
         # Create a new response object
-        return await utils_user_auth.register_api(username, password, 
-                        email, first_name, last_name)
+        response =  await utils_user_auth.register_handler(request)
+        if isinstance(response, JsonResponse):
+            try:
+                data = json.loads(response.content.decode())  # Decode bytes and load JSON
+                new_response = JsonResponse(data, status=response.status_code)
+                new_response.setdefault("X-Internal-Token", INTERNAL_TOKEN)  
+                return new_response  # Return the modified response
+            except json.JSONDecodeError:
+                return JsonResponse({"error": "Invalid JSON response"}, status=500)

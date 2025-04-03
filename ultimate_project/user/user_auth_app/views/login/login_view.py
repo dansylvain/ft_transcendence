@@ -29,12 +29,12 @@ async def login_view(request: HttpRequest):
         """ if not username or not password:
             return HttpResponseForbidden("Username or password missing") """
         response = await utils_user_auth.login_handler(username, password)
-        return (response)
-        
-        """ if isinstance(response, JsonResponse):
-            # Load the original data
-            data = json.loads(response.content)  # Extract JSON content
-            new_response = JsonResponse(data, status=response.status_code)
-            new_response["X-Internal-Token"] = INTERNAL_TOKEN  
-            return new_response   """
+        if isinstance(response, JsonResponse):
+            try:
+                data = json.loads(response.content.decode())  # Decode bytes and load JSON
+                new_response = JsonResponse(data, status=response.status_code)
+                new_response.setdefault("X-Internal-Token", INTERNAL_TOKEN)  
+                return new_response  # Return the modified response
+            except json.JSONDecodeError:
+                return JsonResponse({"error": "Invalid JSON response"}, status=500)
 

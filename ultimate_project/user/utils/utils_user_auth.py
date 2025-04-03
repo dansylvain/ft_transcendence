@@ -37,9 +37,7 @@ async def login_handler(username: str, password: str) -> JsonResponse:
         async with httpx.AsyncClient() as client:
             db_response = await client.post(
                 API_VERIFY_CREDENTIALS, 
-                json={"username": username, "password": password},
-                headers={"X-Internal-Token": INTERNAL_TOKEN}
-            )
+                json={"username": username, "password": password})
         print(f"\n\n == STATUS CODE DB {db_response.status_code} == \n\n", flush=True)
         if not db_response.content.strip():
             print("🚨 Empty response received from authentication service", flush=True)
@@ -55,7 +53,7 @@ async def login_handler(username: str, password: str) -> JsonResponse:
             print("🚨 Invalid JSON received from authentication service", flush=True)
             print(f"Response content: {db_response.content}", flush=True)
             return JsonResponse({"success": False, 
-                "message": "Invalid response from authentication service"}, status=200)
+                "message": "Invalid response from authentication service"}, status=500)
         # Case 4: If response is valid and authentication is successful
         if db_response.status_code == 200:
             print(f"✅ Authentication successful for {username}", flush=True)
@@ -64,9 +62,8 @@ async def login_handler(username: str, password: str) -> JsonResponse:
                 async with httpx.AsyncClient() as client:
                     check_2fa_response = await client.post(
                         API_CHECK_2FA, 
-                        json={"username": username, "password": password},
-                        headers={"X-Internal-Token": INTERNAL_TOKEN})
-                print(f"\n\n == STATUS CODE 2FA: {check_2fa_response.status_code} == \n\n", flush=True)
+                        json={"username": username, "password": password})               
+                    print(f"\n\n == STATUS CODE 2FA: {check_2fa_response.status_code} == \n\n", flush=True)
                 if check_2fa_response.status_code == 200 and check_2fa_response.json().get("success") == True:
                     return JsonResponse(data={"success": True, "message": "2FA is enabled"}, status=200)
             except httpx.RequestError as e:
@@ -97,7 +94,7 @@ async def login_handler(username: str, password: str) -> JsonResponse:
             return (response)
         # Default case: unexpected status code
         print(f"🚨 Unexpected status code {db_response.status_code} received", flush=True)
-        return JsonResponse({"success": False, "message": f"Unexpected response code: {db_response.status_code}"}, status=500)
+        return JsonResponse(data={"success": False, "message": f"Unexpected response code: {db_response.status_code}"}, status=500)
     except httpx.RequestError as e:
         # Handle network or service unavailability
         print(f"🚨 Authentication service unavailable: {str(e)}", flush=True)
@@ -119,86 +116,65 @@ async def logout_handler():
         )
 
 
-
-async def register_api(
-    username: str,
-    password: str,
-    email: str,
-    first_name: str,
-    last_name: str,
-):
+async def register_handler(request: HttpRequest):
     """
     Register a new user and return a JWT token.
     """
+    # Get the parameters from the request
+    username = request.POST.get("username")
+    password = request.POST.get("password")
+    email = request.POST.get("email")
+    first_name = request.POST.get("first_name")
+    last_name = request.POST.get("last_name")
+
     print(f"🔐 Tentative d'inscription pour {username}", flush=True)
 
     # Regex patterns for input validation
     name_pattern = r"^(?!.*--)[a-zA-ZÀ-ÿ0-9\-]+$"
+    username_pattern = r"^(?!.*--)[a-zA-Z0-9_\-]+$"
+    password_pattern = r"^(?!.*--)[a-zA-Z0-9_\-?!$€%&*()]+$"
     # == Validate first name == 
     if not re.match(name_pattern, first_name):
         return JsonResponse(
-            content={
-                "success": False,
-                "message": "Forbidden characters in first name. Allowed characters: a-z, A-Z, 0-9, -, _",
-            },
-            status_code=400,
+            {"success": False, "message": "Forbidden characters in first name. Allowed characters: a-z, A-Z, 0-9, -, _"},
+            status=400
         )
     # == Validate last name == 
     if not re.match(name_pattern, last_name):
         return JsonResponse(
-            content={
-                "success": False,
-                "message": "Forbidden characters in last name. Allowed characters: a-z, A-Z, 0-9, -, _",
-            },
-            status_code=400,
+            {"success": False, "message": "Forbidden characters in last name. Allowed characters: a-z, A-Z, 0-9, -, _"},
+            status=400
         )
-    username_pattern = r"^(?!.*--)[a-zA-Z0-9_\-]+$"
     # == Validate username == 
     if not re.match(username_pattern, username):
         return JsonResponse(
-            content={
-                "success": False,
-                "message": "Forbidden characters in username. Allowed characters: a-z, A-Z, 0-9, -, _",
-            },
-            status_code=400,
+            {"success": False, "message": "Forbidden characters in username. Allowed characters: a-z, A-Z, 0-9, -, _"},
+            status=400
         )
-    password_pattern = r"^(?!.*--)[a-zA-Z0-9_\-?!$€%&*()]+$"
+    
     # == Validate password == 
     if not re.match(password_pattern, password):
         return JsonResponse(
-            content={
-                "success": False,
-                "message": "Forbidden characters in password. Allowed characters: a-z, A-Z, 0-9, -, _, !, ?, $, €, %, &, *, (, )",
-            },
-            status_code=400,
+            {"success": False, "message": "Forbidden characters in password. Allowed characters: a-z, A-Z, 0-9, -, _, !, ?, $, €, %, &, *, (, )"},
+            status=400
         )
 
-    # Check if username already exists first (industry standard to check one field at a time)
     try:
         # == Query for existing users with this username == 
-        # MODIFY WITH CALL TO FAST API
         check_username_url = "http://ctn_api_gateway:8005/api-database/player/?username=" + username
         username_response = requests.get(check_username_url)
 
         if username_response.status_code == 200:
             user_data = username_response.json()
-            # Handle case where user_data is a list (checking if username exists)
             if isinstance(user_data, list) and len(user_data) > 0:
                 return JsonResponse(
-                    content={
-                        "success": False,
-                        "message": "Username already taken.",
-                    },
-                    status_code=400,
+                    {"success": False, "message": "Username already taken."},
+                    status=400
                 )
-            # Handle case where user_data is a dict with count key
             elif isinstance(user_data, dict) and user_data.get("count", 0) > 0:
                 return JsonResponse(
-                    content={
-                        "success": False,
-                        "message": "Username already taken.",
-                    },
-                    status_code=400,
+                    {"success": False, "message": "Username already taken."},
+                    status=400
                 )
 
         # == Then check if email already exists == 
@@ -207,23 +183,15 @@ async def register_api(
 
         if email_response.status_code == 200:
             email_data = email_response.json()
-            # Handle case where email_data is a list
             if isinstance(email_data, list) and len(email_data) > 0:
                 return JsonResponse(
-                    content={
-                        "success": False,
-                        "message": "Email adress already taken.",
-                    },
-                    status_code=400,
+                    {"success": False, "message": "Email address already taken."},
+                    status=400
                 )
-            # Handle case where email_data is a dict with count key
             elif isinstance(email_data, dict) and email_data.get("count", 0) > 0:
                 return JsonResponse(
-                    content={
-                        "success": False,
-                        "message": "Email adress already taken.",
-                    },
-                    status_code=400,
+                    {"success": False, "message": "Email address already taken."},
+                    status=400
                 )
 
         # == If no duplicates, create the new user == 
@@ -249,83 +217,40 @@ async def register_api(
         if create_response.status_code not in (200, 201):
             error_message = create_response.json().get("error", "Registration failed")
             return JsonResponse(
-                content={"success": False, "message": error_message},
-                status_code=create_response.status_code,
+                {"success": False, "message": error_message},
+                status=create_response.status_code
             )
 
         # == User was created successfully, get user data for JWT == 
-        user_data = create_response.json()
-
-        # Generate JWT tokens like in login
-        expire_access = datetime.datetime.utcnow() + datetime.timedelta(
-            minutes=ACCESS_TOKEN_EXPIRE_MINUTES
-        )
-        expire_refresh = datetime.datetime.utcnow() + datetime.timedelta(
-            days=REFRESH_TOKEN_EXPIRE_DAYS
-        )
-
-        # == Create payloads for tokens ==
+        response_json = create_response.json()
+        expire_access = datetime.datetime.utcnow() + datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire_refresh = datetime.datetime.utcnow() + datetime.timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
         access_payload = {
-            "user_id": user_data.get("id", 0),
+            "user_id": response_json.get("user_id", 0),
             "username": username,
             "exp": expire_access,
         }
         refresh_payload = {
-            "user_id": user_data.get("id", 0),
+            "user_id": response_json.get("user_id", 0),
             "username": username,
             "exp": expire_refresh,
         }
-
-        # == Generate tokens == 
         access_token = jwt.encode(access_payload, SECRET_JWT_KEY, algorithm="HS256")
         refresh_token = jwt.encode(refresh_payload, SECRET_JWT_KEY, algorithm="HS256")
-
-        # Debug logging
-        print(f"Registration successful for {username}", flush=True)
-        print(f"Access Token: {access_token}...", flush=True)
-        print(f"Refresh Token: {refresh_token}...", flush=True)
-
-        # Set redirect header for HTMX
-        # response.headers["HX-Redirect"] = "/home"
-
-        # == Create the response object == 
-        json_response = JsonResponse(
-            content={"success": True, "message": "Inscription réussie"}
-        )
-
-        # Copy headers from our response to the JSONResponse
-        # for key, value in response.headers.items():
-        #     json_response.headers[key] = value
-
-        # == Set JWT cookies == 
-        # == Set access token ==
-        json_response.set_cookie(
-            key="access_token",
-            value=access_token,
-            httponly=True,
-            secure=True,
-            samesite="Lax",
-            path="/",
-            max_age=60 * 60 * 6,  # 6 hours
-        )
-        # == Set refresh token ==
-        json_response.set_cookie(
-            key="refresh_token",
-            value=refresh_token,
-            httponly=True,
-            secure=True,
-            samesite="Lax",
-            path="/",
-            max_age=60 * 60 * 24 * 7,  # 7 days
-        )
-        return json_response
+        data = {
+            "success": True,
+            "message": "Registration successful",
+            "access_token": access_token,
+            "refresh_token": refresh_token
+        }
+        return JsonResponse(data=data, status=200)
 
     except requests.exceptions.RequestException as e:
-        # Handle any network or connection errors
         return JsonResponse(
-            content={"success": False, "message": f"Service unavailable: {str(e)}"},
-            status_code=500,
+            {"success": False, "message": f"Service unavailable: {str(e)}"},
+            status=500
         )
+
 
 # Function to verify 2FA code and generate JWT tokens
 async def verify_2fa_and_login(

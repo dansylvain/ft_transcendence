@@ -196,13 +196,17 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
 # ======= 🛠️ Main Function Handling the Reverse Proxy for the Route 🛠️ =======
 
 INTERNAL_TOKEN = os.getenv("INTERNAL_TOKEN")
-
-def validate_internal_token(request: Request) -> bool:
-    internal_token = request.headers.get("X-Internal-Token")
-    print(f"\n\n VALIDATE TOKEN: {internal_token}\n\n", flush=True)
+def validate_response_internal_token(response: Response) -> bool:
+    internal_token = response.headers.get("x-internal-token")
+    print(f"\n\n INETRNATL TOEKN : {internal_token}\n\n", flush=True)
     if not internal_token:
         return None
     return internal_token == INTERNAL_TOKEN
+
+def validate_internal_token(internal_tok_v: str, header: str) -> bool:
+    print(f"\n\n INETRNATL TOEKN HEADER : {header}\n\n", flush=True)
+    return header is not None and internal_tok_v == header
+
 
 async def reverse_proxy_handler(target_service: str, incoming_path: str, request: Request,
             serve_from_static: bool = False, static_service_name: str = None,
@@ -219,7 +223,6 @@ async def reverse_proxy_handler(target_service: str, incoming_path: str, request
     retrieves the response, and serves it back, enabling full-page reloads.
     - Use the bool is single page if you want to use the index.html
         or not
-    
     If you need to call a custom URL within the static container, simply 
     call the static service directly and use a URL defined in its 
    `urls.py`, just as you would when calling any other service.
@@ -228,7 +231,6 @@ async def reverse_proxy_handler(target_service: str, incoming_path: str, request
     ensuring that  static assets like CSS, JavaScript, and HTML templates 
     are properly served and updated.  
     """
-
     # Validate the target service
     if target_service not in services:
         raise HTTPException(status_code=404, detail="Requested service not found.")
@@ -236,7 +238,6 @@ async def reverse_proxy_handler(target_service: str, incoming_path: str, request
     if serve_from_static:
         if not static_service_name or static_service_name not in services:
             raise HTTPException(status_code=400, detail="Invalid or missing static service.")
-
     async with httpx.AsyncClient(follow_redirects=True) as client:
         base_service_url = services[target_service].rstrip("/")
         normalized_path = incoming_path.lstrip("/")
@@ -247,7 +248,6 @@ async def reverse_proxy_handler(target_service: str, incoming_path: str, request
             print("⚠️ Request is for the static service, but it's specified to \
                 be served by the same static service directly. Default \
                 will directly call the static service. ⚠️")
-        
         forwarded_headers = {
             key: value for key, value in request.headers.items() if key.lower() != "host"
         }
@@ -275,14 +275,12 @@ async def reverse_proxy_handler(target_service: str, incoming_path: str, request
         print(f"🛡️ HX-Request Present: {'✅ Yes' if 'HX-Request' in request.headers else '❌ No'}")
         print(f"📦 Using Static container for reload: {'✅ Yes' if serve_from_static else '❌ No'}")
         print("=" * 50 + "\n", flush=True)
-            
         # Check user authentication and attach user info headers
         is_authenticated_user, user_info = authentication.is_authenticated(request)
         if is_authenticated_user and user_info:
             print("🔑 ==== IS AUTHENTICATED ==== \n", flush=True)
             forwarded_headers["X-User-ID"] = str(user_info.get("user_id", ""))
             forwarded_headers["X-Username"] = user_info.get("username", "")
-
         # Debug log cookies
         print("=" * 50 + "\n", flush=True)
         print(f"🔑 Forwarding headers:", flush=True)
@@ -290,18 +288,16 @@ async def reverse_proxy_handler(target_service: str, incoming_path: str, request
             print(f"{key}: {value}", flush=True)
         print("=" * 50 + "\n", flush=True)
         print(f"🍪 Forwarding cookies: {request.cookies}", flush=True)
-
         request_method = request.method
         # need to add a try here
         request_body = await request.body()
         request_cookies = request.cookies
         
-        response = await client.request(
+        """ response = await client.request(
                 request_method, final_url, headers=forwarded_headers, 
                 content=request_body, cookies=request_cookies
-        )
-        # becasue probelm if reposne with status error will build an excpetion
-        """  
+        ) """
+        # becasue probelm if reposne with status error will build an excpetion  
         try:
             response = await client.request(
                 request_method, final_url, headers=forwarded_headers, 
@@ -312,26 +308,34 @@ async def reverse_proxy_handler(target_service: str, incoming_path: str, request
             print(f"🔄 Status Code: {response.status_code}", flush=True)
             print(f"📩 Headers:\n{response.headers}", flush=True)
             print("\n====================================\n", flush=True)
-            response.raise_for_status()     
+            if validate_response_internal_token(response) or (services["databaseapi"] in final_url):
+                print("✔️ Custom header detected or from DB. Skipping error raise.")
+                response_headers = {
+                    key: value 
+                    for key, value in response.headers.items() 
+                    if key.lower() != "X-Internal-Token"
+                }
+                response_headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+                # Set response content type
+                content_type = response.headers.get("Content-Type", "").split(";")[0].strip()
+                return Response(
+                    content=response.content,
+                    status_code=response.status_code,
+                    headers=response_headers,
+                    media_type=content_type if content_type else None,) 
+            response.raise_for_status()
         except httpx.HTTPStatusError as exc:
             logger.error(f"❌ Request failed with status code {exc.response.status_code}")
             raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text)
         except httpx.RequestError as exc:
             logger.error(f"❌ Request error: {exc}")
-            raise HTTPException(status_code=500, detail="Internal Server Error") """
-    """
-    # Prepare response headers (excluding Set-Cookie) 
-    response_headers = {
-        key: value for key, value in response.headers.items() if key.lower() != "set-cookie"
-    } 
-    """
+            raise HTTPException(status_code=500, detail="Internal Server Error")
     response_headers = {
         key: value 
         for key, value in response.headers.items() 
-        if key.lower() != "x-internal-token"
+        if key.lower() != "x-internal-db-json"
     }
     response_headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    # Set response content type
     content_type = response.headers.get("Content-Type", "").split(";")[0].strip()
     return Response(
         content=response.content,
@@ -512,7 +516,7 @@ async def user_auth_post_route(path:str, request: Request):
 
     print(f"\n == CALLED AUTH ROUTE POSTE for path {path} == \n", flush=True)
     response = await reverse_proxy_handler("user", "/auth/" + path, request)
-    if path == "login/":
+    if path == "login/" or path == "register/":
         try:
             return await cookies_helpers.set_auth_cookies(response)  # Call cookie helper
         except Exception as e:
@@ -678,25 +682,7 @@ async def register_page_route(request: Request, path: str = ""):
     return await reverse_proxy_handler("static_files", "register/", request)
  """
 
-""" @app.api_route("/auth/register", methods=["POST"])
-@app.api_route("/auth/register/", methods=["POST"])
-async def register_page_route(request: Request):
-    Extracts form data and passes it to `register_fastAPI`
-    form_data = await request.form()  # Extract form data
 
-    first_name = form_data.get("first_name")
-    last_name = form_data.get("last_name")
-    username = form_data.get("username")
-    password = form_data.get("password")
-    email = form_data.get("email")
-    # Create a new response object
-    response = Response()
-
-    return await register_fastAPI(
-        request, response, username, password, email, first_name, last_name
-    )
-
- """
 
 
 @app.api_route("/two-factor-auth/", methods=["GET"])
@@ -816,14 +802,11 @@ async def delete_profile_proxy(request: Request):
             content = json.loads(response.body.decode())
             if content.get("success"):
                 print("🗑️ Profile deletion successful, clearing cookies", flush=True)
-
                 # Clear the cookies
                 response.delete_cookie(key="access_token", path="/")
                 response.delete_cookie(key="refresh_token", path="/")
-
                 # Set HX-Redirect header for client-side redirection
-                response.headers["HX-Redirect"] = "/register/"
-
+                response.headers["HX-Redirect"] = "/auth/register/"
                 print("🗑️ Cookies cleared and redirect set", flush=True)
         except Exception as e:
             print(f"🗑️ Error processing deletion response: {str(e)}", flush=True)
