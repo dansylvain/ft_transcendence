@@ -67,13 +67,15 @@ def enter_match3d(request: HttpRequest):
 
 async def stop_match(request: HttpRequest, playerId, matchId):
 
-    for p in pongs:
-        if p.id == matchId:
-            if await p.stop(playerId):
-                return JsonResponse({"status": "succes"})
-            else:
-                return JsonResponse({"status": "fail"}, status=400)
-    return JsonResponse({"status": "not authorized"}, status=400)
+	print(f"STOP MATCH pid: {playerId}, mid: {matchId}", flush=True)
+
+	for p in pongs:
+		if p.id == int(matchId):
+			if await p.stop(int(playerId)):
+				return JsonResponse({"status": "succes"})
+			else:
+				return JsonResponse({"status": "fail"}, status=400)
+	return JsonResponse({"status": "not authorized"}, status=400)
 
 def del_pong(pong_id):
 

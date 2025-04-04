@@ -30,7 +30,9 @@ function initTournament() {
 		onTournamentMessage(event, window.tournamentSocket);
 }
 
-function connectNewPlayer(playerId, playerName) {
+function connectNewPlayer(playerId, playerName)
+{
+	console.log("CONNECT NEW PLAYER ", playerId, " ", playerName);
 
 	if (!playerId)
 	{
@@ -40,7 +42,6 @@ function connectNewPlayer(playerId, playerName) {
 		console.log(websockets);
 		return;
 	}
-	console.log("CONNECT NEW PLAYER ", playerId, " ", playerName);
 	const ws = websockets.find(ws => ws.playerName === playerName);	
 	ws.playerId = playerId;
 	console.log("ws id ", ws.playerName, ws.playerId);
@@ -94,20 +95,20 @@ function newTournament(socket) {
 		}));
 }
 
-function enterLocalsPlayerOnTournament(socket, tournamentId) {
-	// const scripts = Array.from(document.getElementsByTagName("script"));
-    // scripts.forEach(el => {console.log("SCRIPTNAME: ", el.src)});
-	// if (scripts.some(script => script.className === "match-script")) {
-	// 	console.log("DEJA SCRIPT");
-	// 	return; // Ne pas exécuter fetch si un script "match-script" existe déjà
-	// };
-	console.log("ENTER LOCALS TOURNAMENT: ", tournamentId);
-	if (socket.readyState === WebSocket.OPEN) 
-		socket.send(JSON.stringify({
-			type: "enterTournament",
-			tournamentId: tournamentId			
-		}));
-}
+// function enterLocalsPlayerOnTournament(socket, tournamentId) {
+// 	// const scripts = Array.from(document.getElementsByTagName("script"));
+//     // scripts.forEach(el => {console.log("SCRIPTNAME: ", el.src)});
+// 	// if (scripts.some(script => script.className === "match-script")) {
+// 	// 	console.log("DEJA SCRIPT");
+// 	// 	return; // Ne pas exécuter fetch si un script "match-script" existe déjà
+// 	// };
+// 	console.log("ENTER LOCALS TOURNAMENT: ", tournamentId);
+// 	if (socket.readyState === WebSocket.OPEN) 
+// 		socket.send(JSON.stringify({
+// 			type: "enterTournament",
+// 			tournamentId: tournamentId			
+// 		}));
+// }
 
 function enterTournament(socket, tournamentId) {
 	const scripts = Array.from(document.getElementsByTagName("script"));
@@ -132,7 +133,8 @@ function closeTournamentSocket() {
 		window.tournamentSocket && 
 		window.tournamentSocket.readyState === WebSocket.OPEN
 	)
-	window.tournamentSocket.close();    
+	window.tournamentSocket.close();
+	websockets.forEach(ws => ws.socket.close());    
 }
 
 function onTournamentMessage(event, socket) {
@@ -225,15 +227,15 @@ function updateWinPlayers(socket, playersUp)
 	});
 }
 
-function createPlayerElement(socket, playerId, playerName) {
-
+function createPlayerElement(socket, playerId, playerName)
+{
 	console.log("CREATE PL ELEMENT ", playerId);
 
 	const div = document.createElement("div");
 	div.className = "user";
 	div.textContent = playerName;
 	div.id = playerId;	
-	
+	const ws = websockets.find(ws => ws.playerId == playerId);	
 	if (playerId == window.selfId)
 	{
 		div.classList.add("self-player");
@@ -242,18 +244,24 @@ function createPlayerElement(socket, playerId, playerName) {
 			quitTournament(socket);	
 		}		
 	}
-	else 
-		div.onclick =  event => {
-			event.stopPropagation();
-			const ws = websockets.find(ws => ws.playerId == playerId);
-			if (!ws)
-				alert("not your player WOMAN");
-			else
-				ws.socket.close();	
-			console.log(websockets);
-		}		
+	else if (ws)
+		phantomPlayer(div, playerId, ws);
 	dragPlayer(div);
 	return div;
+}
+
+function phantomPlayer(div, playerId, ws) {
+
+	const playersCont = document.getElementById("players");
+	div.classList.add("phantom");
+	div.onclick =  event => {
+		event.stopPropagation();
+		const players = [...playersCont.children]
+		if (players.some(el => el.id == playerId))		
+			ws.socket.close();
+		else
+			quitTournament(ws.socket)	
+	}
 }
 
 function dragPlayer(div) {
@@ -289,7 +297,8 @@ function updatePlayersCont(playersUp) {
 	});
 }
 
-function updateTournaments(socket, tournamentsUp) {
+function updateTournaments(socket, tournamentsUp)
+{
 
 	console.log("UPDATE TOURNAMENTS ", tournamentsUp);
 
@@ -336,7 +345,7 @@ function addToTournaments(socket, tournamentsContainer, tournament) {
 	div.textContent = `tournament: ${tournament.tournamentId}`;
 	div.id = tournament.tournamentId;
 	div.className = "tournament-cont"
-	div.onclick = () => enterTournament(socket, tournament.tournamentId);
+	// div.onclick = () => enterTournament(socket, tournament.tournamentId);
 	const overlayPattern = document.createElement("div");
 	overlayPattern.id = "overlay-pattern";
 	const playersCont = document.createElement("div");
@@ -354,13 +363,16 @@ function dropTournament(div, tournamentId) {
 		console.log("dans drop");
 		e.preventDefault();
 		const elementId = e.dataTransfer.getData("text/plain");
-		const socket = websockets.find(el => el.playerId == elementId);	
-		if (!socket)
+		const ws = websockets.find(el => el.playerId == elementId);	
+		if (!ws && window.selfId != elementId)
 		{
 			alert("not your player");
 			return;
 		}
-		enterTournament(socket.socket, tournamentId);
+		if (ws)
+			enterTournament(ws.socket, tournamentId);
+		else
+			enterTournament(window.tournamentSocket, tournamentId);
 	});
 }
 
@@ -385,24 +397,31 @@ function dropTournament(div, tournamentId) {
 // 	});
 // }
 
-function catchPlayersInMatch(lk, playerId, PlayerName) {
-
-	const wss = websockets.filter(ws => ws.playerId == lk.p1Id || ws.playerId == lk.p2Id);
+function catchPlayersInMatch(lk, playerId, playerName)
+{
+	const wss = websockets.filter(
+		ws => ws.playerId == lk.p1Id || ws.playerId == lk.p2Id);
 	if (window.selfId == lk.p1Id || window.selfId == lk.p2Id)
-		wss.push({playerId: window.selfId, playerName: window.selfName});
+		wss.push({playerId: window.selfId, playerName: window.selfName,
+			socket:window.tournamentSocket});
 	let player2Id = 0;
 	let player2Name = "";
-
+	let socket = window.tournamentSocket;
+	console.log("CATCH", socket, " ", window.tournamentSocket);
 	if (wss.length >= 1)
 	{
 		playerId = wss[0].playerId;
 		playerName = wss[0].playerName;
+		socket = wss[0].socket;
 	}
 	if (wss.length == 2)
 	{
 		player2Id = wss[1].playerId;
 		player2Name = wss[1].playerName;
 	}
+	enterTournament(socket, lk.tournamentId);
+	if (player2Id)
+		enterTournament(wss[1].socket, lk.tournamentId);
 	return [playerId, playerName, player2Id, player2Name];
 }
 
@@ -464,8 +483,8 @@ function getPattern(tournamentId) {
 	.catch(error => console.log(error));			
 }
 
-function updateTournamentsPlayers(tournamentsUp) {
-
+function updateTournamentsPlayers(tournamentsUp)
+{
 	if (!tournamentsUp)
 		return;
 	console.log("UPDATE TOURNAMENTS PLAYERS ", tournamentsUp);
@@ -508,27 +527,40 @@ function updateLinkMatchAndResult(tournamentsUp) {
 	});
 }
 
-function linkMatch(lk) {
-
+function linkMatch(lk)
+{
 	console.log("LINK MATCH ", lk);
+
 	const dim = document.getElementById("dim");
 	const tournament = document.getElementById("tournaments").querySelector(
 		`[id='${lk.tournamentId}']`
 	);
 	if (!tournament)
+	{
+		console.log("je sors de link match parceque tournament est faux");
 		return;
+	}
 	const overlay = tournament.querySelector("#overlay-match");
-	overlay.style = "transform:translate(-180px, 200px);"
 	const localMatch = tournament.querySelector(`#${lk.localMatchId}`);
 	if (!localMatch)
+	{
+		console.log("je sors de link match parceque localMatch est faux");
 		return;
+	}
+	overlay.style = "transform:translate(-180px, 200px);"
 	const localP1 = localMatch.querySelector(`#pl1`);
 	const localP2 = localMatch.querySelector(`#pl2`);
 	if (localP1.innerText.trim() !== "p1" && localP1.innerText.trim() !== "p2")
+	{
+		console.log("je sors de link match parceque p1 ou p2 ne sont pas vide");
 		return;
+	}
 	localP1.innerText = lk.p1Name;
 	localP2.innerText = lk.p2Name;
-	if (window.selfId == lk.p1Id || window.selfId == lk.p2Id)
+	// if (window.selfId == lk.p1Id || window.selfId == lk.p2Id)
+	const ws = websockets.find(ws => ws.playerId == lk.p1Id || ws.playerId == lk.p2Id)
+	console.log("WAIBECHAUSETTE ", ws);
+	if (window.selfId == lk.p1Id || window.selfId == lk.p2Id || ws)
 	{
 		window.selfMatchId = lk.matchId;
 		localMatch.classList.add("next-match");
@@ -543,7 +575,9 @@ function linkMatch(lk) {
 			console.log("DEJA SCRIPT");
 			return; // Ne pas exécuter fetch si un script "match-script" existe déjà
 		};
-		if (window.selfId == lk.p1Id || window.selfId == lk.p2Id)
+		const ws = websockets.find(ws => ws.playerId == lk.p1Id || ws.playerId == lk.p2Id)
+		console.log("WAIBECHAUSETTE ", ws);
+		if (window.selfId == lk.p1Id || window.selfId == lk.p2Id || ws)
 		{
 			window.selfMatchId = lk.matchId;
 			// localMatch.classList.add("next-match");
@@ -598,8 +632,8 @@ function loadTournamentHtml(data, overlay) {
 	}
 }
 
-function matchResult(rsl) {
-
+function matchResult(rsl)
+{
 	console.log("MATCH RESULT ", rsl);
 
 	const tournament = document.getElementById("tournaments").querySelector(
@@ -636,8 +670,8 @@ function updateMatchsPlayers(pack) {
 		pack.forEach(plys => updateMatchPlayers(plys));
 }
 
-function updateMatchPlayers(plys) {
-
+function updateMatchPlayers(plys)
+{
 	console.log("MATCH PLAYERS UPDATE ", plys);	
 
 	const tournament = document.getElementById("tournaments").querySelector(

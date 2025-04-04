@@ -12,6 +12,7 @@ class MatchConsumer(AsyncWebsocketConsumer):
 	async def connect(self):
 
 		print(f"CONNECT MATCH CONSUMER: {players}", flush=True)
+
 		query_string = self.scope["query_string"].decode() 	
 		params = urllib.parse.parse_qs(query_string)
 		self.player_id = int(params.get("playerId", [None])[0])
@@ -26,14 +27,14 @@ class MatchConsumer(AsyncWebsocketConsumer):
 			'matchId': self.match_id,
 			'socket': self,
 			'dir': None
-		})
+		})		
 		await self.send_players_update()	
 
 	async def disconnect(self, close_code):
 
-		print(f"DISCONNECT p:{self.player_id} m:{self.match_id}", flush=True)
+		print(f"DISCONNECT MATCH CONSUMER p:{self.player_id} m:{self.match_id}", flush=True)
 			
-		players[:] = [p for p in players if p['playerId'] != self.player_id]
+		players[:] = [p for p in players if p['playerId'] != self.player_id]		
 		await self.send_players_update()
 
 	async def filter_player(self, match_id, player_id):
@@ -63,6 +64,9 @@ class MatchConsumer(AsyncWebsocketConsumer):
 
 	async def send_players_update(self):
 	
+		print(f"MATCH CONSUMER SEND PLAYERS UPDATE p:{self.player_id} m:{self.match_id}", flush=True)
+
+		await asyncio.sleep(1)
 		async with aiohttp.ClientSession() as session:
 			async with session.post(
 				"http://tournament:8001/tournament/match-players-update/",

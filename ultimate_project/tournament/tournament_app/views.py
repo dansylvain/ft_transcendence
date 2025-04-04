@@ -35,9 +35,11 @@ def simple_match(request: HttpRequest, user_id):
 async def match_players_update(request: HttpRequest):
     
     print(f"MATCH PLAYERS UPDATE VIEWS", flush=True)
+    
     data = json.loads(request.body.decode("utf-8"))
     match_id = data.get("matchId", None)
     players = data.get("players", [])
+    print(f"MATCH PLAYERS UPDATE VIEWS match_id: {match_id} {players}", flush=True)
     match = next(
         (m for m in sm_cs.matchs if m.get("matchId") == match_id), None)
     if match:

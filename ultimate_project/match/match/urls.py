@@ -19,6 +19,7 @@ from django.urls import path
 import match_app.views as views
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.urls import re_path
 
 @csrf_exempt
 def health_check(request):
@@ -27,7 +28,10 @@ def health_check(request):
 urlpatterns = [
     path("health/", health_check, name="health_check"), 
 	path("match/new-match/", views.new_match),
-	path("match/stop-match/<int:playerId>/<int:matchId>/", views.stop_match),
     path("match/match2d/", views.enter_match2d),
     path("match/match3d/", views.enter_match3d),
+    re_path(
+		r"^match/stop-match/(?P<playerId>-?\d+)/(?P<matchId>-?\d+)/$",
+		views.stop_match
+    )
 ]

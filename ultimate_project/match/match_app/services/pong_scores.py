@@ -13,7 +13,7 @@ async def score_point(self, cmp, limit, score_idx):
 	if cmp(self.ball[0], limit):
 		self.score[score_idx] += 1
 		self.ball = self.ball_rst.copy()
-		self.vect = self.vect_rst.copy()
+		self.vect = [self.vect_rst(), self.vect_rst()] 
 		await asyncio.sleep(1)
 
 async def max_score_rise(self, ply_idx):

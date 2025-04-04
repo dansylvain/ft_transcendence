@@ -26,6 +26,8 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
 	async def disconnect(self, close_code):
 
+		print(f"DISCONNECT TOURNAMENT {self.id} {self.name}", flush=True)
+		
 		await self.remove_player_in_tournaments()
 		players[:] = [p for p  in players if p.id != self.id]
 		await self.send_list("player", players)
@@ -103,7 +105,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 		if tournament and self not in tournament.players:
 			await self.remove_player_in_tournaments()
 			await tournament.append_player(self)
-		await TournamentConsumer.send_tournaments()	
+			await TournamentConsumer.send_tournaments()	
 
 	async def remove_player_in_tournaments(self):
 

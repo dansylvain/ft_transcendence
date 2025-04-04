@@ -109,6 +109,10 @@ button {
 	background-color: hwb(180 81% 18%) !important;
 }
 
+.phantom {
+	background-color: rgb(8, 234, 250);
+}
+
 .tournament-cont {
 	width:50%;
 	height: fit-content;
