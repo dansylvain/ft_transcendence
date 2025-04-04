@@ -6,7 +6,7 @@ import json
 import aiohttp
 from enum import Enum
 import requests
-
+import random
 import match_app.services.pong_physics as physics
 import match_app.services.pong_scores as scores
 
@@ -41,8 +41,9 @@ class Pong:
 		self.pad_width = 10
 		self.ball_rst = [25, 5]
 		self.ball = self.ball_rst.copy()
-		self.vect_rst = [1, 1]
-		self.vect = self.vect_rst.copy()
+	
+		self.vect_rst = lambda: random.uniform(-1, 1)
+		self.vect = [self.vect_rst(), self.vect_rst()] 
 		self.pad_speed = 4
 		self.max_ball_speed = 10
 		self.ball_acceleration = 1.1

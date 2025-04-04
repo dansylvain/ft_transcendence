@@ -483,8 +483,8 @@ function getPattern(tournamentId) {
 	.catch(error => console.log(error));			
 }
 
-function updateTournamentsPlayers(tournamentsUp) {
-
+function updateTournamentsPlayers(tournamentsUp)
+{
 	if (!tournamentsUp)
 		return;
 	console.log("UPDATE TOURNAMENTS PLAYERS ", tournamentsUp);
