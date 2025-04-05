@@ -140,12 +140,14 @@ class Tournament():
 			import TournamentConsumer
 		await TournamentConsumer.send_all_players(packet)
 
+    # ============== SEND DB ============
 	async def send_db(self, tournament_result):
 
 		from tournament_app.views import send_db as sdb
 
 		path = ""
 		await sdb(path, tournament_result)
+    # ============== SEND DB ============
 
 	async def match_players_update(self, match_update):
 

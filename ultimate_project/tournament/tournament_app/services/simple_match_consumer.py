@@ -280,6 +280,7 @@ class SimpleConsumer(AsyncWebsocketConsumer):
 			await SimpleConsumer.send_list('match', matchs)
 			await SimpleConsumer.send_db(data)
 	
+    # ====================== SEND DB ====================
 	@staticmethod
 	async def send_db(data):
 		
@@ -288,3 +289,4 @@ class SimpleConsumer(AsyncWebsocketConsumer):
 
 		path = ""
 		await sdb(path, data) 
+    # ====================== SEND DB ====================
