@@ -7,24 +7,24 @@ function initTournament() {
 	if (typeof closeSimpleMatchSocket === 'function') 
 		closeSimpleMatchSocket();
 	else 
-		console.log("closeSimpleMatch not define");
+		// console.log("closeSimpleMatch not define");
 	
 	if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
         window.pidom = "localhost:8443";
 	else
 		window.pidom = window.location.hostname + ":8443";
 
-	console.log("INIT TOURNAMENT");
+	// console.log("INIT TOURNAMENT");
     if (window.tournamentSocket)
         window.tournamentSocket.close();
     window.tournamentSocket = new WebSocket(
         `wss://${window.pidom}/ws/tournament/tournament/${window.selfId}/${window.selfName}/`
     );
 	window.tournamentSocket.onopen = () => {
-		console.log("Connexion Tournament établie 😊");	
+		// console.log("Connexion Tournament établie 😊");	
 	}
 	window.tournamentSocket.onclose = () => {
-		console.log("Connexion Tournament disconnected 😈");
+		// console.log("Connexion Tournament disconnected 😈");
 	};	
 	window.tournamentSocket.onmessage = event =>
 		onTournamentMessage(event, window.tournamentSocket);
@@ -45,32 +45,32 @@ function messagePopUp(url, text)
 
 function connectNewPlayer(playerId, playerName)
 {
-	console.log("CONNECT NEW PLAYER ", playerId, " ", playerName);
+	// console.log("CONNECT NEW PLAYER ", playerId, " ", playerName);
 
 	if (!playerId)
 	{
         messagePopUp('https://github.com/dansylvain/pictures/blob/main/non-je-ne-contracte-pas.gif?raw=true', "player name yet exist!")
 		// alert("player name yet exist!");
-		console.log(websockets);
+		// console.log(websockets);
 		websockets = websockets.filter(ws => ws.playerId !== undefined);	
-		console.log(websockets);
+		// console.log(websockets);
 		return;
 	}
 	const ws = websockets.find(ws => ws.playerName === playerName);	
 	ws.playerId = playerId;
-	console.log("ws id ", ws.playerName, ws.playerId);
+	// console.log("ws id ", ws.playerName, ws.playerId);
 	const socket = new WebSocket(
         `wss://${window.pidom}/ws/tournament/tournament/${playerId}/${playerName}/`
     );
 	ws.socket = socket;
 	socket.onopen = () => {
-		console.log(`Connexion Tournament ${playerName} établie 😊`);	
+		// console.log(`Connexion Tournament ${playerName} établie 😊`);	
 	}
 	socket.onclose = () => {
-		console.log(`Connexion Tournament ${playerName} disconnected 😈`);
-		console.log(websockets);
+		// console.log(`Connexion Tournament ${playerName} disconnected 😈`);
+		// console.log(websockets);
 		websockets = websockets.filter(ws => ws.socket !== socket);
-		console.log(websockets);
+		// console.log(websockets);
 	};	
 	socket.onmessage = event =>
 		{};// onTournamentMessage(event, window.tournamentSocket);	
@@ -130,12 +130,12 @@ function newTournament(socket) {
 
 function enterTournament(socket, tournamentId) {
 	const scripts = Array.from(document.getElementsByTagName("script"));
-    scripts.forEach(el => {console.log("SCRIPTNAME: ", el.src)});
+    // scripts.forEach(el => {console.log("SCRIPTNAME: ", el.src)});
 	if (scripts.some(script => script.className === "match-script")) {
-		console.log("DEJA SCRIPT");
+		// console.log("DEJA SCRIPT");
 		return; // Ne pas exécuter fetch si un script "match-script" existe déjà
 	};
-	console.log("entertournement: ", socket, " ", tournamentId);
+	// console.log("entertournement: ", socket, " ", tournamentId);
 	if (socket.readyState === WebSocket.OPEN) 
 		socket.send(JSON.stringify({
 			type: "enterTournament",
@@ -158,6 +158,12 @@ function closeTournamentSocket() {
 function onTournamentMessage(event, socket) {
 
 	console.log("Message reçu :", event.data);
+
+	const message = JSON.parse(event.data);
+	console.log(message.winnerName)
+	if (message.type === "tournamentResult") {
+		messagePopUp('https://github.com/dansylvain/pictures/blob/main/non-je-ne-contracte-pas.gif?raw=true', `${message.winnerName} WON THE TOURNAMENT`)	// Le tournoi est terminé
+	}
 	const data = JSON.parse(event.data);
 	
 	switch (data.type)
@@ -173,7 +179,7 @@ function onTournamentMessage(event, socket) {
 			connectNewPlayer(data.playerId, data.playerName);
 		break;
 		case "playerList":
-			console.log("case playerlist");
+			// console.log("case playerlist");
 			window.playersList = data.players;
 			updatePlayers(socket, data.players);
 
@@ -181,21 +187,21 @@ function onTournamentMessage(event, socket) {
 			updateMatchsPlayers(window.pack);
 			break;
 		case "tournamentList":
-			console.log("case tournamentlist");
+			// console.log("case tournamentlist");
 			updatePlayers(socket, window.playersList);
 			window.tournamentList = data.tournaments; 
 			updateTournaments(socket, data.tournaments);
 			break;
 		case "linkMatch":
-			console.log("case linkmatch");
+			// console.log("case linkmatch");
 			linkMatch(data);			
 			break;
 		case "matchResult":
-			console.log("case matchresult");
+			// console.log("case matchresult");
 			matchResult(data);			
 			break;
 		case "matchsPlayersUpdate":
-			console.log("case matchPlayersUpdate");
+			// console.log("case matchPlayersUpdate");
 			updatePlayersCont(window.playersList)
 			updateTournamentsPlayers(window.tournamentList);
 			window.pack = data.pack;
@@ -223,12 +229,12 @@ function onTournamentMessage(event, socket) {
 
 function tournamentResult(data)
 {
-	console.log("TOURNAMENT RESULT ", data);
+	// console.log("TOURNAMENT RESULT ", data);
 }
 
 function updatePlayers(socket, playersUp)
 {
-	console.log("UPDATE PLAYERS ", playersUp);
+	// console.log("UPDATE PLAYERS ", playersUp);
 
 	updateWinPlayers(socket, playersUp);
 	updatePlayersCont(playersUp);
@@ -236,7 +242,7 @@ function updatePlayers(socket, playersUp)
 
 function updateWinPlayers(socket, playersUp)
 {
-	console.log("UPDATE WIN PLAYERS ", playersUp);
+	// console.log("UPDATE WIN PLAYERS ", playersUp);
 
 	playersUp.forEach(plyUp => {
 		if (window.players.every(el => el.id != plyUp.playerId))
@@ -256,7 +262,7 @@ function updateWinPlayers(socket, playersUp)
 
 function createPlayerElement(socket, playerId, playerName)
 {
-	console.log("CREATE PL ELEMENT ", playerId);
+	// console.log("CREATE PL ELEMENT ", playerId);
 
 	const div = document.createElement("div");
 	div.className = "user";
@@ -300,7 +306,7 @@ function dragPlayer(div) {
 
 function quitTournament(socket) {
 	
-	console.log("QUIT TOURNAMENT");
+	// console.log("QUIT TOURNAMENT");
 
 	if (socket.readyState === WebSocket.OPEN) 
 		socket.send(JSON.stringify({
@@ -310,7 +316,7 @@ function quitTournament(socket) {
 
 function updatePlayersCont(playersUp) {
 
-	console.log("UPDATE PLAYERS CONT ", playersUp);
+	// console.log("UPDATE PLAYERS CONT ", playersUp);
 
 	const playersCont = document.getElementById("players");
 	const playerElements = [...playersCont.children];
@@ -327,7 +333,7 @@ function updatePlayersCont(playersUp) {
 function updateTournaments(socket, tournamentsUp)
 {
 
-	console.log("UPDATE TOURNAMENTS ", tournamentsUp);
+	// console.log("UPDATE TOURNAMENTS ", tournamentsUp);
 
 	const tournamentsCont = document.getElementById("tournaments");
 	const tournamentEls = [...tournamentsCont.children];
@@ -353,10 +359,10 @@ function updateTournaments(socket, tournamentsUp)
 	updateTournamentsPlayers(tournamentsUp);
 	// updateLinkMatchAndResult(tournamentsUp);
 	patternPromises.forEach(promise => promise.then(value =>{
-		console.log("NEW PROMISE REC ", value);
+		// console.log("NEW PROMISE REC ", value);
 		if (value)
 		{
-			console.log("GO To UTP ULKR ", value);
+			// console.log("GO To UTP ULKR ", value);
 			updateTournamentsPlayers(tournamentsUp);
 			updateLinkMatchAndResult(tournamentsUp);
 		}
@@ -365,7 +371,7 @@ function updateTournaments(socket, tournamentsUp)
 
 function addToTournaments(socket, tournamentsContainer, tournament) {
 
-	console.log("ADD TO TOURNAMENT ", tournamentsContainer, " : ", tournament);
+	// console.log("ADD TO TOURNAMENT ", tournamentsContainer, " : ", tournament);
 
 	const div = document.createElement("div");	
 	div.className = "tournament";
@@ -387,7 +393,7 @@ function dropTournament(div, tournamentId) {
 
 	div.addEventListener("dragover", e => e.preventDefault());
 	div.addEventListener("drop", e => {
-		console.log("dans drop");
+		// console.log("dans drop");
 		e.preventDefault();
 		const elementId = e.dataTransfer.getData("text/plain");
 		const ws = websockets.find(el => el.playerId == elementId);	
@@ -436,7 +442,7 @@ function catchPlayersInMatch(lk, playerId, playerName)
 	let player2Id = 0;
 	let player2Name = "";
 	let socket = window.tournamentSocket;
-	console.log("CATCH", socket, " ", window.tournamentSocket);
+	// console.log("CATCH", socket, " ", window.tournamentSocket);
 	if (wss.length >= 1)
 	{
 		playerId = wss[0].playerId;
@@ -491,7 +497,7 @@ function catchPlayersInMatch(lk, playerId, playerName)
 
 function getPattern(tournamentId) {
 
-	console.log("GET PATTERN ", tournamentId);
+	// console.log("GET PATTERN ", tournamentId);
 
 	const tournament = document.getElementById("tournaments").querySelector(
 		`[id='${tournamentId}']`);
@@ -516,7 +522,7 @@ function updateTournamentsPlayers(tournamentsUp) {
 
 	if (!tournamentsUp)
 		return;
-	console.log("UPDATE TOURNAMENTS PLAYERS ", tournamentsUp);
+	// console.log("UPDATE TOURNAMENTS PLAYERS ", tournamentsUp);
 
 	const tournamentsCont = document.getElementById("tournaments");
 	const tournamentEls = [...tournamentsCont.children];
@@ -542,7 +548,7 @@ function updateTournamentsPlayers(tournamentsUp) {
 
 function updateLinkMatchAndResult(tournamentsUp) {
 
-	console.log("UPDATE LINK AND MATCH RESULT ", tournamentsUp);
+	// console.log("UPDATE LINK AND MATCH RESULT ", tournamentsUp);
 
 	tournamentsUp.forEach(tourUp => {
 		tourUp.matchs.forEach(matchUp => {
@@ -558,7 +564,7 @@ function updateLinkMatchAndResult(tournamentsUp) {
 
 function linkMatch(lk)
 {
-	console.log("LINK MATCH ", lk);
+	// console.log("LINK MATCH ", lk);
 
 	const dim = document.getElementById("dim");
 	const tournament = document.getElementById("tournaments").querySelector(
@@ -566,14 +572,14 @@ function linkMatch(lk)
 	);
 	if (!tournament)
 	{
-		console.log("je sors de link match parceque tournament est faux");
+		// console.log("je sors de link match parceque tournament est faux");
 		return;
 	}
 	const overlay = tournament.querySelector("#overlay-match");
 	const localMatch = tournament.querySelector(`#${lk.localMatchId}`);
 	if (!localMatch)
 	{
-		console.log("je sors de link match parceque localMatch est faux");
+		// console.log("je sors de link match parceque localMatch est faux");
 		return;
 	}
 	// overlay.style = "transform:translate(-180px, 200px);"
@@ -581,14 +587,14 @@ function linkMatch(lk)
 	const localP2 = localMatch.querySelector(`#pl2`);
 	if (localP1.innerText.trim() !== "p1" && localP1.innerText.trim() !== "p2")
 	{
-		console.log("je sors de link match parceque p1 ou p2 ne sont pas vide");
+		// console.log("je sors de link match parceque p1 ou p2 ne sont pas vide");
 		return;
 	}
 	localP1.innerText = lk.p1Name;
 	localP2.innerText = lk.p2Name;
 	// if (window.selfId == lk.p1Id || window.selfId == lk.p2Id)
 	const ws = websockets.find(ws => ws.playerId == lk.p1Id || ws.playerId == lk.p2Id)
-	console.log("WAIBECHAUSETTE ", ws);
+	// console.log("WAIBECHAUSETTE ", ws);
 	if (window.selfId == lk.p1Id || window.selfId == lk.p2Id || ws)
 	{
 		window.selfMatchId = lk.matchId;
@@ -599,13 +605,13 @@ function linkMatch(lk)
 
 	localMatch.onclick = function() {
 		const scripts = Array.from(document.getElementsByTagName("script"));
-		scripts.forEach(el => {console.log("SCRIPTNAME: ", el.src)});
+		// scripts.forEach(el => {console.log("SCRIPTNAME: ", el.src)});
 		if (scripts.some(script => script.className === "match-script")) {
-			console.log("DEJA SCRIPT");
+			// console.log("DEJA SCRIPT");
 			return; // Ne pas exécuter fetch si un script "match-script" existe déjà
 		};
 		const ws = websockets.find(ws => ws.playerId == lk.p1Id || ws.playerId == lk.p2Id)
-		console.log("WAIBECHAUSETTE ", ws);
+		// console.log("WAIBECHAUSETTE ", ws);
 		if (window.selfId == lk.p1Id || window.selfId == lk.p2Id || ws)
 		{
 			window.selfMatchId = lk.matchId;
@@ -663,7 +669,7 @@ function loadTournamentHtml(data, overlay) {
 
 function matchResult(rsl)
 {
-	console.log("MATCH RESULT ", rsl);
+	// console.log("MATCH RESULT ", rsl);
 
 	const tournament = document.getElementById("tournaments").querySelector(
 		`[id='${rsl.tournamentId}']`
@@ -701,49 +707,49 @@ function updateMatchsPlayers(pack) {
 
 function updateMatchPlayers(plys)
 {
-	console.log("MATCH PLAYERS UPDATE ", plys);	
+	// console.log("MATCH PLAYERS UPDATE ", plys);	
 
 	const tournament = document.getElementById("tournaments").querySelector(
 		`[id='${plys.tournamentId}']`
 	);
 	if (!tournament)
 		return;
-	console.log("MATCH PLAYERS UPDATE TOURNMANTEE", tournament);	
+	// console.log("MATCH PLAYERS UPDATE TOURNMANTEE", tournament);	
 	const localMatch = tournament.querySelector(`#${plys.localMatchId}`);
 	if (!localMatch)
 		return;
-	console.log("MATCH PLAYERS UPDATE localmatch", localMatch);	
+	// console.log("MATCH PLAYERS UPDATE localmatch", localMatch);	
 	const localP1 = localMatch.querySelector(`#pl1`);
 	const localP2 = localMatch.querySelector(`#pl2`);
 	const specCont = localMatch.querySelector(`#specs`);
-	console.log("localp1", localP1);	
-	console.log("localp2", localP2);	
-	console.log("sepccont", specCont);
+	// console.log("localp1", localP1);	
+	// console.log("localp2", localP2);	
+	// console.log("sepccont", specCont);
 	const specs = [...specCont.children]
 
 	plys.players.forEach(player => {
-		console.log("foreachplayer ", player);	
+		// console.log("foreachplayer ", player);	
 		if (specs.every(el => el.id != player.playerId))
 		{
-			console.log("every ", player);	
+			// console.log("every ", player);	
 			const winPly = window.players.find(el => el.id == player.playerId);
-			console.log("winply ", winPly);	
-			console.log("winply id ", winPly.id);	
-			console.log("plys.p1Id ", plys.p1Id);	
-			console.log("plys.p2Id ", plys.p2Id);	
+			// console.log("winply ", winPly);	
+			// console.log("winply id ", winPly.id);	
+			// console.log("plys.p1Id ", plys.p1Id);	
+			// console.log("plys.p2Id ", plys.p2Id);	
 			if (plys.p1Id == winPly.id)
 			{
-				console.log("plys.p1Id == winPly.id ");	
+				// console.log("plys.p1Id == winPly.id ");	
 				localP1.appendChild(winPly);
 			}
 			else if (plys.p2Id == winPly.id)
 			{
-				console.log("plys.p2Id == winPly.id ");	
+				// console.log("plys.p2Id == winPly.id ");	
 				localP2.appendChild(winPly);
 			}
 			else
 			{
-				console.log("else ");	
+				// console.log("else ");	
 				specCont.appendChild(winPly);
 			}
 		}

@@ -30,7 +30,7 @@ async function invitationPopup(socket, applicantId, applicantName)
         confirmButtonText: 'Accept',
         cancelButtonText: 'Decline',
       });
-      console.log("RESULT: ", result, result.isConfirmed)
+    //   console.log("RESULT: ", result, result.isConfirmed)
     // const userConfirmed = confirm(`You have an invitation from ${applicantName}`);
     sendConfirmation(socket, applicantId, applicantName, result.isConfirmed);
 }
@@ -57,12 +57,12 @@ function showNotification(message, applicantId) {
             }
         });
     } else {
-        console.log("Notification permission not granted");
+        // console.log("Notification permission not granted");
     }
 }
 
 function receiveInvitation(socket, applicantId, applicantName) {
-    console.log("I have had an invitation from: " + applicantName);
+    // console.log("I have had an invitation from: " + applicantName);
     
     if (isPageVisible) {
         // Si l'onglet est actif, demande la confirmation immédiatement
@@ -202,11 +202,11 @@ function setSelfMatchId() {
 
 function moveSimplePlayerInMatch(matchElement, match) {
 
-	console.log("MOVE SIMPLE PLAYER IN MATCH", match);
+	// console.log("MOVE SIMPLE PLAYER IN MATCH", match);
 
 	if (!match.players)
 		return;
-	console.log("MOVE SIMPLE PLAYER IN MATCH after return");
+	// console.log("MOVE SIMPLE PLAYER IN MATCH after return");
 	match.players.forEach(ply => {
 		const winPly = window.simplePlayers.find(el => el.id == ply.playerId);
 		if (winPly)
@@ -251,7 +251,7 @@ function removeMatchs(socket, matchs, matchsContainer, matchElements) {
 
 function updateMatchs(socket, matchs) {
 
-	console.log("UPDATE MATCH", matchs);
+	// console.log("UPDATE MATCH", matchs);
 
     const matchsContainer = document.getElementById("matchs");
 	let matchElements = [...matchsContainer.children];
@@ -312,7 +312,7 @@ function updateMatchs(socket, matchs) {
 
 function sendConfirmation(socket, applicantId, applicantName, response) {
 
-	console.log(`i will send ${response} to applicant: ${applicantName}`);
+	// console.log(`i will send ${response} to applicant: ${applicantName}`);
 
 	if (socket.readyState === WebSocket.OPEN) 
 		socket.send(JSON.stringify({
@@ -324,7 +324,7 @@ function sendConfirmation(socket, applicantId, applicantName, response) {
 
 function invitationCancelled(targetName) {
 
-	console.log(`invitation with ${targetName} is cancelled`);
+	// console.log(`invitation with ${targetName} is cancelled`);
 
     messagePopUp('https://github.com/dansylvain/pictures/blob/main/non-je-ne-contracte-pas.gif?raw=true', `invitation with ${targetName} is cancelled`)
 	// alert(`invitation with ${targetName} is cancelled`);
@@ -499,7 +499,7 @@ function invitation(socket, data) {
 
 function onSimpleMatchMessage(event, socket) {
 
-	console.log("Message reçu :", event.data);
+	// console.log("Message reçu :", event.data);
 	const data = JSON.parse(event.data);
 	
 	switch (data.type)
@@ -539,7 +539,7 @@ function closeSimpleMatchSocket() {
 
 function updateSimplePlayers(socket, playersUp)
 {
-	console.log("UPDATE PLAYERS ", playersUp);
+	// console.log("UPDATE PLAYERS ", playersUp);
 
 	updateSimpleWinPlayers(socket, playersUp);
 	updateSimplePlayersCont(playersUp);
@@ -547,7 +547,7 @@ function updateSimplePlayers(socket, playersUp)
 
 function updateSimpleWinPlayers(socket, playersUp)
 {
-	console.log("UPDATE SIMPLE WIN PLAYERS ", playersUp);
+	// console.log("UPDATE SIMPLE WIN PLAYERS ", playersUp);
 
 	playersUp.forEach(plyUp => {
 		if (window.simplePlayers.every(el => el.id != plyUp.playerId))
@@ -567,7 +567,7 @@ function updateSimpleWinPlayers(socket, playersUp)
 
 function updateSimplePlayersCont(playersUp) {
 
-	console.log("UPDATE SIMPLE PLAYERS CONT ", playersUp);
+	// console.log("UPDATE SIMPLE PLAYERS CONT ", playersUp);
 
 	const playersCont = document.getElementById("players");
 	const playerElements = [...playersCont.children];
@@ -583,7 +583,7 @@ function updateSimplePlayersCont(playersUp) {
 
 function createSimplePlayerElement(socket, playerId, playerName) {
 
-	console.log("CREATE PL ELEMENT ", playerId);
+	// console.log("CREATE PL ELEMENT ", playerId);
 	const div = document.createElement("div");
 	div.className = "user";
 	div.textContent = playerName;
@@ -597,28 +597,28 @@ function createSimplePlayerElement(socket, playerId, playerName) {
 
 function initSimpleMatch() {
 	
-	console.log("INIT SIMPLE MATCH");	
+	// console.log("INIT SIMPLE MATCH");	
 	if (typeof closeTournamentSocket === 'function') 
 		closeTournamentSocket();
 	else 
-		console.log("closeTournamentSocket is not define");
+		// console.log("closeTournamentSocket is not define");
 	
     if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
         window.pidom = "localhost:8443";
 	else
 		window.pidom = window.location.hostname + ":8443";
 
-	console.log("INIT SIMPLE MATCH");
+	// console.log("INIT SIMPLE MATCH");
     if (window.simpleMatchSocket)
         window.simpleMatchSocket.close();
     window.simpleMatchSocket = new WebSocket(
         `wss://${window.pidom}/ws/tournament/simple-match/${window.selfId}/${window.selfName}/`
     );
 	window.simpleMatchSocket.onopen = () => {
-        console.log("Connexion Simple Match établie 😊");	
+        // console.log("Connexion Simple Match établie 😊");	
 	}
 	window.simpleMatchSocket.onclose = () => {
-		console.log("Connexion Simple Match disconnected 😈");
+		// console.log("Connexion Simple Match disconnected 😈");
 	};	
 	window.simpleMatchSocket.onmessage = event =>
 		onSimpleMatchMessage(event, window.simpleMatchSocket);

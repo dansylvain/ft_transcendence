@@ -32,12 +32,12 @@ function stopMatch(matchId)
 	console.log("YOUHOUHOUHOU");
 	// if (window.selfMatchId != window.matchId)
 	// {
-		console.log("jypigequeuedalle");
+		// console.log("jypigequeuedalle");
 		if (!window.matchSocket)
 			console.log("LE WEBSOCKET ETS NULL.");
 		else 
 		{
-			console.log("je sais pas ce qu eje fou la");
+			// console.log("je sais pas ce qu eje fou la");
 			if (window.matchSocket.readyState === WebSocket.OPEN)
 			{
 				console.log("je vais envoyer 42");
@@ -305,7 +305,7 @@ function animate3(pads) {
 	if (Math.abs(currentX - targetX) < eps && Math.abs(currentY - targetY) < eps) {
 		const tar = targets.shift();
 		if (tar) {
-			console.log("je dois passer ici a chaque refresh serveur");
+			// console.log("je dois passer ici a chaque refresh serveur");
 			targetX = tar[0];
 			targetY = tar[1];
 		}
@@ -450,7 +450,7 @@ function calculateOffset(spd)
 function setSpeed() {
 
 	speed = (1 - (1 / ((Math.abs(targetX - newTargetX) * 4) + 1)));
-	console.log("speed: ", speed);
+	// console.log("speed: ", speed);
 }
 
 window.celerity = window.celerity || 0;
@@ -612,7 +612,7 @@ function onMatchWsMessage(event, pads, [waiting, endCont, end], waitingState) {
 		if (window.gameStartTimestamp === undefined) {
 			window.gameStartTimestamp = data.timestamp;
             delay = data.delay;
-			console.log("✅ Premier timestamp enregistré:", data.timestamp);
+			// console.log("✅ Premier timestamp enregistré:", data.timestamp);
 	
 			// Ici tu peux démarrer ton compte à rebours
 			// startCountdownFrom(data.timestamp, '.countdown', '.loader');
@@ -620,7 +620,7 @@ function onMatchWsMessage(event, pads, [waiting, endCont, end], waitingState) {
 
             startCountdown(delay);
 		} else {
-			console.log("⏩ Timestamp déjà reçu, ignoré.");
+			// console.log("⏩ Timestamp déjà reçu, ignoré.");
 		}
 		return;
 	}
@@ -785,10 +785,10 @@ function sequelInitMatchWs(socket) {
 		else
 			spec.style.display = "none";
 	}
-	console.log("BEFORE INIT SEC !!!!!! ", window.player2Id, typeof(window.player2Id));
+	// console.log("BEFORE INIT SEC !!!!!! ", window.player2Id, typeof(window.player2Id));
 	if (window.player2Id != 0)
 	{
-		console.log("INIT SEC !!!!!! ", window.player2Id);
+		// console.log("INIT SEC !!!!!! ", window.player2Id);
 		initSecPlayer();
 	}
 	setCommands(socket, window.matchSocket2);
@@ -805,10 +805,10 @@ function initSecPlayer() {
         `wss://${window.pidom}/ws/match/${window.matchId}/` +
         `?playerId=${window.player2Id}`);
 	window.matchSocket2.onopen = () => {
-		console.log("Connexion Match établie 2nd Player😊");
+		// console.log("Connexion Match établie 2nd Player😊");
 	};
 	window.matchSocket2.onclose = (event) => {
-		console.log("Connexion Match disconnected 😈 2nd Player");
+		// console.log("Connexion Match disconnected 😈 2nd Player");
 	};
 	// setCommands2(window.matchSocket2);
 }
@@ -820,9 +820,9 @@ function initMatchWs() {
 		window.pidom = window.location.hostname + ":8443";
 
 //si je viens du debut je sui sclosé (et je reviens par boucle) si je viens de onclse je continu normal
-	console.log("INIT MATCH 😊😊😊");
-	console.log("STOP: " + window.stopFlag);
-	console.log("ANTILOPP: " + window.antiLoop);
+	// console.log("INIT MATCH 😊😊😊");
+	// console.log("STOP: " + window.stopFlag);
+	// console.log("ANTILOPP: " + window.antiLoop);
 	if (window.matchSocket && window.antiLoop)
 		return window.matchSocket.close();
 	if (window.matchSocket2 && window.antiLoop)
@@ -834,20 +834,20 @@ function initMatchWs() {
         `wss://${window.pidom}/ws/match/${window.matchId}/` +
         `?playerId=${window.playerId}`);
 	window.matchSocket.onopen = () => {
-		console.log("Connexion Match établie 😊");
+		// console.log("Connexion Match établie 😊");
 	};
 	window.matchSocket.onclose = (event) => {	
-		console.log("Connexion Match disconnected 😈");		
+		// console.log("Connexion Match disconnected 😈");		
 		window.antiLoop = false;
-		console.log("CODE: " + event.code);
-		console.log("STOP: " + window.stopFlag);
+		// console.log("CODE: " + event.code);
+		// console.log("STOP: " + window.stopFlag);
 		if (event.code !== 3000 && !window.stopFlag)
 		{			
-			console.log("codepas42");
+			// console.log("codepas42");
 			initMatchWs();	
 		}
 		else
-			console.log("code42");
+			// console.log("code42");
 		window.stopFlag = false;
 	};
 	sequelInitMatchWs(window.matchSocket);
