@@ -30,15 +30,20 @@ function initTournament() {
 		onTournamentMessage(event, window.tournamentSocket);
 }
 
-function messagePopUp(url, text)
+function messagePopUp(titre, url, text, traduction)
 {
     Swal.fire({
-        title: 'Oops!',
+        title: titre,
         text: text,
         imageUrl: url,
         imageWidth: 300,
         imageHeight: 300,
         imageAlt: 'GIF fun',
+        willOpen: () => {
+            // Ajoute l'attribut data-translate au texte affiché
+            const swalText = Swal.getPopup().querySelector('.swal2-html-container');
+            swalText.setAttribute('data-translate', 'traduction');
+        }
       });
 }
 
@@ -49,7 +54,7 @@ function connectNewPlayer(playerId, playerName)
 
 	if (!playerId)
 	{
-        messagePopUp('https://dansylvain.github.io/pictures/marioNo.webp', "player name yet exist!")
+        messagePopUp('Oops!', 'https://dansylvain.github.io/pictures/marioNo.webp', "player name yet exist!", "")
 		// alert("player name yet exist!");
 		// console.log(websockets);
 		websockets = websockets.filter(ws => ws.playerId !== undefined);	
@@ -85,14 +90,14 @@ function newPlayer(socket) {
 	const playerName = document.getElementById("player-name").value;
 	if (playerName.trim() === "")
 	{
-        messagePopUp('https://dansylvain.github.io/pictures/travolta.webp', "enter a name!")
+        messagePopUp('Oops!', 'https://dansylvain.github.io/pictures/travolta.webp', "enter a name!", "")
 
 		// alert("enter a name!");
 		return;
 	}
 	if (websockets.length >= 3)
 	{
-        messagePopUp('https://dansylvain.github.io/pictures/marioNo.webp', "you can't create more than three players!")
+        messagePopUp('Oops!', 'https://dansylvain.github.io/pictures/marioNo.webp', "you can't create more than three players!", "")
 
 		// alert("you can't create more than three players!");
 		return;
@@ -162,7 +167,7 @@ function onTournamentMessage(event, socket) {
 	const message = JSON.parse(event.data);
 	console.log(message.winnerName)
 	if (message.type === "tournamentResult") {
-		messagePopUp('https://dansylvain.github.io/pictures/trumpDance.webp', `${message.winnerName} WON THE TOURNAMENT`)	// Le tournoi est terminé
+		messagePopUp('Oops!', 'https://dansylvain.github.io/pictures/trumpDance.webp', `${message.winnerName} WON THE TOURNAMENT`, "")	// Le tournoi est terminé
 	}
 	const data = JSON.parse(event.data);
 	
@@ -399,7 +404,7 @@ function dropTournament(div, tournamentId) {
 		const ws = websockets.find(el => el.playerId == elementId);	
 		if (!ws && window.selfId != elementId)
 		{
-            messagePopUp('https://dansylvain.github.io/pictures/marioNo.webp', "not your player")
+            messagePopUp('Oops!', 'https://dansylvain.github.io/pictures/marioNo.webp', "not your player", "")
 
 			// alert("not your player");
 			return;

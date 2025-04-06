@@ -21,5 +21,7 @@
     "Games lost: ": "Jeux perdus: ",
     "Ready to Leave?": "Prêt à partir ?",
     "Logout-leave": "Cliquez sur \"Déconnexion\" ci-dessous si vous êtes prêt à mettre fin à votre session actuelle.",
-    "cancel": "annuler"
+    "cancel": "annuler",
+    "key_for_translation": "truc machin chouette",
+    "enter a name for second player": "entrez un nom pour le deuxieme joueur!"
 }

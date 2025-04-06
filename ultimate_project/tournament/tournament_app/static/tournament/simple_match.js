@@ -326,7 +326,7 @@ function invitationCancelled(targetName) {
 
 	// console.log(`invitation with ${targetName} is cancelled`);
 
-    messagePopUp('https://dansylvain.github.io/pictures/marioNo.webp', `invitation with ${targetName} is cancelled`)
+    messagePopUp('Oops!', 'https://dansylvain.github.io/pictures/marioNo.webp', `invitation with ${targetName} is cancelled`, "")
 	// alert(`invitation with ${targetName} is cancelled`);
 	if (window.busyElement)	
 		window.busyElement.classList.remove("invitation-waiting");
@@ -339,7 +339,7 @@ function invitationCancelled(targetName) {
 
 function selectedBusy() {
 
-    messagePopUp('https://dansylvain.github.io/pictures/marioNo.webp', "selectedBusy")
+    messagePopUp('Oops!', 'https://dansylvain.github.io/pictures/marioNo.webp', "selectedBusy", "")
 
 	// alert("selectedBusy");
 	if (window.busyElement)
@@ -349,22 +349,27 @@ function selectedBusy() {
 
 function invitationRefused(targetName) {
 
-    messagePopUp('https://dansylvain.github.io/pictures/non-je-ne-contracte-pas.webp', ' ne contracte pas...')
+    messagePopUp('Oops!', 'https://dansylvain.github.io/pictures/non-je-ne-contracte-pas.webp', ' ne contracte pas...', "")
 
     if (window.busyElement)
 		window.busyElement.classList.remove("invitation-waiting");
 	window.busyElement = null;
 }
 
-function messagePopUp(url, text)
+function messagePopUp(titre, url, text, traduction)
 {
     Swal.fire({
-        title: 'Oops!',
+        title: titre,
         text: text,
         imageUrl: url,
         imageWidth: 300,
         imageHeight: 300,
         imageAlt: 'GIF fun',
+        willOpen: () => {
+            // Ajoute l'attribut data-translate au texte affiché
+            const swalText = Swal.getPopup().querySelector('.swal2-html-container');
+            swalText.setAttribute('data-translate', traduction);
+        }
       });
 }
 
@@ -401,7 +406,7 @@ function sendPlayerClick(socket, event, selected)
 		name = input.value;
 		if (name.trim() === "" && input.style.display === "block")
 		{
-            messagePopUp('https://dansylvain.github.io/pictures/travolta.webp', "enter a name for second player")
+            messagePopUp('Oops!', 'https://dansylvain.github.io/pictures/travolta.webp', "enter a name for second player", "enter a name for second player")
 
 			// alert("enter a name for second player");			
 			return;
@@ -475,7 +480,7 @@ function invitation(socket, data) {
 	{
 		case "back":				
 			if (data.response === "selfBusy")
-                messagePopUp('https://dansylvain.github.io/pictures/busy.webp', "selfBusy")
+                messagePopUp('Oops!', 'https://dansylvain.github.io/pictures/busy.webp', "selfBusy", "")
 				// alert("selfBusy");
 			else if (data.response === "selectedBusy")
 				selectedBusy();	
