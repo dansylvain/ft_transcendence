@@ -638,14 +638,14 @@ function onMatchWsMessage(event, pads, [waiting, endCont, end], waitingState) {
 	{	
         let gifUrl;
         if (window.selfName == data.winnerName)
-            gifUrl = document.getElementById("winner-gif").dataset.gifUrl;
+            gifUrl = "https://dansylvain.github.io/pictures/sdurif.webp";
 		else if (spec.style.display != "none")
 			{
-				gifUrl = "https://i.gifer.com/origin/0c/0c928224e981a44014280dd496d3c6e1_w200.gif";
+				gifUrl = "https://dansylvain.github.io/pictures/eye.webp";
 				spec.style.display = "none";
 			}
 		else 
-			gifUrl = document.getElementById("loser-gif").dataset.gifUrl;
+			gifUrl = "https://dansylvain.github.io/pictures/MacronExplosion.webp";
 
 		end.innerHTML = `The winner is: ${data.winnerName} <br> 
 		Score: ${data.score[0]} : ${data.score[1]} <br> 

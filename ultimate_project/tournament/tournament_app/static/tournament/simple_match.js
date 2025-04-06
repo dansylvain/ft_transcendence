@@ -22,7 +22,7 @@ async function invitationPopup(socket, applicantId, applicantName)
     const result = await Swal.fire({
         title: 'Oops!',
         text: ' You have an invitation!',
-        imageUrl: 'https://github.com/dansylvain/pictures/blob/main/non-je-ne-contracte-pas.gif?raw=true',
+        imageUrl: 'https://dansylvain.github.io/pictures/thumbs.webp',
         imageWidth: 300,
         imageHeight: 300,
         imageAlt: 'GIF fun',
@@ -326,7 +326,7 @@ function invitationCancelled(targetName) {
 
 	// console.log(`invitation with ${targetName} is cancelled`);
 
-    messagePopUp('https://github.com/dansylvain/pictures/blob/main/non-je-ne-contracte-pas.gif?raw=true', `invitation with ${targetName} is cancelled`)
+    messagePopUp('https://dansylvain.github.io/pictures/marioNo.webp', `invitation with ${targetName} is cancelled`)
 	// alert(`invitation with ${targetName} is cancelled`);
 	if (window.busyElement)	
 		window.busyElement.classList.remove("invitation-waiting");
@@ -339,7 +339,7 @@ function invitationCancelled(targetName) {
 
 function selectedBusy() {
 
-    messagePopUp('https://github.com/dansylvain/pictures/blob/main/non-je-ne-contracte-pas.gif?raw=true', "selectedBusy")
+    messagePopUp('https://dansylvain.github.io/pictures/marioNo.webp', "selectedBusy")
 
 	// alert("selectedBusy");
 	if (window.busyElement)
@@ -349,7 +349,7 @@ function selectedBusy() {
 
 function invitationRefused(targetName) {
 
-    messagePopUp('https://github.com/dansylvain/pictures/blob/main/non-je-ne-contracte-pas.gif?raw=true', ' ne contracte pas...')
+    messagePopUp('https://dansylvain.github.io/pictures/non-je-ne-contracte-pas.webp', ' ne contracte pas...')
 
     if (window.busyElement)
 		window.busyElement.classList.remove("invitation-waiting");
@@ -401,7 +401,7 @@ function sendPlayerClick(socket, event, selected)
 		name = input.value;
 		if (name.trim() === "" && input.style.display === "block")
 		{
-            messagePopUp('https://github.com/dansylvain/pictures/blob/main/non-je-ne-contracte-pas.gif?raw=true', "enter a name for second player")
+            messagePopUp('https://dansylvain.github.io/pictures/travolta.webp', "enter a name for second player")
 
 			// alert("enter a name for second player");			
 			return;
@@ -475,7 +475,7 @@ function invitation(socket, data) {
 	{
 		case "back":				
 			if (data.response === "selfBusy")
-                messagePopUp('https://github.com/dansylvain/pictures/blob/main/non-je-ne-contracte-pas.gif?raw=true', "selfBusy")
+                messagePopUp('https://dansylvain.github.io/pictures/busy.webp', "selfBusy")
 				// alert("selfBusy");
 			else if (data.response === "selectedBusy")
 				selectedBusy();	
