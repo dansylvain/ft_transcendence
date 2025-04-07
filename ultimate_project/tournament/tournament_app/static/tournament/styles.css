@@ -29,6 +29,11 @@
     /* margin: 10px;    */
 }
 
+.self-player::before {
+	content: "👤 ";
+	margin-right: 4px;
+}
+
 .user {
 	/* width:20px; */
 	/* height:20px; */
@@ -72,6 +77,11 @@
 	background-color: rgb(16, 90, 175);
 }
 
+.self-player::before {
+	content: "👤 ";
+	margin-right: 4px;
+}
+
 .self-player {
 	background-color: rgb(250, 8, 250);
 }
@@ -109,8 +119,12 @@ button {
 	background-color: hwb(180 81% 18%) !important;
 }
 
+.phantom::before {
+	content: "👻 ";
+	margin-right: 4px;
+}
+
 .phantom {
-    background-image: url("https://images.creativefabrica.com/products/previews/2024/03/31/axvDiTp2B/2eSsvlapRvdzCFVky7QzsmaMzaO-mobile.jpg");
 	background-size: cover;
     background-color: rgb(8, 234, 250);
 }
