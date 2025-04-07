@@ -1,40 +1,46 @@
-var container = document.getElementById('scene-container');
+window.tjs_container = window.tjs_container || document.getElementById('scene-container');
 
-var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-var renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(container.clientWidth, container.clientHeight);
-container.appendChild(renderer.domElement);
+window.tjs_scene = window.tjs_scene || new THREE.Scene();
+window.tjs_camera = window.tjs_camera || new THREE.PerspectiveCamera(75, window.tjs_container.clientWidth / window.tjs_container.clientHeight, 0.1, 1000);
+window.tjs_renderer = window.tjs_renderer || new THREE.WebGLRenderer({ antialias: true });
+window.tjs_renderer.setSize(window.tjs_container.clientWidth, window.tjs_container.clientHeight);
+window.tjs_container.appendChild(window.tjs_renderer.domElement);
 
-var textureLoader = new THREE.TextureLoader();
+window.tjs_textureLoader = window.tjs_textureLoader || new THREE.TextureLoader();
 
-var rgeo = new THREE.BoxGeometry(5, 1, 1);
-var sgeo = new THREE.SphereGeometry(1, 32, 32);
+window.tjs_rgeo = window.tjs_rgeo || new THREE.BoxGeometry(10, 10, 40 * (60 / 100));
+window.tjs_sgeo = window.tjs_sgeo || new THREE.SphereGeometry(2, 32, 32);
 
-var rmat = [
-    new THREE.MeshBasicMaterial({ map: textureLoader.load('https://threejs.org/examples/textures/crate.gif') }),
-    new THREE.MeshBasicMaterial({ map: textureLoader.load('https://threejs.org/examples/textures/crate.gif') }),
-    new THREE.MeshBasicMaterial({ map: textureLoader.load('https://threejs.org/examples/textures/crate.gif') }),
-    new THREE.MeshBasicMaterial({ map: textureLoader.load('https://threejs.org/examples/textures/crate.gif') }),
-    new THREE.MeshBasicMaterial({ map: textureLoader.load('https://threejs.org/examples/textures/crate.gif') }),
-    new THREE.MeshBasicMaterial({ map: textureLoader.load('https://threejs.org/examples/textures/crate.gif') })
+window.tjs_rmat = window.tjs_rmat || [
+    new THREE.MeshBasicMaterial({ map: window.tjs_textureLoader.load('https://threejs.org/examples/textures/crate.gif') }),
+    new THREE.MeshBasicMaterial({ map: window.tjs_textureLoader.load('https://threejs.org/examples/textures/crate.gif') }),
+    new THREE.MeshBasicMaterial({ map: window.tjs_textureLoader.load('https://threejs.org/examples/textures/crate.gif') }),
+    new THREE.MeshBasicMaterial({ map: window.tjs_textureLoader.load('https://threejs.org/examples/textures/crate.gif') }),
+    new THREE.MeshBasicMaterial({ map: window.tjs_textureLoader.load('https://threejs.org/examples/textures/crate.gif') }),
+    new THREE.MeshBasicMaterial({ map: window.tjs_textureLoader.load('https://threejs.org/examples/textures/crate.gif') })
 ];
 
-var smat = new THREE.MeshBasicMaterial({ map: textureLoader.load('https://threejs.org/examples/textures/crate.gif') });
+window.tjs_smat = window.tjs_smat || new THREE.MeshBasicMaterial({ map: window.tjs_textureLoader.load('https://threejs.org/examples/textures/crate.gif') });
 
-var r1 = new THREE.Mesh(rgeo, rmat);
-var r2 = new THREE.Mesh(rgeo, rmat);
+window.tjs_r1 = window.tjs_r1 || new THREE.Mesh(window.tjs_rgeo, window.tjs_rmat);
+window.tjs_r2 = window.tjs_r2 || new THREE.Mesh(window.tjs_rgeo, window.tjs_rmat);
 
-var ball = new THREE.Mesh(sgeo, smat);
+window.tjs_ball = window.tjs_ball || new THREE.Mesh(window.tjs_sgeo, window.tjs_smat);
 
-scene.add(ball);
-scene.add(r1);
-scene.add(r2);
+window.tjs_scene.add(window.tjs_ball);
+window.tjs_scene.add(window.tjs_r1);
+window.tjs_scene.add(window.tjs_r2);
 
-r1.position.z = 10;
-r2.position.z = -10;
+window.tjs_r1.position.z = -20;
+window.tjs_r1.position.x = 5;
 
-var upgrade = {
+window.tjs_r2.position.z = -20;
+window.tjs_r2.position.x = 90;
+
+window.tjs_ball.position.x = -1;
+window.tjs_ball.position.z = -1;
+
+window.tjs_upgrade = window.tjs_upgrade || {
 	user_lvl: 0,
 	points: 0,
 	cooldown: 5,
@@ -42,54 +48,51 @@ var upgrade = {
 
 function actionCooldownUpdate() {
 	// update the html button
-	if (!upgrade.cooldown) {
-		document.getElementById("upgrade").innerHTML = `Upgrade (+${upgrade.points})`;
-	} else if (upgrade.points) {
-		document.getElementById("upgrade").innerHTML = `Upgrade (+${upgrade.points}) ${upgrade.cooldown}s`;
+	if (!window.tjs_upgrade.cooldown) {
+		document.getElementById("upgrade").innerHTML = `Upgrade (+${window.tjs_upgrade.points})`;
+	} else if (window.tjs_upgrade.points) {
+		document.getElementById("upgrade").innerHTML = `Upgrade (+${window.tjs_upgrade.points}) ${window.tjs_upgrade.cooldown}s`;
 	} else {
-		document.getElementById("upgrade").innerHTML = `Upgrade ${upgrade.cooldown}s`;
+		document.getElementById("upgrade").innerHTML = `Upgrade ${window.tjs_upgrade.cooldown}s`;
 	}
 }
 
 // function call on button click
 function actionUpgrade() {
-	if (upgrade.points < 1) {
+	if (window.tjs_upgrade.points < 1) {
 		return;
 	}
-	upgrade.points--;
-	switch (upgrade.user_lvl) {
+	window.tjs_upgrade.points--;
+	switch (window.tjs_upgrade.user_lvl) {
 		case 0:
-    		ball.material.color.setHex(0x00ff00);
+    		window.tjs_ball.material.color.setHex(0x00ff00);
 			break;
 		case 1:
-			ball.material.color.setHex(0xff0000);
+			window.tjs_ball.material.color.setHex(0xff0000);
 			break;
 		case 2:
-			ball.material.color.setHex(0x0000ff);
+			window.tjs_ball.material.color.setHex(0x0000ff);
 			break;
 		case 3:
-			// reset the color
-			ball.material.color.setHex(0xffffff);
-			ball.material.map = textureLoader.load('https://media.tenor.com/YkyhmCCJd_0AAAAM/aaaa.gif');
-			// print the image size in the console
-			console.log("Image size: " + ball.material.map.image.width + "x" + ball.material.map.image.height);
+			window.tjs_ball.material.color.setHex(0xffffff);
+			window.tjs_ball.material.map = textureLoader.load('https://media.tenor.com/YkyhmCCJd_0AAAAM/aaaa.gif');
 			break;
 		default:
 			break;
 	}
-	upgrade.user_lvl++;
+	window.tjs_upgrade.user_lvl++;
 	actionCooldownUpdate();
 }
 
 // function call each seconds
 function actionCooldown() {
-	if (upgrade.cooldown > 0) {
-		upgrade.cooldown--;
+	if (window.tjs_upgrade.cooldown > 0) {
+		window.tjs_upgrade.cooldown--;
 	} else {
-		upgrade.cooldown = 5;
+		window.tjs_upgrade.cooldown = 5;
 	}
-	if (upgrade.cooldown == 0) {
-		upgrade.points++;
+	if (window.tjs_upgrade.cooldown == 0) {
+		window.tjs_upgrade.points++;
 	}
 	actionCooldownUpdate();
 }
@@ -97,82 +100,84 @@ function actionCooldown() {
 actionCooldownUpdate();
 setInterval(actionCooldown, 1000);
 
-let isDragging = false;
-let previousMousePosition = { x: 0, y: 0 };
+window.tjs_isDragging = false;
+window.tjs_previous_mouse = { x: 0, y: 0 };
 
-let radius = 15;
+window.tjs_radius = window.tjs_radius || 15;
 
-let theta = 0; 			// horizontal angle
-let phi = Math.PI / 2;  // vertical angle
+window.tjs_theta = window.tjs_theta || 0;         // horizontal angle
+window.tjs_phi = window.tjs_phi || Math.PI / 2;   // vertical angle
 
-container.onmousedown = function (e) {
-	isDragging = true;
-	previousMousePosition = { x: e.clientX, y: e.clientY };
+window.tjs_container.onmousedown = function (e) {
+	window.tjs_isDragging = true;
+	window.tjs_previous_mouse = { x: e.clientX, y: e.clientY };
 };
 
-container.onmouseup = function () {
-	isDragging = false;
+window.tjs_container.onmouseup = function () {
+	window.tjs_isDragging = false;
 };
 
-container.onmousemove = function (e) {
-	if (!isDragging) return;
+window.tjs_container.onmousemove = function (e) {
+	if (!window.tjs_isDragging)
+        return;
 
 	let sensitivity = 0.005;
 
 	// update angles based on mouse movement
-	theta -= (e.clientX - previousMousePosition.x) * sensitivity;
-	phi   -= (e.clientY - previousMousePosition.y) * sensitivity;
+	window.tjs_theta -= (e.clientX - window.tjs_previous_mouse.x) * sensitivity;
+	window.tjs_phi   -= (e.clientY - window.tjs_previous_mouse.y) * sensitivity;
 
-	phi = Math.max(0.1, Math.min(Math.PI - 0.1, phi));
+	window.tjs_phi = Math.max(0.1, Math.min(Math.PI - 0.1, window.tjs_phi));
 
 	// calculate new camera position
-	camera.position.x = radius * Math.sin(phi) * Math.sin(theta);
-	camera.position.z = radius * Math.sin(phi) * Math.cos(theta);
-	camera.position.y = radius * Math.cos(phi);
+	window.tjs_camera.position.x = window.tjs_radius * Math.sin(window.tjs_phi) * Math.sin(window.tjs_theta);
+	window.tjs_camera.position.z = window.tjs_radius * Math.sin(window.tjs_phi) * Math.cos(window.tjs_theta);
+	window.tjs_camera.position.y = window.tjs_radius * Math.cos(window.tjs_phi);
 
-	camera.lookAt(0, 0, 0);
+	window.tjs_camera.lookAt(0, 0, 0);
 
-	previousMousePosition = { x: e.clientX, y: e.clientY };
+	window.tjs_previous_mouse = { x: e.clientX, y: e.clientY };
 };
 
 // if mouse is inside the container and scrolling
-container.onwheel = function (e) {
-	radius -= e.deltaY * 0.01;
-	radius = Math.max(10, Math.min(50, radius));
+window.tjs_container.onwheel = function (e) {
+	window.tjs_radius -= e.deltaY * 0.1;
+	window.tjs_radius = Math.max(10, Math.min(500, window.tjs_radius));
 
-	camera.position.x = radius * Math.sin(phi) * Math.sin(theta);
-	camera.position.z = radius * Math.sin(phi) * Math.cos(theta);
-	camera.position.y = radius * Math.cos(phi);
+	window.tjs_camera.position.x = window.tjs_radius * Math.sin(window.tjs_phi) * Math.sin(window.tjs_theta);
+	window.tjs_camera.position.z = window.tjs_radius * Math.sin(window.tjs_phi) * Math.cos(window.tjs_theta);
+	window.tjs_camera.position.y = window.tjs_radius * Math.cos(window.tjs_phi);
 
-	camera.lookAt(0, 0, 0);
+	window.tjs_camera.lookAt(0, 0, 0);
 };
 
-container.addEventListener('wheel', function (event) {
+window.tjs_container.addEventListener('wheel', function (event) {
     event.preventDefault();
 }, { passive: false });
 
-container.addEventListener('touchmove', function (event) {
+window.tjs_container.addEventListener('touchmove', function (event) {
     event.preventDefault();
 }, { passive: false });
 
 // resize canvas on window resize
 window.addEventListener('resize', function () {
-	renderer.setSize(container.clientWidth, container.clientHeight);
-	camera.aspect = container.clientWidth / container.clientHeight;
-	camera.updateProjectionMatrix();
+	window.tjs_renderer.setSize(window.tjs_container.clientWidth, window.tjs_container.clientHeight);
+	window.tjs_camera.aspect = window.tjs_container.clientWidth / window.tjs_container.clientHeight;
+	window.tjs_camera.updateProjectionMatrix();
 });
 
 function animate() {
     requestAnimationFrame(animate);
 
-    ball.rotation.z += 0.1;
+    window.tjs_ball.rotation.z += 0.1;
 
-    renderer.render(scene, camera);
+    window.tjs_renderer.render(window.tjs_scene, window.tjs_camera);
 }
 
-camera.position.z = 15;
-camera.position.y = 2;
-camera.lookAt(0, 0, 0);
+window.tjs_camera.position.x = 50;
+window.tjs_camera.position.y = 50;
+window.tjs_camera.position.z = 30;
+window.tjs_camera.lookAt(50, 0, 30);
 
 animate();
 
@@ -245,10 +250,12 @@ function onMatchWsMessage3D(event, [waiting, end], waitingState) {
 
 	if (data.yp1 !== undefined && data.yp2 !== undefined) {
         console.log("data.yp1: ", data.yp1);
-		window.r1.position.x = data.yp1 - 20;
-		window.r2.position.x = data.yp2 - 20;
-		window.ball.position.z = data.ball[0] / 4 - 10;
-		window.ball.position.x = data.ball[1] / 4 - 6;
+
+    	window.tjs_r1.position.z = (60 / 100) * (data.yp1);
+		window.tjs_r2.position.z = (60 / 100) * (data.yp2);
+
+		window.tjs_ball.position.x = (100 / 100) * (data.ball[0] - 1);
+		window.tjs_ball.position.z = (60 / 100) * (data.ball[1] - 1);
 	}
 }
 

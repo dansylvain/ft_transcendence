@@ -222,7 +222,6 @@ async def debug_cookies_middleware(request: Request, call_next):
 
     return response
 
-
 async def proxy_request(service_name: str, path: str, request: Request):
     if service_name not in services:
         raise HTTPException(status_code=404, detail="Service not found")
