@@ -40,7 +40,7 @@ async def profile(request: HttpRequest):
 
     context = {
         "rasp": os.getenv("rasp", "false"),
-        "pidom": os.getenv("pi_domain", "localhost:8443"),
+        "pidom": os.getenv("HOST_IP", "localhost:8443"),
     }
 
     if username:
@@ -61,6 +61,6 @@ def stats(request: HttpRequest):
         "stats.html",
         {
             "rasp": os.getenv("rasp", "false"),
-            "pidom": os.getenv("pi_domain", "localhost:8443"),
+            "pidom": os.getenv("HOST_IP", "localhost:8443"),
         },
     )

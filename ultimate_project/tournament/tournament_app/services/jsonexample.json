@@ -1,0 +1,120 @@
+MATCH SIMPLE
+{
+  "matchId": 4,
+  "winnerId": -2,
+  "looserId": 2,
+  "winnerName": "der",
+  "looserName": "user2",
+  "p1Id": -2,
+  "p2Id": 2,
+  "score": [0, 0]
+}
+TOURNOIS
+{
+	"type": "tournamentResult",
+	"tournamentId": 1,
+	"winnerId": 2,
+	"winnerName": "user2",
+	"looserId": -3,
+	"looserName": "na",
+	"matchs": [
+	  {
+		"matchId": 1,
+		"linkMatch": {
+		  "type": "linkMatch",
+		  "tournamentId": 1,
+		  "localMatchId": "m2",
+		  "matchId": 1,
+		  "p1Id": 2,
+		  "p2Id": -1,
+		  "p1Name": "user2",
+		  "p2Name": "sa"
+		},
+		"matchPlayersUpdate": {
+		  "matchId": 1,
+		  "players": [],
+		  "type": "matchPlayersUpdate",
+		  "tournamentId": 1,
+		  "localMatchId": "m2",
+		  "p1Id": 2,
+		  "p2Id": -1
+		},
+		"matchResult": {
+		  "type": "matchResult",
+		  "tournamentId": 1,
+		  "localMatchId": "m2",
+		  "matchId": 1,
+		  "winnerId": 2,
+		  "looserId": -1,
+		  "winnerName": "user2",
+		  "looserName": "sa",
+		  "p1Id": 2,
+		  "p2Id": -1,
+		  "score": [0, 0]
+		}
+	  },
+	  {
+		"matchId": 2,
+		"linkMatch": {
+		  "type": "linkMatch",
+		  "tournamentId": 1,
+		  "localMatchId": "m3",
+		  "matchId": 2,
+		  "p1Id": -2,
+		  "p2Id": -3,
+		  "p1Name": "bri",
+		  "p2Name": "na"
+		},
+		"matchPlayersUpdate": {
+		  "matchId": 2,
+		  "players": [],
+		  "type": "matchPlayersUpdate",
+		  "tournamentId": 1,
+		  "localMatchId": "m3",
+		  "p1Id": -2,
+		  "p2Id": -3
+		},
+		"matchResult": {
+		  "type": "matchResult",
+		  "tournamentId": 1,
+		  "localMatchId": "m3",
+		  "matchId": 2,
+		  "winnerId": -3,
+		  "looserId": -2,
+		  "winnerName": "na",
+		  "looserName": "bri",
+		  "p1Id": -2,
+		  "p2Id": -3,
+		  "score": [0, 0]
+		}
+	  },
+	  {
+		"matchId": 3,
+		"linkMatch": {
+		  "type": "linkMatch",
+		  "tournamentId": 1,
+		  "localMatchId": "m1",
+		  "matchId": 3,
+		  "p1Id": 2,
+		  "p2Id": -3,
+		  "p1Name": "user2",
+		  "p2Name": "na"
+		},
+		"matchPlayersUpdate": null,
+		"matchResult": {
+		  "type": "matchResult",
+		  "tournamentId": 1,
+		  "localMatchId": "m1",
+		  "matchId": 3,
+		  "winnerId": 2,
+		  "looserId": -3,
+		  "winnerName": "user2",
+		  "looserName": "na",
+		  "p1Id": 2,
+		  "p2Id": -3,
+		  "score": [0, 1]
+		}
+	  }
+	]
+  }
+  

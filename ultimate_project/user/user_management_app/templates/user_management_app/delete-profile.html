@@ -1,0 +1,54 @@
+{% load static %}
+<div class="container-fluid">
+	<!-- Page Heading -->
+	<h1 data-translate="DELETE PROFILE" class="h3 mb-2 text-gray-800">DELETE PROFILE</h1>
+	<p class="mb-4">Please confirm your identity to delete your profile. This action cannot be undone.</p>
+
+	<div class="row">
+		<div class="col-lg-8 mb-4">
+			<div class="card shadow mb-4">
+				<div class="card-header py-3">
+					<h6 class="m-0 font-weight-bold text-primary">Confirm Profile Deletion</h6>
+				</div>
+				<div class="card-body">
+					<form hx-post="/user/delete-profile/" 
+                          hx-target="#main_div" 
+                          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                          hx-ext="csrf">
+						{% csrf_token %}
+                        <div class="form-group">
+							<label>Enter your password:</label>
+							<input id="password" type="password" name="password" maxlength="100" class="form-control form-control-user" 
+								placeholder="Enter your password" required>
+						</div>
+                        {% if user.two_fa_enabled %}
+                        <div class="form-group">
+							<label>Enter your 2FA code:</label>
+							<input id="otp-code" type="number" name="otp-code" maxlength="6" class="form-control form-control-user" 
+								placeholder="Enter 6-digit code" required>
+						</div>
+                        {% endif %}
+						<div class="form-group mt-4">
+							<button type="submit" class="btn btn-danger btn-user btn-block" id="delete_profile">
+								Delete Profile
+							</button>
+							
+							<!-- ! BUTTON TO GO BACK TO PROFILE -->
+                            <a href="/user/profile/" class="btn btn-secondary btn-user btn-block mt-2" 
+                               hx-get="/user/profile/" 
+                               hx-target="#main_div" 
+                               hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+                                Cancel
+                            </a>
+						</div>
+						{% if error %}
+						<div class="text-danger mt-2">
+							<h3 id="error_delete_user" name="error_delete_user">{{ error }}</h3>
+						</div>
+						{% endif %}
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,7 @@
+. Degage toutes les igrations du dossier databaseapi/databaseapi_app/migrations (sauf __init__.py)
+
+. Entre le container ctn_database:
+docker exec -it ctn_databaseapi bash
+
+. puis effectue une migration "initiale"
+python manage.py makemigrations databaseapi_app

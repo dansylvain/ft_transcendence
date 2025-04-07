@@ -78,8 +78,6 @@
             // Marque que la redirection a eu lieu pour éviter la boucle infinie
             sessionStorage.setItem("redirected", "true");
 
-            // Redirige vers la dernière page visitée
-            window.location.href = lastVisitedPage;
         } else {
             sessionStorage.removeItem("redirected");
             console.log("Aucune page précédente trouvée ou déjà sur la page visitée.");

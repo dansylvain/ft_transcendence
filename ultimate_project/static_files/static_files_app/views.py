@@ -10,7 +10,6 @@ import os
 import static_files.settings as settings
 from django.http import JsonResponse
 
-
 @never_cache
 def index(request):
     # Get username from JWT header if available
@@ -37,8 +36,6 @@ def login(request):
     obj = {"username": "", "page": "login.html"}
     return render(request, "index.html", obj)
 
-
-@never_cache
 def home(request):
     # Get username from JWT header if available
     username = request.headers.get("X-Username") or request.session.get("username")
@@ -48,6 +45,10 @@ def home(request):
         and request.headers.get("HX-Login-Success") != "true"
     ):
         return render(request, "partials/home.html", {"username": username})
+    # SERVER_IP = os.getenv('HOST_IP', '127.0.0.42')
+    # print("#####################################################################", flush=True)
+    # print(f"SERVER_IP: {os.getenv('PATH')}", flush=True)
+    # print("#####################################################################", flush=True)
 
     obj = {"username": username, "page": "partials/home.html"}
     return render(request, "index.html", obj)
@@ -95,7 +96,7 @@ def match_simple_template(request, user_id):
         {
             "username": username,
             "rasp": os.getenv("rasp", "false"),
-            "pidom": os.getenv("pi_domain", "localhost:8443"),
+            "pidom": os.getenv("HOST_IP", "localhost:8443"),
             # "simpleUsers": consumer.players,
             "page": page_html,
         },
@@ -117,7 +118,7 @@ def tournament_template(request, user_id):
         {
             "username": username,
             "rasp": os.getenv("rasp", "false"),
-            "pidom": os.getenv("pi_domain", "localhost:8443"),
+            "pidom": os.getenv("HOST_IP", "localhost:8443"),
             # "simpleUsers": consumer.players,
             "page": page_html,
         },
@@ -138,7 +139,7 @@ def user_profile_template(request):
         {
             "username": username,
             "rasp": os.getenv("rasp", "false"),
-            "pidom": os.getenv("pi_domain", "localhost:8443"),
+            "pidom": os.getenv("HOST_IP", "localhost:8443"),
             # "simpleUsers": consumer.players,
             "page": page_html,
         },
@@ -159,7 +160,7 @@ def user_stats_template(request):
         {
             "username": username,
             "rasp": os.getenv("rasp", "false"),
-            "pidom": os.getenv("pi_domain", "localhost:8443"),
+            "pidom": os.getenv("HOST_IP", "localhost:8443"),
             # "simpleUsers": consumer.players,
             "page": page_html,
         },

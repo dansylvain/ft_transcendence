@@ -5,7 +5,6 @@ import pyotp
 import qrcode
 import io
 import base64
-import json
 import httpx
 
 # import os
@@ -286,7 +285,7 @@ async def disable_2fa(request):
             if not form.is_valid():
                 print(f"ERROR: Form validation failed: {form.errors}", flush=True)
                 return render(
-                    request, "twofa_app/disable2fa.html", {"username": username}
+                    request, "twofa_app/disable2fa.html", {"username": username, "error": "Form Validation failed"}
                 )
 
             token = request.POST.get("token")
@@ -295,27 +294,27 @@ async def disable_2fa(request):
             if not token:
                 print("ERROR: No token provided", flush=True)
                 return render(
-                    request, "twofa_app/disable2fa.html", {"username": username}
+                    request, "twofa_app/disable2fa.html", {"username": username, "error": "2FA code required"}
                 )
 
             if not token.isdigit() or len(token) != 6:
                 print(f"ERROR: Invalid token format: {token}", flush=True)
                 return render(
-                    request, "twofa_app/disable2fa.html", {"username": username}
+                    request, "twofa_app/disable2fa.html", {"username": username, "error": "Invalid 2FA code"}
                 )
 
             secret = user.get("_two_fa_secret")
             if not secret:
                 print("ERROR: 2FA secret not found in user data", flush=True)
                 return render(
-                    request, "twofa_app/disable2fa.html", {"username": username}
+                    request, "twofa_app/error.html", {"error": "2FA Secret not found on user.database"}
                 )
 
             totp = pyotp.TOTP(secret)
             if not totp.verify(token):
                 print("ERROR: Invalid token", flush=True)
                 return render(
-                    request, "twofa_app/disable2fa.html", {"username": username}
+                    request, "twofa_app/disable2fa.html", {"username": username, "error": "Invalid 2FA code"}
                 )
 
             update_data = {"two_fa_enabled": False, "_two_fa_secret": None}
@@ -323,7 +322,7 @@ async def disable_2fa(request):
             if not update_result:
                 print("ERROR: Failed to update 2FA status", flush=True)
                 return render(
-                    request, "twofa_app/disable2fa.html", {"username": username}
+                    request, "twofa_app/disable2fa.html", {"username": username, "error": "Can't update 2FA"}
                 )
 
             print("2FA disabled successfully", flush=True)

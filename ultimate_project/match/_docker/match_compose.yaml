@@ -9,7 +9,7 @@ services:
       env: prod
       name: match
       port: $match_port
-      pi_domain: $PI_DOMAIN # maybe not set up yet
+      HOST_IP: $HOST_IP # maybe not set up yet
       rasp: $rasp
       DJANGO_SETTINGS_MODULE: match.settings
     env_file:

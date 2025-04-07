@@ -1,9 +1,24 @@
 
 function stopMatch(matchId)
 {
+	const input = document.getElementById("match-player-name");
+	if (input)
+	{
+		input.style.display = "none";
+		input.value = "";
+	}
+	if (!matchId)
+	{
+		console.log("matchID EST NULLE");
+		const oldScripts = document.querySelectorAll("script.match-script");
+		console.log("olscript len", oldScripts.length);			
+		oldScripts.forEach(oldScript =>{console.log("old: ", oldScript.src); oldScript.remove()});
+		return;
+	}
+		
 	if (window.selfMatchId == matchId)
-	{	
-		fetch(`/match/stop-match/${window.selfId}/${matchId}/`)
+	{
+		fetch(`/match/stop-match/${window.playerId}/${matchId}/`)
 		.then(response => {
 			if (!response.ok) 
 				throw new Error(`Error HTTP! Status: ${response.status}`);		  
@@ -28,7 +43,8 @@ function stopMatch(matchId)
 				console.log("je vais envoyer 42");
 				window.stopFlag = true
 				window.matchSocket.close(3666);
-				window.matchSocket2.close(3666);
+				if (window.matchSocket2)
+					window.matchSocket2.close(3666);
 			} 
 			else 
 			{
@@ -149,7 +165,7 @@ function setCommands(socket, socket2) {
     }
 
     document.addEventListener("keydown", function(event) {
-		event.preventDefault();
+		// event.preventDefault();
         if (!keysPressed[event.key]) { // Empêche d'ajouter plusieurs fois la même touche
             keysPressed[event.key] = true;
         }
@@ -556,17 +572,91 @@ function animateZ(pads) {
 //     }
 // }
 
-function onMatchWsMessage(event, pads, [waiting, end], waitingState) {
+function startCountdown(delay)
+{
+	// console.log("%%%%%%%%%%%%%%% get the shit going , BABY!!!%%%%%%%%%%%%%%");
+
+	loaderElement = document.querySelector(".loader");
+	if (loaderElement)
+		loaderElement.style.opacity = "1";
+
+    const countdownEl = document.querySelector('.countdown');
+    const countdownEndsAt = window.gameStartTimestamp * 1000 + delay * 1000;
+    // console.log("Le compte à rebours se termine à:", countdownEndsAt / 1000);
+
+	function updateCountdown() {
+        const now = Date.now();
+        const remaining = Math.ceil((countdownEndsAt - now) / 1000);
+
+        if (remaining > 0) {
+            countdownEl.textContent = remaining;
+            requestAnimationFrame(updateCountdown);
+        } else if (remaining > -1) {
+            countdownEl.textContent = "GO!";
+            requestAnimationFrame(updateCountdown);
+        } else {
+            loaderElement.style.opacity = "0";
+            window.gameStartTimestamp = undefined;
+        }
+    }
+	updateCountdown();
+}
+
+function onMatchWsMessage(event, pads, [waiting, endCont, end], waitingState) {
 	match = document.getElementById("match");
-	
+
 	// console.log("SERVEUR");
 	// requestAnimationFrame(() => {
 	const data = JSON.parse(event.data);
+	if (data.timestamp && !data.state) {
+		if (window.gameStartTimestamp === undefined) {
+			window.gameStartTimestamp = data.timestamp;
+            delay = data.delay;
+			console.log("✅ Premier timestamp enregistré:", data.timestamp);
+	
+			// Ici tu peux démarrer ton compte à rebours
+			// startCountdownFrom(data.timestamp, '.countdown', '.loader');
+			// console.log("################START THE GAME##############");
+
+            startCountdown(delay);
+		} else {
+			console.log("⏩ Timestamp déjà reçu, ignoré.");
+		}
+		return;
+	}
 	// console.log("match mesage: ", data);
+	
+	//! TO OPTI
+	const leftNameElement = document.getElementById("inst-left");
+	const rightNameElement = document.getElementById("inst-right");
+	if (data.names)
+	{
+		leftNameElement.innerHTML = data.names[0] + "<br> keys: enter / +"
+		rightNameElement.innerHTML = data.names[1] + "<br> keys: ↑ / ↓";
+	}
 	if (data.state == "end")
 	{	
-		end.innerHTML = "the winner is :" + data.winnerId + end.innerHTML;
-		end.classList.add("end");
+        let gifUrl;
+        if (window.selfName == data.winnerName)
+            gifUrl = "https://dansylvain.github.io/pictures/sdurif.webp";
+		else if (spec.style.display != "none")
+			{
+				gifUrl = "https://dansylvain.github.io/pictures/tennis.webp";
+				spec.style.display = "none";
+			}
+		else 
+			gifUrl = "https://dansylvain.github.io/pictures/MacronExplosion.webp";
+
+		end.innerHTML = `The winner is: ${data.winnerName} <br> 
+		Score: ${data.score[0]} : ${data.score[1]} <br> 
+		<img src="${gifUrl}" 
+		alt="Winner GIF" 
+		class="winner-gif">
+		`;
+		
+		endCont.classList.add("end-cont");
+		console.log("🏁 Match terminé, reset du timestamp");
+		window.gameStartTimestamp = undefined;	
 	}
 	if (waitingState[0] != data.state) 
 	{
@@ -667,6 +757,8 @@ function onMatchWsMessage(event, pads, [waiting, end], waitingState) {
 // 	}
 // }
 
+
+
 function sequelInitMatchWs(socket) {
 
 	const pads = [
@@ -676,12 +768,14 @@ function sequelInitMatchWs(socket) {
 		document.getElementById("score"),
 		document.getElementById("ball2")
 	];
-	const [waiting, end] = [		
-		document.getElementById("waiting"),	document.getElementById("end")];	
+	const [waiting, endCont, end] = [		
+		document.getElementById("waiting"),
+		document.getElementById("end-cont"),
+		document.getElementById("end")];	
 	let waitingState = ["waiting"];
 	requestAnimationFrame(()=>animate(pads));
 	socket.onmessage = event => onMatchWsMessage(
-		event, pads, [waiting, end], waitingState);
+		event, pads, [waiting, endCont, end], waitingState);
 	
 	const spec = document.getElementById("spec")
 	if (spec)
@@ -691,21 +785,25 @@ function sequelInitMatchWs(socket) {
 		else
 			spec.style.display = "none";
 	}
-	initSecPlayer();
+	console.log("BEFORE INIT SEC !!!!!! ", window.player2Id, typeof(window.player2Id));
+	if (window.player2Id != 0)
+	{
+		console.log("INIT SEC !!!!!! ", window.player2Id);
+		initSecPlayer();
+	}
 	setCommands(socket, window.matchSocket2);
 }
 
 function initSecPlayer() {
 
-	if (window.rasp == "true")
-		window.matchSocket2 = new WebSocket(
-			`wss://${window.pidom}/ws/match/${window.matchId}/` +
-			`?playerId=${-window.playerId}`);
-	else	
-		window.matchSocket2 = new WebSocket(
-			`wss://localhost:8443/ws/match/${window.matchId}/` +
-			`?playerId=${-window.playerId}`);
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+        window.pidom = "localhost:8443";
+	else
+		window.pidom = window.location.hostname + ":8443";
 
+    window.matchSocket2 = new WebSocket(
+        `wss://${window.pidom}/ws/match/${window.matchId}/` +
+        `?playerId=${window.player2Id}`);
 	window.matchSocket2.onopen = () => {
 		console.log("Connexion Match établie 2nd Player😊");
 	};
@@ -716,23 +814,25 @@ function initSecPlayer() {
 }
 
 function initMatchWs() {
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+        window.pidom = "localhost:8443";
+	else
+		window.pidom = window.location.hostname + ":8443";
+
 //si je viens du debut je sui sclosé (et je reviens par boucle) si je viens de onclse je continu normal
 	console.log("INIT MATCH 😊😊😊");
 	console.log("STOP: " + window.stopFlag);
 	console.log("ANTILOPP: " + window.antiLoop);
 	if (window.matchSocket && window.antiLoop)
 		return window.matchSocket.close();
+	if (window.matchSocket2 && window.antiLoop)
+		return window.matchSocket2.close();
     // if (window.matchSocket)
 	// 	window.matchSocket.close();
 	window.antiLoop = true;
-	if (window.rasp == "true")
-		window.matchSocket = new WebSocket(
-			`wss://${window.pidom}/ws/match/${window.matchId}/` +
-			`?playerId=${window.playerId}`);
-	else	
-		window.matchSocket = new WebSocket(
-			`wss://localhost:8443/ws/match/${window.matchId}/` +
-			`?playerId=${window.playerId}`);
+    window.matchSocket = new WebSocket(
+        `wss://${window.pidom}/ws/match/${window.matchId}/` +
+        `?playerId=${window.playerId}`);
 	window.matchSocket.onopen = () => {
 		console.log("Connexion Match établie 😊");
 	};

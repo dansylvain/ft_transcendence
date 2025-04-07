@@ -17,7 +17,7 @@ import logging
 
 NAME = os.getenv("name")
 
-PI_DOMAIN = os.getenv("pi_domain")
+HOST_IP = os.getenv("HOST_IP")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,21 +25,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-\
-    8to7%ajqsxrgsbr5asn@mzimmxx9-t^4&356adt680x(v^34kt"
+# ! SECURED BY FLO
+SECRET_KEY = os.getenv("DJANGO_KEY")
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("env", "prod") != "prod"
 
-ALLOWED_HOSTS = ["*", f"https://{PI_DOMAIN}"]
+ALLOWED_HOSTS = ["*", f"https://{HOST_IP}"]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://localhost:8443",
     "http://localhost:8000",
-    "http://127.0.0.1:8000",
-    f"https://{PI_DOMAIN}",
+    f"https://{HOST_IP}",
 ]
 
 # Application definition
@@ -53,7 +51,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     f"{NAME}_app",
     "user_management_app",
-    'corsheaders',
+    "corsheaders",
     "twofa_app",
 ]
 
@@ -64,8 +62,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    'corsheaders.middleware.CorsMiddleware',  # This must be BEFORE CommonMiddleware
-    'django.middleware.common.CommonMiddleware',
+    "corsheaders.middleware.CorsMiddleware",  # This must be BEFORE CommonMiddleware
+    "django.middleware.common.CommonMiddleware",
 ]
 
 ROOT_URLCONF = f"{NAME}.urls"
@@ -138,10 +136,12 @@ STATIC_ROOT = "/app/staticfiles"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+
 # Healthcheck filter
 class HealthCheckFilter(logging.Filter):
     def filter(self, record):
         return "/health/" not in record.getMessage()
+
 
 # Logging configuration for healthcheck
 LOGGING = {
@@ -170,15 +170,29 @@ LOGGING = {
 
 CORS_ALLOW_CREDENTIALS = True  # 🔥 Allow cookies in requests
 CORS_ALLOW_ORIGINS = [
-    "http://localhost:8000",  # Basic
-    "http://localhost:8001",  # Tournament
-    "http://localhost:8002",  # Match
-    "http://localhost:8003",  # Static files
+    # "http://localhost:8000",  # Basic
+    # "http://localhost:8001",  # Tournament
+    # "http://localhost:8002",  # Match
+    # "http://localhost:8003",  # Static files
     # "http://localhost:8004",  # User
-    "http://localhost:8005",  # FastAPI
-    "http://localhost:8006",  # Authentication
+    # "http://localhost:8005",  # FastAPI
     "http://localhost:8007",  # DatabaseAPI
-    f"https://{PI_DOMAIN}",  # Production
+    "https://localhost:8443"  # For secure HTTPS access
+    f"https://{HOST_IP}",  # Production
 ]
-CORS_ALLOW_METHODS = ["GET", "POST", "OPTIONS", "PUT", "DELETE"]
+CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "DELETE"]
 CORS_ALLOW_HEADERS = ["*"]
+
+# Cookie settings
+SESSION_COOKIE_SECURE = True  # Ensures session cookies are only sent over HTTPS
+SESSION_COOKIE_HTTPONLY = True  # Prevents JavaScript access (for security)
+SESSION_COOKIE_SAMESITE = (
+    "Lax"  # Allows cookies on same-site navigation, blocks cross-site
+)
+
+CSRF_COOKIE_SECURE = True  # Ensures CSRF cookie is only sent over HTTPS
+CSRF_COOKIE_HTTPONLY = False  # JavaScript needs access to CSRF token
+CSRF_COOKIE_SAMESITE = "Lax"  # Allows CSRF cookie on same-site requests
+
+# CSRF Middleware settings
+CSRF_TRUSTED_ORIGINS = ["https://localhost:8443"]  # Add your domain(s) here

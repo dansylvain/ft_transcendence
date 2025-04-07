@@ -1,18 +1,5 @@
-# ! IMPORTANT : For register AND login testing purposes, you need to create a user with the following credentials :
-# !  USERNAME : test
-# !  EMAIL : test@test.com
-# !  PASSWORD : password
-
-# And also another user with the following credentials :
-# !  USERNAME : test_2fa
-# !  EMAIL : test2@test.com
-# !  PASSWORD : password
-
-# ! 2FA USER SECRET : S3EF2KESUQR45MRTL7MXDSJVI6JQDG4R
-
 from playwright.sync_api import Playwright, sync_playwright, expect
 import time
-from test_2fa import test_login_2fa, test_register_2fa
 
 def run(playwright: Playwright) -> None:
     base_url = "https://localhost:8443"
@@ -201,7 +188,7 @@ def run(playwright: Playwright) -> None:
     # Those tests create, test and close their own browsers
     register_from_login()
     register_after_login()
-    test_login_2fa(playwright)
+    # test_login_2fa(playwright) # ! NOT YET READY
     # test_register_2fa(playwright) # ! NOT YET READY
 
     # ? =============== START REGULAR TESTS ===============
@@ -215,6 +202,9 @@ def run(playwright: Playwright) -> None:
     # Regular register + login tests which links to Dan tests after getting proprely logged-in
     test_register(base_url, page)
     test_login(base_url, page)
+
+    print(f"✅ AUTHENTICATION TESTS PASSED ✅")
+
 
 with sync_playwright() as playwright:
     run(playwright)

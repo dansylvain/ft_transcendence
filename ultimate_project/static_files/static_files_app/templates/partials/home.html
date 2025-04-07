@@ -2,7 +2,6 @@
   <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 id="home-page" data-translate="Accueil" class="h3 mb-0 text-gray-800">ACCUEIL</h1>
   </div>
-
   <div class="row justify-content-center">
     <a
       id="field-match"
@@ -14,7 +13,7 @@
       hx-on="htmx:beforeRequest: toggleSidebar(true);"
     >
       <div class="card bg-primary text-white shadow py-5">
-        <div class="card-body" data-translate="Match simple">Match simple</div>
+        <div id="big-match-simple" class="card-body" data-translate="Match simple">Match simple</div>
       </div>
     </a>
     <a
@@ -27,7 +26,7 @@
       hx-on="htmx:beforeRequest: toggleSidebar(true);"
     >
       <div class="card bg-warning text-white shadow py-5">
-        <div class="card-body" data-translate="Tournoi">> Match</div>
+        <div id="big-tournament" class="card-body" data-translate="Tournoi">Tournament</div>
       </div>
     </a>
     <a
@@ -40,7 +39,7 @@
       hx-on="htmx:beforeRequest: toggleSidebar(true);"
     >
       <div class="card bg-success text-white shadow py-5">
-        <div class="card-body" data-translate="Profil">> Profil</div>
+        <div id="big-profile" class="card-body" data-translate="Profil"> Profile </div>
       </div>
     </a>
     <a
@@ -53,7 +52,7 @@
       hx-on="htmx:beforeRequest: toggleSidebar(true);"
     >
       <div class="card bg-info text-white shadow py-5">
-        <div class="card-body" data-translate="Statistiques">> Stats</div>
+        <div id="big-stats" class="card-body" data-translate="Statistiques"> Stats</div>
       </div>
     </a>
   </div>

@@ -157,7 +157,8 @@
                hx-get="/user/disable-2fa/" 
                hx-target="#main_div"
                hx-headers='{"HX-Request": "true"}'
-			   id="disable_2fa">
+			   id="disable_2fa"
+			   name="disable_2fa">
               <span class="icon text-white-50">
                 <i class="fas fa-shield-alt"></i>
               </span>
@@ -168,7 +169,8 @@
                hx-get="/user/setup-2fa/" 
                hx-target="#main_div"
                hx-headers='{"HX-Request": "true"}'
-			   id="setup_2fa">
+			   id="setup_2fa"
+			   name="setup_2fa">
               <span class="icon text-white-50">
                 <i class="fas fa-shield-alt"></i>
               </span>
@@ -176,7 +178,12 @@
             </a>
             {% endif %}
             
-            <a href="#" class="btn btn-danger btn-icon-split float-right">
+			<!-- ! DELETE BUTTON PROFILE  -->
+            <a	href="#" class="btn btn-danger btn-icon-split float-right"
+				hx-get="/user/delete-profile/" 
+            	hx-target="#main_div"
+            	hx-headers='{"HX-Request": "true"}'
+				id="delete_profile">
               <span class="icon text-white-50">
                 <i class="fas fa-trash"></i>
               </span>
@@ -204,8 +211,6 @@
             // Marque que la redirection a eu lieu pour éviter la boucle infinie
             sessionStorage.setItem("redirected", "true");
 
-            // Redirige vers la dernière page visitée
-            window.location.href = lastVisitedPage;
         } else {
             sessionStorage.removeItem("redirected");
             console.log("Aucune page précédente trouvée ou déjà sur la page visitée.");

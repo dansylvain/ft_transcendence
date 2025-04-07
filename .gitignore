@@ -146,7 +146,13 @@ GitHub.sublime-settings
 
 
 ultimate_project/staticfiles/*
-migration/*
+migrations/*
 ultimate_project/databaseapi/databaseapi_app/migrations/0001_initial.py
 ultimate_project/databaseapi/databaseapi_app/migrations/__init__.py
 .vscode/settings.json
+ultimate_project/databaseapi/databaseapi_app/migrations/0002_remove_player_language.py
+ultimate_project/databaseapi/databaseapi_app/migrations/0002_player_language.py
+ultimate_project/databaseapi/databaseapi_app/migrations/0003_remove_player_language.py
+ultimate_project/databaseapi/databaseapi_app/migrations/0002_player_uuid.py
+ultimate_project/.env
+ultimate_project/.env

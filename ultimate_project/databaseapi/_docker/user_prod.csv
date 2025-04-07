@@ -1,0 +1,12 @@
+first_name,last_name,username,email,password,two_fa_enabled,_two_fa_secret
+Bob,Bobby,user2,user2@hehe.com,password,False
+Peter,Parker,user3,user3@hehe.com,password,False
+Michael,Scott,user4,user4@hehe.com,password,False
+Thanos,The Titan,user5,user5@hehe.com,password,False
+Bruce,Wayne,user6,user6@hehe.com,password,False
+Clark,Kent,user7,user7@hehe.com,password,False
+Diana,Princess,user8,user8@hehe.com,password,False
+Pablo,Picasso,user9,user9@hehe.com,password,False
+Jean-Marie,Dupont,user10,user10@hehe.com,password,False
+Bond,James Bond,user11,user11@hehe.com,password,False
+Genghis,Khan,user12,user12@hehe.com,password,False

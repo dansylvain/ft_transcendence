@@ -12,7 +12,7 @@ services:
       env: prod
       name: databaseapi
       port: $databaseapi_port
-      pi_domain: $PI_DOMAIN
+      HOST_IP: $HOST_IP
       DJANGO_SETTINGS_MODULE: databaseapi.settings
     env_file:
       - ../../.env

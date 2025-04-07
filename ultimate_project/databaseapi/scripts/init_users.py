@@ -45,7 +45,6 @@ def create_user(current_user):
         print(f"✅✅ User {username} created ✅✅", flush=True)
 
 
-
 # Scripts for manage.py needs a run() function instead of a main()
 def run():
 
@@ -79,13 +78,23 @@ def run():
 
             data.append(row)
 
+        skipped_created_users = 0
+        created_users = 0
+        skipped_users = []
         for user in data:
             User = get_user_model()
 
             # If the current user does not exists in the data set, create
             if not User.objects.filter(username=user["username"]).exists():
                 create_user(user)
+                created_users += 1
             else:
-                print(
-                    f"🚷 Skipping -- {user['username']} -- user : Already exists in the DB"
-                )
+                skipped_users.append(user["username"])
+                skipped_created_users += 1
+
+        if skipped_created_users:
+            print(
+                f"🚷 The following users :🚷\n🚷{skipped_users}🚷\n🚷have not been created. Already exists in the DB🚷"
+            )
+        if not created_users:
+            print(f"🚷 No new users created 🚷")

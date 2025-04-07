@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.contrib.auth.models import (
     AbstractBaseUser,
@@ -38,6 +39,9 @@ class Player(AbstractBaseUser, PermissionsMixin):
     # 2FA fields
     two_fa_enabled = models.BooleanField(default=False)  # 2FA toggle
     _two_fa_secret = models.CharField(max_length=32, blank=True, null=True)
+
+    # UUID field
+    uuid = models.UUIDField(default=uuid.uuid4, blank=True)
 
     # Encrypt and decrypt 2FA secrets
     @property

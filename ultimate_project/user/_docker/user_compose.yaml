@@ -8,7 +8,7 @@ services:
       env: prod
       name: user
       port: $user_port
-      pi_domain: $PI_DOMAIN     
+      HOST_IP: $HOST_IP     
       DJANGO_SETTINGS_MODULE: user.settings # usefull ??
     env_file:
       - ../../.env

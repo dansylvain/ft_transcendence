@@ -11,8 +11,6 @@ services:
         condition: service_healthy
       static_files:
         condition: service_healthy
-      # authentication:
-      #   condition: service_healthy
       databaseapi:
         condition: service_healthy
     container_name: ctn_nginx
@@ -61,9 +59,7 @@ services:
       retries: 10
       start_period: 60s
     volumes:
-      # Bind mount for db in local
       - database_volume:/var/lib/postgresql/data
-      # - ./postgres/schemas.sql:/docker-entrypoint-initdb.d/schemas.sql
     networks:
       - transcendence_network
     restart: always
@@ -91,11 +87,6 @@ services:
       file: ./user/_docker/user_compose.yaml
       service: user
 
-# ================================= AUTHENTICATION ===================================
-  # authentication:
-  #   extends:
-  #     file: ./authentication/_docker/auth_compose.yaml
-  #     service: authentication
 
 # ================================= STATIC_FILES =====================================
   static_files:
@@ -107,7 +98,7 @@ services:
       port: ${static_files_port}
       name: static_files
       pi_domain: ${PI_DOMAIN}
-      DJANGO_SETTINGS_MODULE: static_files.settings
+      DJANGO_SETTINGS_MODULE: static_files.settings # TODO SECURITY
     image: img_static_files
     env_file:
       - .env

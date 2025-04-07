@@ -5,7 +5,8 @@
 		<script>
 			window.rasp = "{{ rasp }}"; 
 			window.pidom = "{{ pidom }}";
-            window.user_id = "{{ user_id }}";								
+            window.selfId = "{{ user_id }}";
+			window.selfName = "{{ user_name }}";							
 		</script>
 		<script src="{% static 'tournament/simple_match.js' %}"
 				onload="initSimpleMatch()"></script>
@@ -16,35 +17,86 @@
 	<h2 id ="myh1">
 		Je dois choisir un joueur et entrer dans le match!
 	</h2>
-	<h2 id="player">Je suis le joueur ...</h2>
+	<h2 id="player">Je suis {{user_name}}</h2>
 	<label for="dim">Selectionner le nombre de dimension</label>
 	<select id="dim">
 		<option value="2">2D</option>
 		<option value="3">3D</option>
 	</select>
-	<div id="players"></div>
-	<div id="matchs"></div>
-	<div id="overlay-match"></div>
+    <div class="tuto-overlay" id="tuto-overlay">
+        <div class="tuto-box">
+          <img src="https://github.com/dansylvain/pictures/blob/main/tuto_test.gif?raw=true" alt="Tutoriel" />
+          <p>Clique ici pour démarrer un match !</p>
+        </div>
+    </div>
+    <button onclick="replayTuto()">Afficher le tutoriel</button>
+<input
+	id="match-player-name"
+	type="text"
+	maxlength="50"
+	pattern=".{1,50}"
+	required
+	placeholder="enter a name"
+	oninput="this.value = this.value.replace(/[^a-zA-Z0-9_]/g, '');"
+    />
+<div id="players"></div>
+<div id="matchs"></div>
+<div id="response"></div>
+<div id="overlay-match"></div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-window.addEventListener("DOMContentLoaded", () => {
-    let lastVisitedPage = history.state?.lastVisitedPage || sessionStorage.getItem("lastVisitedPage");
+    document.addEventListener('click', (event) => {
+        const overlay = document.getElementById('tuto-overlay');
+        if (!overlay) return;
 
-    console.log("Dernière page visitée:", lastVisitedPage);
-    console.log("Page actuelle:", window.location.href);
+        // Si on clique directement sur l'overlay (et pas à l'intérieur de la box)
+        if (event.target === overlay) {
+            overlay.style.display = 'none';
+        }
+    });
 
-    // Vérifie si une page précédente existe et si l'URL actuelle n'est pas celle de la page d'erreur
-    if (lastVisitedPage && window.location.href === lastVisitedPage && !sessionStorage.getItem("redirected")) {
-        console.log("Redirection vers la dernière page visitée :", lastVisitedPage);
-        
-        // Marque que la redirection a eu lieu pour éviter la boucle infinie
-        sessionStorage.setItem("redirected", "true");
+    function replayTuto() {
+        const overlay = document.getElementById('tuto-overlay');
+        if (!overlay) return;
 
-        // Redirige vers la dernière page visitée
-        window.location.href = lastVisitedPage;
-    } else {
-        sessionStorage.removeItem("redirected");
-        console.log("Aucune page précédente trouvée ou déjà sur la page visitée.");
+        overlay.style.display = 'flex';
+        localStorage.removeItem('tutoSimpleMatchSeen');
     }
-});
+    
+    function showTutoOverlayIfFirstTime() {
+        const overlay = document.getElementById('tuto-overlay');
+        if (!overlay) return;
+
+        const alreadySeen = localStorage.getItem('tutoSimpleMatchSeen');
+        // if (!alreadySeen) { exchange the two lines to activate tutorial
+        if (alreadySeen) {
+            overlay.style.display = 'flex';
+
+            overlay.addEventListener('click', () => {
+                overlay.style.display = 'none';
+                localStorage.setItem('tutoSimpleMatchSeen', 'true');
+            });
+        }
+    }
+
+    showTutoOverlayIfFirstTime();
+
+    window.addEventListener("DOMContentLoaded", () => {
+        let lastVisitedPage = history.state?.lastVisitedPage || sessionStorage.getItem("lastVisitedPage");
+
+        console.log("Dernière page visitée:", lastVisitedPage);
+        console.log("Page actuelle:", window.location.href);
+
+        // Vérifie si une page précédente existe et si l'URL actuelle n'est pas celle de la page d'erreur
+        if (lastVisitedPage && window.location.href === lastVisitedPage && !sessionStorage.getItem("redirected")) {
+            console.log("Redirection vers la dernière page visitée :", lastVisitedPage);
+            
+            // Marque que la redirection a eu lieu pour éviter la boucle infinie
+            sessionStorage.setItem("redirected", "true");
+        } else {
+            sessionStorage.removeItem("redirected");
+            console.log("Aucune page précédente trouvée ou déjà sur la page visitée.");
+        }
+    });
 </script>   

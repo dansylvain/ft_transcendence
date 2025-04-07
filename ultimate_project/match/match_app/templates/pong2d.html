@@ -1,0 +1,70 @@
+{% load static %}
+<div style="display:none">
+	<head>
+		<link rel="stylesheet" href="{% static 'match/styles.css' %}">
+		<script class="match-script">
+			window.rasp = "{{ rasp }}"; 
+			window.pidom = "{{ pidom }}";
+			window.matchId = "{{ matchId }}";
+			window.playerId = "{{ playerId }}";
+			window.selfName = "{{ playerName }}";
+			window.player2Id = "{{ player2Id }}";
+			window.player2Name = "{{ player2Name }}";
+		</script>
+		<script class="match-script" src="{% static 'match/script.js' %}"
+				onload="initMatchWs()"></script>
+	</head>
+</div>		
+<div id="match">
+	<!-- <div id="p3"></div> -->
+    <div id="spec">
+        <img src="https://dansylvain.github.io/pictures/tennis.webp">
+    </div>
+	<!-- <h1 id="spec" style="display: none">Je suis spectateur</h1>			 -->
+	<div id="p1"></div>
+	<div id="ball"></div>
+	<div id="ball2"></div>
+	<div id="p2"></div>
+	<div id="waiting">Waiting</div>
+    <div class="loader">
+        <div class="circle"></div>
+        <div class="countdown">3</div>
+    </div>
+	<div id="end-cont" style="display:none">
+	<div id="end"></div>
+	</div>
+</div>
+<div id="rules-overlay">
+    <div id="score">Score</div>
+    <p id="inst-right"> <br> keys: ↑ / ↓</p>
+    <p id="inst-left"> <br> keys: enter / +</p>
+    <p>Be the first one to score 5 points.</p><button id="quit-match-button" onclick="
+    stopMatch('{{matchId}}');
+    const matchDiv = document.getElementById('match');
+    if (matchDiv) matchDiv.remove();
+    const rulesOverlay = document.getElementById('rules-overlay');
+    if (rulesOverlay) rulesOverlay.style.display = 'none';
+    window.gameStartTimestamp = undefined;">EXIT</button>
+</div>
+<script>
+    window.addEventListener("DOMContentLoaded", () => {
+    let lastVisitedPage = history.state?.lastVisitedPage || sessionStorage.getItem("lastVisitedPage");
+
+    console.log("Dernière page visitée:", lastVisitedPage);
+    console.log("Page actuelle:", window.location.href);
+
+    // Vérifie si une page précédente existe et si l'URL actuelle n'est pas celle de la page d'erreur
+    if (lastVisitedPage && window.location.href === lastVisitedPage && !sessionStorage.getItem("redirected")) {
+        console.log("Redirection vers la dernière page visitée :", lastVisitedPage);
+        
+        // Marque que la redirection a eu lieu pour éviter la boucle infinie
+        sessionStorage.setItem("redirected", "true");
+
+        sessionStorage.setItem("redirected", "true");
+    } else {
+        sessionStorage.removeItem("redirected");
+        console.log("Aucune page précédente trouvée ou déjà sur la page visitée.");
+    }
+});
+
+</script>

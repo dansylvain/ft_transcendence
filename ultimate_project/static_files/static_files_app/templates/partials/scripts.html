@@ -1,30 +1,60 @@
 {% load static %}
 <script
-  src="https://kit.fontawesome.com/3dd39fb56b.js"
+  src="{% static 'static_files/fa.js' %}"
   crossorigin="anonymous"
 ></script>
 <script src="{% static 'static_files/translations.js' %}"></script>
-<script src="https://unpkg.com/htmx.org@1.9.6"></script>
+<script src="{% static 'static_files/htmx.js' %}"></script>
 <script
-  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-  integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+  src="{% static 'static_files/bootstrap.js' %}"
   crossorigin="anonymous"
 ></script>
 <script src="{% static 'static_files/vendor/jquery/jquery.min.js' %}"></script>
 <script src="{% static 'static_files/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 <script src="{% static 'static_files/vendor/jquery-easing/jquery.easing.min.js' %}"></script>
 <script src="{% static 'static_files/purify.min.js' %}"></script>
-
+<script src="{% static 'static_files/three.js' %}"></script>
 <script>
   // this function is part of the history logic
   window.addEventListener("beforeunload", () => {
     console.log("URL sauvegardée avec history.state et sessionStorage");
+	stopMatch();
     let currentURL = window.location.href;
     history.replaceState({ lastVisitedPage: currentURL }, "");
     sessionStorage.setItem("lastVisitedPage", currentURL);
   });
 
-  // this function helps reloading the scripts after browser navigation
+function stopMatch()
+{
+	fetch(`/match/stop-match/${window.selfId}/${window.selfMatchId}/`)
+	.then(response => {
+		if (!response.ok) 
+			throw new Error(`Error HTTP! Status: ${response.status}`);		  
+		return response.text();
+	})
+	.then(data => console.log(data))
+	.catch(error => console.log(error))
+}
+
+  function closeWebsockets() {
+
+    console.log("########### closing websockets #######");
+    if (typeof closeSimpleMatchSocket === "function") closeSimpleMatchSocket();
+    if (typeof closeTournamentSocket === "function") closeTournamentSocket();
+  }
+
+  closeWebsockets();
+  function interceptUrlChanges() {
+    const originalReplaceState = history.replaceState;
+
+    history.replaceState = function (state, title, url) {
+      originalReplaceState.apply(history, arguments);
+      closeWebsockets();
+    };
+  }
+
+  interceptUrlChanges();
+
   console.log("Attachement de l'event popstate...");
   window.addEventListener("popstate", () => {
     toggleSidebar(true);
@@ -34,8 +64,9 @@
       swap: "outerhtml",
       headers: { "HX-Login-Success": "true" },
     });
+    // closeWebsockets();
   });
-  
+
   // this function toggles the sidebar on and off
   function toggleSidebar(show) {
     console.log("toggleSidebar called");

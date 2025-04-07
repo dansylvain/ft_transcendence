@@ -1,17 +1,20 @@
 #p1, #p2 {
 	/* position: absolute; */
 	/* top:0%; */
-	width: 10%;
+	width: 9%;
 	height: 40%;
 	/* height: 100%; */
 	/* transform: translate(-50%, -50%); */
-	background-color: rgb(35, 38, 222);
 }
 
 #p1 {
 	position: absolute;
 	top:-20%;
 	left:5%;
+    background-image: url('pal_left.png');
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
 	/* transform: translate(-50%, -50%); */
 }
 
@@ -19,6 +22,11 @@
 	position: absolute;
 	top:-20%;
 	right:5%;
+    background-image: url('pal_right.png');
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+
 	/* transform: translate(-50%, -50%); */
 }
 
@@ -31,17 +39,15 @@
 	/* transform: translate(-50%, -50%); */
 }
 
-#match {
-	position: relative;
-	width:100%;
-	height:100%;	
-	background-color: rgb(50, 92, 87);
-}
-
 #waiting {
+	position:absolute;
+	top:50%;
+	left:50%;
+	transform: translate(-50%, -50%);
+
 	display:block;
-	width:80%;
-	height:80%;
+	width:fit-content;
+	height:fit-content;
 	background-color: rgb(244, 37, 22);
 }
 
@@ -49,11 +55,21 @@
 	display:none !important;
 }
 
-.end {
-	display:block !important;
-	width:80%;
-	height:80%;
+#end-cont {	
+	width:100%;
+	height:100%;
 	background-color: rgb(244, 118, 22);
+}
+
+.end-cont {
+	display:block !important;	
+}
+
+#end {
+	position:absolute;
+	top:50%;
+	left:50%;
+	transform: translate(-50%, -50%);
 }
 
 #ball {
@@ -78,4 +94,160 @@
 	height:2vw; */
 	border-radius: 50%;
 	background-color: rgb(244, 22, 22);
+}
+
+#quit-match-button {
+    position: relative; /* Toujours visible même en scrollant */
+    z-index: 1000; /* Assure qu'il est au-dessus de tout */
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#match {
+	position: fixed;
+	top:0;
+	left:0;
+	width:100vw;
+	height:85vh;	
+    background-color: rgba(30, 30, 30, 1); /* Complètement transparent */
+	overflow: hidden;
+    background-image: url('https://dansylvain.github.io/pictures/SylvainDurifOmbaya.webp');
+	background-size: contain;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+#rules-overlay {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    height: 15vh;  /* Prend 20% de la hauteur */
+    background-color: rgba(30, 30, 30, 1); /* Complètement transparent */
+    color: white;
+    z-index: 999; /* Juste en dessous du match */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+}
+
+#inst-left {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 1.2em;
+	text-align: center;
+}
+
+#inst-right {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.2em;
+	text-align: center;
+}
+
+#end {
+    font-weight: bold;
+    font-size: 30px;
+    color: gold;
+    text-align: center;
+    padding: 20px;
+    border: 3px solid gold;
+    border-radius: 10px;
+    background: linear-gradient(45deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.2));
+    box-shadow: 0px 0px 15px rgba(255, 215, 0, 0.8), 
+                0px 0px 30px rgba(255, 165, 0, 0.5);
+    text-shadow: 2px 2px 5px rgba(255, 215, 0, 0.7);
+    animation: glow 1.5s infinite alternate, colorShift 3s infinite alternate;
+}
+
+@keyframes glow {
+    0% {
+        box-shadow: 0px 0px 10px rgba(255, 215, 0, 0.8),
+                    0px 0px 20px rgba(255, 165, 0, 0.5);
+    }
+    100% {
+        box-shadow: 0px 0px 20px rgba(0, 174, 255, 1),
+                    0px 0px 40px rgba(0, 140, 255, 0.7);
+    }
+}
+
+@keyframes colorShift {
+    0% {
+        color: gold;
+        border-color: gold;
+        text-shadow: 2px 2px 5px rgba(255, 215, 0, 0.7);
+    }
+    100% {
+        color: #00aaff; /* Bleu électrique */
+        border-color: #00aaff;
+        text-shadow: 2px 2px 5px rgba(0, 140, 255, 0.7);
+    }
+}
+
+#spec {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    z-index: 9999;
+}
+/* From Uiverse.io by mrhyddenn */ 
+.loader {
+    opacity: 0;
+    color: gold;
+    position:absolute;
+	top:50%;
+	left:50%;
+    background: transparent;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform: translate(-50%, -50%)
+  }
+  
+  .circle {
+    color: gold;
+
+    width: 80px;
+    height: 80px;
+    border: 2px solid gold;
+    position: absolute;
+    border-radius: 50%;
+    animation: circle14512 2s linear infinite;
+  }
+  
+  .circle::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #9ae932;
+    box-shadow: 0 0 20px #9ae932, 0 0 60px #9ae932;
+  }
+  
+  @keyframes circle14512 {
+    0% {
+      transform: rotate(0deg);
+    }
+  
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  .no-waiting {
+    display: none !important;
 }

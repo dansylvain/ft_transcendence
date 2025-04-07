@@ -12,7 +12,7 @@
                 </div>
                 <div class="card-body">
                     {% if error %}
-                    <div class="alert alert-danger mb-3">
+                    <div id="error" name="error" class="alert alert-danger mb-3">
                         {{ error }}
                     </div>
                     {% endif %}
@@ -23,11 +23,11 @@
                         {% csrf_token %}
                         <div class="form-group">
                             <label>Enter the 6-digit code from your authenticator app:</label>
-                            <input type="number" name="token" maxlength="6" class="form-control form-control-user" 
+                            <input id="token"type="number" name="token" maxlength="6" class="form-control form-control-user" 
                                 placeholder="Enter 6-digit code" required>
                         </div>
                         <div class="form-group mt-4">
-                            <button type="submit" class="btn btn-danger btn-user btn-block">
+                            <button id="otp_verify" name="otp_verify" type="submit" class="btn btn-danger btn-user btn-block">
                                 Verify and Disable 2FA
                             </button>
                             <a href="/user/profile/" class="btn btn-secondary btn-user btn-block mt-2" 

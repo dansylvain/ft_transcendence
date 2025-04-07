@@ -1,121 +1,94 @@
 import os
 import json
-import tournament_app.services.simple_match_consumer as sm_cons
+import tournament_app.services.simple_match_consumer as sm_cs
 from django.shortcuts import render
 from django.http import HttpResponse, HttpRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from tournament_app.services.tournament_consumer import tournaments
-
+import tournament_app.services.tournament_consumer as t_cs
+import requests
+import aiohttp
 
 def simple_match(request: HttpRequest, user_id):
+    
     print(f"dans simple match {user_id}", flush=True)
+    if user_id:
+        response = requests.get(
+                    f"http://databaseapi:8007/api/player/{user_id}/"
+                )
+        tmp = response.json()
+        user_name = tmp["username"]
+    else:
+        user_name = 0
+
     return render(
         request,
         "simple_match.html",
         {
             "rasp": os.getenv("rasp", "false"),
-            "pidom": os.getenv("pi_domain", "localhost:8443"),
+            "pidom": os.getenv("HOST_IP", "localhost:8443"),
             "user_id": user_id,
-            # "username": request.headers.get("X-Username"),
+            # "user_name": request.headers.get("X-Username", None),
+            "user_name": user_name,
         },
     )
 
-
 @csrf_exempt
 async def match_players_update(request: HttpRequest):
-    print(f"MATCH PLAYERS UPDATE VIEWS", flush=True)
+    
+    print(f"MATCH PLAYERS UPDATE VIEWS", flush=True)    
     data = json.loads(request.body.decode("utf-8"))
-    match_id = data.get("matchId", None)
-    players = data.get("players", [])
-    match = next((m for m in sm_cons.matchs if m.get("matchId") == match_id), None)
-    if match:
-        match["players"] = players
-        await sm_cons.SimpleConsumer.match_update()
-    tournament = next(
-        (
-            t
-            for t in tournaments
-            if any(data.get("matchId") == m.get("matchId") for m in t.matchs)
-        ),
-        None,
-    )
-    if tournament:
-        await tournament.match_players_update(data)
-
+    await sm_cs.SimpleConsumer.match_players_update(data)
+    await t_cs.TournamentConsumer.match_players_update(data)
     return JsonResponse({"status": "succes"})
-
 
 @csrf_exempt
 async def match_result(request: HttpRequest):
-    data = json.loads(request.body.decode("utf-8"))
-    match_id = data.get("matchId")
-    winner_id = data.get("winnerId")
-    looser_id = data.get("looserId")
-    p1_id = data.get("p1Id")
-    p2_id = data.get("p2Id")
-    p1 = next((p for p in sm_cons.players if p.get("playerId") == p1_id), None)
-    p2 = next((p for p in sm_cons.players if p.get("playerId") == p2_id), None)
-    if p1:
-        p1["busy"] = None
-    if p2:
-        p2["busy"] = None
-    sm_cons.matchs[:] = [m for m in sm_cons.matchs if m.get("matchId") != match_id]
-    await sm_cons.SimpleConsumer.match_update()
-
-    tournament = next(
-        (
-            t
-            for t in tournaments
-            if any(match_id == m.get("matchId", None) for m in t.matchs)
-        ),
-        None,
-    )
-    if tournament:
-        await tournament.match_result(match_id, winner_id, looser_id)
+    
+    print("MATCH RESULT", flush=True)
+    data = json.loads(request.body.decode("utf-8"))   
+    await sm_cs.SimpleConsumer.match_result(data)
+    await t_cs.TournamentConsumer.match_result(data)
     return JsonResponse({"status": "succes"})
 
-
 def tournament(request: HttpRequest, user_id):
-    print(f"dans tournament {user_id}", flush=True)  # //!
+    
+    print(f"dans tournament {user_id}, {request.headers.get('X-Username')}", flush=True) 
+    
+    if user_id:
+        response = requests.get(
+                    f"http://databaseapi:8007/api/player/{user_id}/"
+                )
+        tmp = response.json()
+        user_name = tmp["username"]
+    else:
+        user_name = 0
+    
     return render(
         request,
         "tournament.html",
         {
             "rasp": os.getenv("rasp", "false"),
-            "pidom": os.getenv("pi_domain", "localhost:8443"),
+            "pidom": os.getenv("HOST_IP", "localhost:8443"),
             "user_id": user_id,
-            # "username": request.headers.get("X-Username"),
+            "user_name": user_name,
         },
     )
 
-
 def tournament_pattern(request: HttpRequest, tournament_id):
+    
     print(f"dans tournament pattern {tournament_id}", flush=True)
     return render(
         request,
         "tournament_pattern.html",
     )
 
+async def send_db(path, result):
 
-# def create_tournament(playerList):
-# 	player1
-# 	player2
-# 	player3
-# 	player4
-# 	askmatchid
-# 	send matchid to player1 player2
-# 	send matchid to player3 player4
-
-# 	makegamewith player1 player2 les joueur vont se connecter
-# 	makegamewith player3 player4 les joueur vont se connecter
-
-# 	winnergame1 je vais recevoir le res par match result
-# 	winnergame2	je vais recevoir le res par match result
-# 	une fois que les deux res sont arrive je vais
-# 	askmatchId
-# 	send matchid to winnergame1 winnergame2
-
-# 	makegamewith winnergame1 winnergame2
-
-# 	winnergame1 je vais recevoir le res par match result
-# 	winnergame3
+	print(f"SEND DB {result}", flush=True)
+	return	
+	async with aiohttp.ClientSession() as session:
+		async with session.post(
+			f"http://databaseapi:8007/{path}", json=result) as response:				
+			if response.status not in (200, 201):
+				err = await response.text()
+				print(f"Error HTTP {response.status}: {err}", flush=True)

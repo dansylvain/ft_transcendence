@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Response, HTTPException
+from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 import requests
 import jwt
@@ -6,6 +6,10 @@ import datetime
 import os
 import pyotp
 import re
+import secrets
+import hashlib
+import uuid
+
 router = APIRouter()
 
 # Clé secrète pour signer les JWT
@@ -18,6 +22,12 @@ REFRESH_TOKEN_EXPIRE_DAYS = 7
 # URL de l'API qui gère la vérification des identifiants
 DATABASE_API_URL = "http://databaseapi:8007/api/verify-credentials/"
 CHECK_2FA_URL = "http://databaseapi:8007/api/check-2fa/"
+
+
+def generate_django_csrf_token():
+    secret = secrets.token_hex(32)  # 32-byte secret key
+    hashed_token = hashlib.sha256(secret.encode()).hexdigest()
+    return hashed_token
 
 
 # @router.post("/auth/login/")
@@ -76,9 +86,27 @@ async def login_fastAPI(
         days=REFRESH_TOKEN_EXPIRE_DAYS
     )
 
+    my_uuid = str(uuid.uuid4())
+
+    # Store the UUID in the database
+    try:
+        session_response = requests.put(
+            f"http://databaseapi:8007/api/player/{auth_data.get('user_id', 0)}/uuid",
+            json={"uuid": my_uuid},
+            headers={"Content-Type": "application/json"},
+        )
+        if session_response.status_code != 200:
+            print(
+                f"⚠️ Failed to update UUID: {session_response.status_code}",
+                flush=True,
+            )
+    except Exception as e:
+        print(f"⚠️ Error updating UUID: {str(e)}", flush=True)
+
     access_payload = {
         "user_id": auth_data.get("user_id", 0),
         "username": username,
+        "uuid": my_uuid,  # Include UUID in the payload
         "exp": expire_access,
     }
     refresh_payload = {
@@ -113,7 +141,7 @@ async def login_fastAPI(
         key="access_token",
         value=access_token,
         httponly=True,
-        secure=False,
+        secure=True,
         samesite="Lax",
         path="/",
         max_age=60 * 60 * 6,
@@ -124,10 +152,22 @@ async def login_fastAPI(
         key="refresh_token",
         value=refresh_token,
         httponly=True,
-        secure=False,
+        secure=True,
         samesite="Lax",
         path="/",
         max_age=60 * 60 * 24 * 7,
+    )
+
+    # Generate and set CSRF token
+    # csrf_token = secrets.token_urlsafe(64)
+    json_response.set_cookie(
+        key="csrftoken",
+        value=generate_django_csrf_token(),
+        httponly=True,
+        secure=True,
+        samesite="Lax",
+        path="/",
+        max_age=60 * 60 * 6,  # 6 hours, same as access token
     )
 
     # Debug log for headers
@@ -172,6 +212,17 @@ def refresh_access_token(refresh_payload):
     user_id = refresh_payload.get("user_id")
     username = refresh_payload.get("username")  # Extract username from refresh token
 
+    # Get the current UUID for this user
+    try:
+        response = requests.get(f"http://databaseapi:8007/api/player/{user_id}/uuid")
+        uuid_value = None
+        if response.status_code == 200:
+            session_data = response.json()
+            uuid_value = session_data.get("uuid")
+    except Exception as e:
+        print(f"⚠️ Error retrieving UUID during refresh: {str(e)}", flush=True)
+        uuid_value = None
+
     # Set expiration for new access token
     expire_access = datetime.datetime.utcnow() + datetime.timedelta(
         minutes=ACCESS_TOKEN_EXPIRE_MINUTES
@@ -180,7 +231,8 @@ def refresh_access_token(refresh_payload):
     # Create payload for new access token
     access_payload = {
         "user_id": user_id,
-        "username": username,  # Include username in new access token
+        "username": username,
+        "uuid": uuid_value,
         "exp": expire_access,
     }
 
@@ -227,12 +279,37 @@ def is_authenticated(request: Request):
         # we'll need to return a signal to set a new cookie
         return True, {
             "user_id": refresh_payload.get("user_id"),
-            "username": refresh_payload.get(
-                "username"
-            ),  # Include username from refresh token
+            "username": refresh_payload.get("username"),
             "refresh_needed": True,
             "new_access_token": new_access_token,
         }
+
+    # Get the user ID and UUID from the token
+    user_id = payload.get("user_id")
+    token_uuid = payload.get("uuid")
+
+    # Verify this is the active session for the user
+    if token_uuid:
+        try:
+            # Check if this session is still valid
+            response = requests.get(
+                f"http://databaseapi:8007/api/player/{user_id}/uuid"
+            )
+            if response.status_code == 200:
+                current_data = response.json()
+                current_uuid = current_data.get("uuid")
+
+                # If the UUIDs don't match, this token is from an old session
+                if current_uuid and current_uuid != token_uuid:
+                    print(
+                        f"⚠️ UUID mismatch. Token: {token_uuid}, DB: {current_uuid}",
+                        flush=True,
+                    )
+                    return False, None
+        except Exception as e:
+            print(f"⚠️ Error checking UUID: {str(e)}", flush=True)
+            # Continue with authentication if we can't check the UUID
+            # This is a failsafe to prevent lockouts if the database API is down
 
     # Return authentication status and user info from the valid access token
     return True, {
@@ -253,6 +330,23 @@ async def logout_fastAPI(request: Request):
         JSONResponse with cleared cookies and redirect header
     """
     print("🚪 Logout requested", flush=True)
+
+    # Get user ID from the token to clear the session
+    access_token = request.cookies.get("access_token")
+    if access_token:
+        try:
+            payload = verify_jwt(access_token)
+            if payload:
+                user_id = payload.get("user_id")
+                # Clear the active session in the database
+                requests.put(
+                    f"http://databaseapi:8007/api/player/{user_id}/uuid",
+                    json={"uuid": None},
+                    headers={"Content-Type": "application/json"},
+                )
+        except Exception as e:
+            print(f"⚠️ Error clearing session during logout: {str(e)}", flush=True)
+            # Continue with logout even if session clearing fails
 
     # Create response
     response = JSONResponse(content={"success": True, "message": "Déconnexion réussie"})
@@ -405,9 +499,28 @@ async def verify_2fa_and_login(
             days=REFRESH_TOKEN_EXPIRE_DAYS
         )
 
+        # Generate a unique session ID
+        my_uuid = str(uuid.uuid4())
+
+        # Store the UUID in the database
+        try:
+            session_response = requests.put(
+                f"http://databaseapi:8007/api/player/{user_id}/uuid",
+                json={"uuid": my_uuid},
+                headers={"Content-Type": "application/json"},
+            )
+            if session_response.status_code != 200:
+                print(
+                    f"⚠️ Failed to update UUID during 2FA: {session_response.status_code}",
+                    flush=True,
+                )
+        except Exception as e:
+            print(f"⚠️ Error updating UUID during 2FA: {str(e)}", flush=True)
+
         access_payload = {
             "user_id": user_id,
             "username": username,
+            "uuid": my_uuid,
             "exp": expire_access,
         }
         refresh_payload = {
@@ -433,7 +546,7 @@ async def verify_2fa_and_login(
             key="access_token",
             value=access_token,
             httponly=True,
-            secure=False,
+            secure=True,
             samesite="Lax",
             path="/",
             max_age=60 * 60 * 6,  # 6 hours
@@ -443,10 +556,22 @@ async def verify_2fa_and_login(
             key="refresh_token",
             value=refresh_token,
             httponly=True,
-            secure=False,
+            secure=True,
             samesite="Lax",
             path="/",
             max_age=60 * 60 * 24 * 7,  # 7 days
+        )
+
+        # Generate and set CSRF token
+        # csrf_token = secrets.token_urlsafe(64)
+        json_response.set_cookie(
+            key="csrftoken",
+            value=generate_django_csrf_token(),
+            httponly=True,
+            secure=True,
+            samesite="Lax",
+            path="/",
+            max_age=60 * 60 * 6,  # 6 hours, same as access token
         )
 
         # Debug log for headers
@@ -486,7 +611,7 @@ async def register_fastAPI(
     print(f"🔐 Tentative d'inscription pour {username}", flush=True)
 
     # Regex patterns for input validation
-    name_pattern = r'^(?!.*--)[a-zA-ZÀ-ÿ0-9\-]+$'
+    name_pattern = r"^(?!.*--)[a-zA-ZÀ-ÿ0-9\-]+$"
     # Validate first name
     if not re.match(name_pattern, first_name):
         return JSONResponse(
@@ -507,7 +632,7 @@ async def register_fastAPI(
             status_code=400,
         )
 
-    username_pattern = r'^(?!.*--)[a-zA-Z0-9_\-]+$'
+    username_pattern = r"^(?!.*--)[a-zA-Z0-9_\-]+$"
     # Validate username
     if not re.match(username_pattern, username):
         return JSONResponse(
@@ -518,8 +643,8 @@ async def register_fastAPI(
             status_code=400,
         )
 
-    password_pattern = r'^(?!.*--)[a-zA-Z0-9_\-?!$€%&*()]+$'
-    # Validate password 
+    password_pattern = r"^(?!.*--)[a-zA-Z0-9_\-?!$€%&*()]+$"
+    # Validate password
     if not re.match(password_pattern, password):
         return JSONResponse(
             content={
@@ -528,7 +653,6 @@ async def register_fastAPI(
             },
             status_code=400,
         )
-
 
     # Check if username already exists first (industry standard to check one field at a time)
     try:
@@ -620,10 +744,29 @@ async def register_fastAPI(
             days=REFRESH_TOKEN_EXPIRE_DAYS
         )
 
+        # Generate a unique session ID
+        my_uuid = str(uuid.uuid4())
+
+        # Store the UUID in the database
+        try:
+            session_response = requests.put(
+                f"http://databaseapi:8007/api/player/{user_data.get('id', 0)}/uuid",
+                json={"uuid": my_uuid},
+                headers={"Content-Type": "application/json"},
+            )
+            if session_response.status_code != 200:
+                print(
+                    f"⚠️ Failed to update UUID during registration: {session_response.status_code}",
+                    flush=True,
+                )
+        except Exception as e:
+            print(f"⚠️ Error updating UUID during registration: {str(e)}", flush=True)
+
         # Create payloads for tokens
         access_payload = {
             "user_id": user_data.get("id", 0),
             "username": username,
+            "uuid": my_uuid,
             "exp": expire_access,
         }
         refresh_payload = {
@@ -658,7 +801,7 @@ async def register_fastAPI(
             key="access_token",
             value=access_token,
             httponly=True,
-            secure=False,
+            secure=True,
             samesite="Lax",
             path="/",
             max_age=60 * 60 * 6,  # 6 hours
@@ -668,10 +811,22 @@ async def register_fastAPI(
             key="refresh_token",
             value=refresh_token,
             httponly=True,
-            secure=False,
+            secure=True,
             samesite="Lax",
             path="/",
             max_age=60 * 60 * 24 * 7,  # 7 days
+        )
+
+        # Generate and set CSRF token
+        # csrf_token = secrets.token_urlsafe(64)
+        json_response.set_cookie(
+            key="csrftoken",
+            value=generate_django_csrf_token(),
+            httponly=True,
+            secure=True,
+            samesite="Lax",
+            path="/",
+            max_age=60 * 60 * 6,  # 6 hours, same as access token
         )
 
         return json_response

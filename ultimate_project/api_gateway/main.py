@@ -1,17 +1,13 @@
 from fastapi import FastAPI, Request, HTTPException, Query, Depends
-import httpx
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from starlette.exceptions import HTTPException as StarletteHTTPException
-import logging
-from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-
-templates = Jinja2Templates(directory="templates")
-
-
-# from fastapi.middleware.cors import CORSMiddleware
-from auth_helpers import block_authenticated_users
+from fastapi.middleware.cors import CORSMiddleware
+import httpx
+import logging
 import json
+
+
 from authentication import (
     login_fastAPI,
     is_authenticated,
@@ -28,18 +24,18 @@ app = FastAPI(
 )
 
 # Configure CORS middleware with more permissive settings
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["*"],  # Allow all origins for development
-#     allow_credentials=True,  # Allow cookies
-#     allow_methods=["*"],  # Allow all HTTP methods
-#     allow_headers=["*"],  # Allow all headers
-#     expose_headers=[
-#         "Content-Type",
-#         "X-CSRFToken",
-#         "Set-Cookie",
-#     ],  # Expose these headers
-# )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins for development
+    allow_credentials=True,  # Allow cookies
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
+    expose_headers=[
+        "Content-Type",
+        "X-CSRFToken",
+        "Set-Cookie",
+    ],  # Expose these headers
+)
 
 
 # error page handler
@@ -53,7 +49,6 @@ services = {
     "match": "http://match:8002",
     "static_files": "http://static_files:8003",
     "user": "http://user:8004",
-    # "authentication": "http://authentication:8006", # ! OUTDATED SERVICE, DO NOT USE
     "databaseapi": "http://databaseapi:8007",
 }
 
@@ -61,10 +56,101 @@ services = {
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Exclude Path for the
+AUTH_PATH = [
+    "/login",
+    "/register",
+    "/login/",
+    "/register/",
+    "/auth/login/",
+    "/auth/register/",
+    "/two-factor-auth/",
+    "/auth/verify-2fa/"
+]
+
+EXCLUDED_PATH = [
+    "/favicon.ico",
+    "/translations/de.json",
+    "/translations/en.json",
+    "/translations/es.json",
+    "/translations/fr.json",
+    "/translations/tl.json",
+    "/match/stop-match/undefined/undefined/",
+]
+
+# TODO : To let error pages go through when non authenticated
+# KNOWN_PATHS = [
+#     "/login",
+
+# ]
+
+
+
+# ! NEED TO MIX THE BOUNCER LOGIC TO NON AUTH AND AUTH USERS
+@app.middleware("http")
+async def bouncer_middleware(request: Request, call_next):
+    """
+    Main Middleware to filter authenticated users from non-auth users
+    """
+    is_auth, user_info = is_authenticated(request)
+
+    print(f"============= URL REQUEST ENTERING BOUNCER ================\n")
+    print(f"=============           {request.url.path} ================\n")
+    print(f"============= URL REQUEST ENTERING BOUNCER ================\n")
+
+    # TODO : To let error pages go through when non authenticated
+    # if request.url.path not in KNOWN_PATHS:
+    #     print(f"👍 Bounder Middleware non trigered for error message on login/register pages 👍")
+    #     response = await call_next(request)
+    #     return response
+
+    # Let go through the Middleware everyting included in EXCLUDED_PATH 
+    if request.url.path in EXCLUDED_PATH:
+        print(f"👍 Bounder Middleware non trigered 👍")
+        response = await call_next(request)
+        return response
+
+
+    if is_auth and request.url.path in AUTH_PATH:
+        print(f"⬅️ Auth user request auth pages, redirecting to home ⬅️")
+        # Check if this is an HTMX request
+        if "HX-Request" in request.headers:
+            response = Response(status_code=200)
+            response.headers["HX-Location"] = (
+                "/home/"  # Use HX-Location for SPA navigation
+            )
+        else:
+            response = RedirectResponse(url="/home/")
+        return response
+
+    elif not is_auth and request.url.path not in AUTH_PATH:
+        print(f"⛔ Bounder Middleware Trigerred, non auth request ⛔")
+        # Check if this is an HTMX request
+        if "HX-Request" in request.headers:
+            print(f"🔄 HTMX request detected, using HX-Location", flush=True)
+            # HX-Location makes HTMX do a client-side redirect without a full page reload
+            response = Response(status_code=200)
+            response.headers["HX-Location"] = "/register/"
+            # Clear JWT cookies
+            response.delete_cookie(key="access_token", path="/")
+            response.delete_cookie(key="refresh_token", path="/")
+        else:
+            print(f"🔄 Standard request, using RedirectResponse", flush=True)
+            response = RedirectResponse(url="/register/")
+            # Clear JWT cookies
+            response.delete_cookie(key="access_token", path="/")
+            response.delete_cookie(key="refresh_token", path="/")
+        return response
+
+    print(f"👍 Bounder Middleware non trigered 👍")
+    
+    response = await call_next(request)
+    return response
+
 
 # Token refresh middleware
 @app.middleware("http")
-async def token_refresh_middleware(request: Request, call_next):
+async def jwt_refresh_middleware(request: Request, call_next):
     """
     Middleware that checks if the access token needs to be refreshed.
     If refresh is needed, it adds the new access token to the response.
@@ -84,7 +170,7 @@ async def token_refresh_middleware(request: Request, call_next):
             key="access_token",
             value=user_info.get("new_access_token"),
             httponly=True,
-            secure=False,
+            secure=True,
             samesite="Lax",
             path="/",
             max_age=60 * 60 * 6,  # 6 hours
@@ -93,7 +179,33 @@ async def token_refresh_middleware(request: Request, call_next):
     return response
 
 
-# ! DEBUGGING COOKIES MIDDLEWARE.
+# CSRF middleware
+# @app.middleware("http")
+# async def csrf_middleware(request: Request, call_next):
+#     """
+#     Middleware that verifies CSRF token for non-GET requests.
+#     """
+#     # Skip CSRF check for GET requests and health checks
+#     if request.method == "GET" or request.url.path == "/health/":
+#         return await call_next(request)
+
+#     # Get CSRF token from cookie
+#     csrf_token = request.cookies.get("csrf_token")
+
+#     # Get CSRF token from header
+#     header_token = request.headers.get("X-CSRFToken")
+
+#     # Verify tokens match
+#     if not csrf_token or not header_token or csrf_token != header_token:
+#         return JSONResponse(
+#             status_code=403,
+#             content={"detail": "Invalid CSRF token"},
+#         )
+
+#     return await call_next(request)
+
+
+# ! DEBUGGING COOKIES MIDDLEWARE, DO DELETE
 # This middleware is used to debug incoming cookies in FastAPI.
 # It prints the incoming cookies to the console.
 @app.middleware("http")
@@ -220,10 +332,9 @@ async def tournament_proxy(path: str, request: Request):
         user_id = user_info.get("user_id")
     else:
         user_id = 0
-        
-        # return RedirectResponse(url="/login/") # to FIX FLO
-        # return RedirectResponse(url="/login/") # to FIX FLO
 
+        # return RedirectResponse(url="/login/") # to FIX FLO
+        # return RedirectResponse(url="/login/") # to FIX FLO
 
     print(
         "################## NEW USER CREATED #######################",
@@ -290,6 +401,7 @@ async def stop_match_proxy(path: str, request: Request):
     """
     return await proxy_request("match", "/match/stop-match/" + path, request)
 
+
 @app.api_route("/match/match3d/{path:path}", methods=["GET"])
 async def match_proxy(
     path: str,
@@ -316,12 +428,16 @@ async def match_proxy(
 
     return await proxy_request("match", path, request)
 
+
 @app.api_route("/match/match2d/{path:path}", methods=["GET"])
 async def match_proxy(
     path: str,
     request: Request,
     matchId: int = Query(None),
     playerId: int = Query(None),
+    playerName: str = Query(None),
+    player2Id: int = Query(None),
+    player2Name: str = Query(None),
 ):
     """
     Proxy requests to the match microservice.
@@ -335,7 +451,7 @@ async def match_proxy(
       - Returns the content from the match microservice.
     """
     path = (
-        f"match/match2d/?matchId={matchId}&playerId={playerId}"
+        f"match/match2d/?matchId={matchId}&playerId={playerId}&playerName={playerName}&player2Id={player2Id}&player2Name={player2Name}"
         if matchId is not None and playerId is not None
         else "match/"
     )
@@ -353,7 +469,8 @@ async def redirect_to_home():
     return RedirectResponse(url="/home/")
 
 
-@app.api_route("/api/{path:path}", methods=["GET", "POST"])
+# ! DATABASE API ROUTE
+@app.api_route("/api/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
 async def databaseapi_proxy(path: str, request: Request):
     """
     Proxy requests to the database API microservice.
@@ -391,24 +508,6 @@ async def databaseapi_proxy(path: str, request: Request):
     - **Responses**:
       - `200 OK`: The user is authenticated and 2FA is not enabled
       - `401 Unauthorized`: The user is authenticated but 2FA is enabled
-
-    ### Response format:
-    ```json
-    {
-        "count": 100,
-        "next": "http://localhost:8005/api/player/?page=2",
-        "previous": null,
-        "results": [
-            {
-                "id": 1,
-                "username": "player1",
-                "email": "player1@example.com",
-                ...
-            },
-            ...
-        ]
-    }
-    ```
     """
     return await proxy_request("databaseapi", f"api/{path}", request)
 
@@ -421,26 +520,26 @@ async def login_page_route(request: Request, path: str = ""):
     Redirects to home if user is already authenticated.
     """
     # Check if user is authenticated
-    is_auth, user_info = is_authenticated(request)
+    # is_auth, user_info = is_authenticated(request)
 
-    if is_auth:
-        # If authenticated, redirect to home
-        response = RedirectResponse(url="/home")
+    # if is_auth:
+    #     # If authenticated, redirect to home
+    #     response = RedirectResponse(url="/home")
 
-        # If token refresh is needed, set the new access token cookie
-        if user_info and user_info.get("refresh_needed"):
-            print("🔄 Setting refreshed access token during login redirect", flush=True)
-            response.set_cookie(
-                key="access_token",
-                value=user_info.get("new_access_token"),
-                httponly=True,
-                secure=False,
-                samesite="Lax",
-                path="/",
-                max_age=60 * 60 * 6,  # 6 hours
-            )
+    # If token refresh is needed, set the new access token cookie
+    # if user_info and user_info.get("refresh_needed"):
+    #     print("🔄 Setting refreshed access token during login redirect", flush=True)
+    #     response.set_cookie(
+    #         key="access_token",
+    #         value=user_info.get("new_access_token"),
+    #         httponly=True,
+    #         secure=True,
+    #         samesite="Lax",
+    #         path="/",
+    #         max_age=60 * 60 * 6,  # 6 hours
+    #     )
 
-        return response
+    # return response
 
     # If not authenticated, show login page
     return await proxy_request("static_files", "login/", request)
@@ -462,7 +561,7 @@ async def login_page_route(request: Request):
     return await login_fastAPI(request, response, username, password)
 
 
-# Add auth-status endpoint for debugging
+# ! ROUTE TO DELETE
 @app.get("/auth/status")
 async def auth_status(request: Request):
     """
@@ -496,7 +595,7 @@ async def auth_status(request: Request):
             key="access_token",
             value=user_info.get("new_access_token"),
             httponly=True,
-            secure=False,
+            secure=True,
             samesite="Lax",
             path="/",
             max_age=60 * 60 * 6,  # 6 hours
@@ -523,26 +622,26 @@ async def register_page_route(request: Request, path: str = ""):
     Redirects to home if user is already authenticated.
     """
     # Check if user is authenticated
-    is_auth, user_info = is_authenticated(request)
+    # is_auth, user_info = is_authenticated(request)
 
-    if is_auth:
-        # If authenticated, redirect to home
-        response = RedirectResponse(url="/home")
+    # if is_auth:
+    #     # If authenticated, redirect to home
+    #     response = RedirectResponse(url="/home")
 
-        # If token refresh is needed, set the new access token cookie
-        if user_info and user_info.get("refresh_needed"):
-            print("🔄 Setting refreshed access token during login redirect", flush=True)
-            response.set_cookie(
-                key="access_token",
-                value=user_info.get("new_access_token"),
-                httponly=True,
-                secure=False,
-                samesite="Lax",
-                path="/",
-                max_age=60 * 60 * 6,  # 6 hours
-            )
+    # If token refresh is needed, set the new access token cookie
+    # if user_info and user_info.get("refresh_needed"):
+    #     print("🔄 Setting refreshed access token during login redirect", flush=True)
+    #     response.set_cookie(
+    #         key="access_token",
+    #         value=user_info.get("new_access_token"),
+    #         httponly=True,
+    #         secure=True,
+    #         samesite="Lax",
+    #         path="/",
+    #         max_age=60 * 60 * 6,  # 6 hours
+    #     )
 
-        return response
+    # return response
 
     # If not authenticated, show login page
     return await proxy_request("static_files", "register/", request)
@@ -656,6 +755,50 @@ async def disable_2fa_proxy(request: Request):
     print(f"🔐 Headers: {request.headers}", flush=True)
 
     return await proxy_request("user", "user/disable-2fa/", request)
+
+
+@app.api_route("/user/delete-profile/", methods=["GET", "POST"])
+@app.api_route("/delete-profile/", methods=["GET", "POST"])
+async def delete_profile_proxy(request: Request):
+    """
+    Proxy requests for profile deletion to the user microservice.
+    """
+    print("🗑️ Handling delete-profile request", flush=True)
+    print(f"🗑️ Method: {request.method}", flush=True)
+
+    # Log headers for debugging CSRF issues
+    print(f"🗑️ Headers: {request.headers}", flush=True)
+
+    # For GET requests, make sure we get a fresh CSRF token
+    if request.method == "GET":
+        response = await proxy_request("user", "user/delete-profile/", request)
+        # Ensure Set-Cookie headers are preserved
+        return response
+
+    # Forward the request to the user microservice
+    response = await proxy_request("user", "user/delete-profile/", request)
+
+    # If it's a POST request and deletion was successful, clear JWT cookies
+    if request.method == "POST" and response.status_code == 200:
+        try:
+            # Parse the response content to check for success
+            content = json.loads(response.body.decode())
+            if content.get("success"):
+                print("🗑️ Profile deletion successful, clearing cookies", flush=True)
+
+                # Clear the cookies
+                response.delete_cookie(key="access_token", path="/")
+                response.delete_cookie(key="refresh_token", path="/")
+
+                # ! REDIRECT RELOAD THE SPA HERE
+                response.headers["HX-Redirect"] = "/register/"
+                # response = RedirectResponse(url="/register/")
+
+                print("🗑️ Cookies cleared and redirect set", flush=True)
+        except Exception as e:
+            print(f"🗑️ Error processing deletion response: {str(e)}", flush=True)
+
+    return response
 
 
 @app.api_route("/{path:path}", methods=["GET"])

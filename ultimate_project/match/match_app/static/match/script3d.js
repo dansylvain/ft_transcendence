@@ -181,11 +181,11 @@ window.tjs_camera.lookAt(50, 0, 30);
 
 animate();
 
-function setCommands(socket, socket2) {
+function setCommands3D(socket, socket2) {
     const keysPressed = {}; // Stocker les touches enfoncées
     let animationFrameId = null; // Stocke l'ID du requestAnimationFrame
 
-    function sendCommands() {
+    function sendCommands3D() {
         if (socket.readyState === WebSocket.OPEN) {
             if (keysPressed["ArrowUp"]) {
                 socket.send(JSON.stringify({ action: 'move', dir: 'up' }));
@@ -204,7 +204,7 @@ function setCommands(socket, socket2) {
             }
         }
 
-        animationFrameId = requestAnimationFrame(sendCommands); // Appelle la fonction en boucle
+        animationFrameId = requestAnimationFrame(sendCommands3D); // Appelle la fonction en boucle
     }
 
     document.addEventListener("keydown", function(event) {
@@ -214,7 +214,7 @@ function setCommands(socket, socket2) {
         }
 
         if (!animationFrameId) { // Démarre l'animation seulement si elle n'est pas déjà en cours
-            animationFrameId = requestAnimationFrame(sendCommands);
+            animationFrameId = requestAnimationFrame(sendCommands3D);
         }
     });
 
@@ -228,7 +228,7 @@ function setCommands(socket, socket2) {
     });
 }
 
-function onMatchWsMessage(event, [waiting, end], waitingState) {
+function onMatchWsMessage3D(event, [waiting, end], waitingState) {
 	const data = JSON.parse(event.data);
 
 	if (data.state == "end")
@@ -259,12 +259,12 @@ function onMatchWsMessage(event, [waiting, end], waitingState) {
 	}
 }
 
-function sequelInitMatchWs(socket) {
+function sequelInitMatchWs3D(socket) {
 	const [waiting, end] = [		
 		document.getElementById("waiting"),	document.getElementById("end")];	
 	let waitingState = ["waiting"];
 
-	socket.onmessage = event => onMatchWsMessage(
+	socket.onmessage = event => onMatchWsMessage3D(
 		event, [waiting, end], waitingState);
 
 	const spec = document.getElementById("spec")
@@ -275,31 +275,35 @@ function sequelInitMatchWs(socket) {
 		else
 			spec.style.display = "none";
 	}
-	initSecPlayer();
-	setCommands(socket, window.matchSocket2);
+	initSecPlayer3D();
+	setCommands3D(socket, window.matchSocket2);
 }
 
-function initSecPlayer() {
+function initSecPlayer3D() {
 
-	if (window.rasp == "true")
-		window.matchSocket2 = new WebSocket(
-			`wss://${window.pidom}/ws/match/${window.matchId}/` +
-			`?playerId=${-window.playerId}`);
-	else	
-		window.matchSocket2 = new WebSocket(
-			`wss://localhost:8443/ws/match/${window.matchId}/` +
-			`?playerId=${-window.playerId}`);
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+        window.pidom = "localhost:8443";
+	else
+		window.pidom = window.location.hostname + ":8443";
 
+    window.matchSocket2 = new WebSocket(
+        `wss://${window.pidom}/ws/match/${window.matchId}/` +
+        `?playerId=${-window.playerId}`);
 	window.matchSocket2.onopen = () => {
 		console.log("Connexion Match établie 2nd Player😊");
 	};
 	window.matchSocket2.onclose = (event) => {
 		console.log("Connexion Match disconnected 😈 2nd Player");
 	};
-	// setCommands2(window.matchSocket2);
+	// setCommands3D2(window.matchSocket2);
 }
 
-function initMatchWs() {
+function initMatchWs3D() {
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+        window.pidom = "localhost:8443";
+	else
+		window.pidom = window.location.hostname + ":8443";
+
 //si je viens du debut je sui sclosé (et je reviens par boucle) si je viens de onclse je continu normal
 	console.log("INIT MATCH 😊😊😊");
 	console.log("STOP: " + window.stopFlag);
@@ -309,16 +313,9 @@ function initMatchWs() {
     // if (window.matchSocket)
 	// 	window.matchSocket.close();
 	window.antiLoop = true;
-
-	if (window.rasp == "true")
-		window.matchSocket = new WebSocket(
-			`wss://${window.pidom}/ws/match/${window.matchId}/` +
-			`?playerId=${window.playerId}`);
-	else	
-		window.matchSocket = new WebSocket(
-			`wss://localhost:8443/ws/match/${window.matchId}/` +
-			`?playerId=${window.playerId}`);
-
+    window.matchSocket = new WebSocket(
+        `wss://${window.pidom}/ws/match/${window.matchId}/` +
+        `?playerId=${window.playerId}`);
 	window.matchSocket.onopen = () => {
 		console.log("Connexion Match établie 😊");
 	};
@@ -330,13 +327,13 @@ function initMatchWs() {
 		if (event.code !== 3000 && !window.stopFlag)
 		{			
 			console.log("codepas42");
-			initMatchWs();	
+			initMatchWs3D();	
 		}
 		else
 			console.log("code42");
 		window.stopFlag = false;
 	};
-	sequelInitMatchWs(window.matchSocket);
+	sequelInitMatchWs3D(window.matchSocket);
 }
 
-initMatchWs();
+initMatchWs3D();

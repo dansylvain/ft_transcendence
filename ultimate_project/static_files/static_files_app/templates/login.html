@@ -27,9 +27,11 @@
                       class="form-control form-control-user"
                       id="username"
                       name="username"
+                      autocomplete="username"
                       placeholder="Enter Username..."
+					  maxlength="100"
                       required
-                    />
+					  />
                   </div>
                   <div class="form-group">
                     <input
@@ -37,7 +39,9 @@
                       class="form-control form-control-user"
                       id="password"
                       name="password"
+                      autocomplete="password"
                       placeholder="Password"
+					  maxlength="100"
                       required
                     />
                   </div>
@@ -72,20 +76,18 @@
                 <hr />
 				
 				<!-- ! Link towards register  -->
-                <div
-					id="register-link"
+                <div class="text-center small" style="font-size: larger;">
+				<a	id="register-link"
                   hx-boost="false"
                   hx-trigger="click"
                   hx-push-url="true"
                   hx-get="/register/"
                   hx-target="body"
-                  class="text-center small"
                   href=""
                   data-translate="Create an Account!"
-                >
-                  Create an Account!
-                </div>
-              </div>
+                > Create an Account! </a>
+				</div>
+			</div>
             </div>
           </div>
         </div>
@@ -97,17 +99,17 @@
 <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" /> -->
 
 <script>
-  document.addEventListener("htmx:beforeSwap", function (evt) {
+document.addEventListener("htmx:beforeSwap", function (evt) {
     console.log("document.addEventListener working");
     console.log("LOGIN FORM LISTENNING");
     if (evt.detail.target.id === "login-form") {
-      try {
+    	try {
         console.log("Réponse brute:", evt.detail.xhr.responseText);
         const response = JSON.parse(evt.detail.xhr.responseText);
-
+		
         if (response.success) {
-          console.log("SUCCESS")
-          evt.detail.shouldSwap = false;
+        console.log("SUCCESS")
+        evt.detail.shouldSwap = false;
 
           htmx
             .ajax("GET", "/home/", {
@@ -160,19 +162,11 @@
               }, 200);
             });
         } else {
-			// ! UNSAFE METHOD
-		// document.getElementById("login-form").innerHTML = response.message;
-
           // Sanitize the message using DOMPurify before setting content
           const messageElement = document.getElementById("login-form");
           const sanitizedMessage = DOMPurify.sanitize(response.message);
           
-		  //   // Use textContent for plain text or innerHTML with sanitized content
-		    if (sanitizedMessage.includes("<") && sanitizedMessage.includes(">")) {
-			messageElement.innerHTML = sanitizedMessage;
-          } else {
-            messageElement.textContent = sanitizedMessage;
-          }
+		  messageElement.textContent = sanitizedMessage;
         }
       } catch (e) {
         console.error("Erreur de traitement de la réponse:", e);

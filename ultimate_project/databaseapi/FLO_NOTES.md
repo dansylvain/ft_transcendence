@@ -3,74 +3,91 @@
 🟧
 ⚠️
 --------------------------------------------------------------------------------
+									LAST DEV WEEK
+--------------------------------------------------------------------------------
+
+✅ Create a worklofo to delete the DB at 42
+
+✅ Test and stabilize multi-users connection (once everything is locked up) 
+
+🟧 Beautify register / login / 2fa landing pages
+
+🟧 Find a way to lock the database routes as well
+
+🟧✅ Lock all the routes (lock les routes visibles dans le front)
+
+🟧 DELETE ALL THE PRINT OF DEBUG WITH SENSITIVE INFOS
+
+🟧 VOIR LE REGEX DE SEB DANS DISCORD POUR SES WEBSOCKETS (lock )
+
+🟧 DELETE THIS FILE
+
+🟧 DELETE ALL SENSITIVE FILES ON RASPBERRY ENDPOINT, ECT...
+
+🟧 XSS / Injection SQL sur tout les formulaires
+
+🟧 Changer le mot de passe d'admin / Delete l'admin en production
+
+🟧 Garder des users standarts pour la correction
+
+🟧 https://docs.djangoproject.com/en/5.1/ref/csrf/#csrf-limitations
+==> Proteger les routes de POST / PUT / DELETE avec des decorateurs CSRF adequats
+
+🟧 Mettre un decorateur sur l'API gateway ?
+
+🟧 Encoder les clefs SSL de NGINX ?
+
+🟧 Mettre un bouton retour HOME sur les pages d'erreur (maxi casse couilles)
+
+🟧 Implementer les pages d'erreur si pas auth a la fin de la semaine
+
+
+
+
+
+
+
+--------------------------------------------------------------------------------
 									TOUDOU
 --------------------------------------------------------------------------------
 
-FIX LES TEST DES 2FA QUI PLANTES PARFOIS dans playright
 
-Retravailler la securisation des routes dans fastAPI
+🟧 DELETE LE BASH MIGRATION.DELETE.SH DANS LE MAKEFILE
+
+🟧 LIMITER LA LENGHT DES INPUTS DANS LES FORMULAIRES ==> VOIR AVEC MERGE THOMAS
+
+🟧 Retravailler la securisation des routes dans fastAPI
+
+✅ TODO FOR DELETING THE DATABASE
+
+✅ METTRE LES CHAMPS REQUIRED DANS DELETE-PROFILE.HTMl sur les champs password et otp
+
+✅ Tester le multi login sur la branche `prevent_double_auth`
+
+✅ TESTER LE WORKLOW : Register -> turn on 2FA -> Logout -> Login -> 2FA -> Disable 2fa -> Logout -> Login -> delete user -> Login
+
+✅ CREER DES TEST AVEC LE CSRF TOKEN	
+
+✅ FIX LES TEST DES 2FA QUI PLANTES PARFOIS dans playright
+
 
 `STABILIZATION`:
 
 ## BASE REQUIREMENTS
 
-🟧 Bouton Back and Forward (notaament dans un match)
+✅ Bouton Back and Forward (notaament dans un match)
 ✅ Pong contre soi-meme
 ✅ Tournoi 
-🟧 Mettre des alias a chaque debut de tournoi
+✅ Mettre des alias a chaque debut de tournoi
 🟧 Injections SQL / XSS
-🟧 HTTPS (wss)
+✅ HTTPS (wss)
 🟧 Secure routes API
-🟧 Changer le mot de passe d'admin
 🟧
 ✅
 
 `AVATAR CREATION` :
 
 In user creation : create a default image when creating an user
-
-
-
-`POST 2FA`
-
-injections SQL
-CROSS Injection
-
-`LOGIN 2 FIX`
-FORMULAIRE PAS DE FEEDBACK POUR LOGIN + REGISTER
-bugs de console quand on resgiter avec success
-
-AVOIR UN SEUL FICHIER DE TEST pour les deux formulaire et activer des conditionelles 
-
-
-`2FA`
-For Dan => translate 2FA
-
-
-Then try to login with 2FA
-
-
-
-
-
-
-
-
-
-
-========================
-
-Now that I got a functionnal login/logout logic, I need to implement the registration logic following the same pattern accros fastAPI main file, authentication file.
-
-The resgister form is register.html . Note that we're going to username as primary login.
-
-Please add a email field to the register.html.
-
-The request will be a POST request to the route "auth/register". Like login, you'll also create a 
-
-
-
-========================
 
 
 
@@ -156,7 +173,7 @@ CORS_ALLOW_ORIGINS = [
     "http://localhost:8005",  # FastAPI
     "http://localhost:8006",  # Authentication
     "http://localhost:8007",  # DatabaseAPI
-    f"https://{PI_DOMAIN}",  # Production
+    f"https://{HOST_IP}",  # Production
 ]
 CORS_ALLOW_METHODS = ["GET", "POST", "OPTIONS", "PUT", "DELETE"]
 CORS_ALLOW_HEADERS = ["*"]
