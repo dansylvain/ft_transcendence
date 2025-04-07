@@ -796,10 +796,10 @@ function sequelInitMatchWs(socket) {
 
 function initSecPlayer() {
 
-    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
-        window.pidom = "localhost:8443";
-	else
-		window.pidom = window.location.hostname + ":8443";
+    // if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+    //     window.pidom = "localhost:8443";
+	// else
+    window.pidom = window.location.hostname + ":8443";
 
     window.matchSocket2 = new WebSocket(
         `wss://${window.pidom}/ws/match/${window.matchId}/` +
@@ -814,10 +814,10 @@ function initSecPlayer() {
 }
 
 function initMatchWs() {
-    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
-        window.pidom = "localhost:8443";
-	else
-		window.pidom = window.location.hostname + ":8443";
+    // if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+    //     window.pidom = "localhost:8443";
+	// else
+    window.pidom = window.location.hostname + ":8443";
 
 //si je viens du debut je sui sclosé (et je reviens par boucle) si je viens de onclse je continu normal
 	// console.log("INIT MATCH 😊😊😊");

@@ -6,13 +6,13 @@ function initTournament() {
 	
 	if (typeof closeSimpleMatchSocket === 'function') 
 		closeSimpleMatchSocket();
-	else 
+	// else 
 		// console.log("closeSimpleMatch not define");
 	
-	if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
-        window.pidom = "localhost:8443";
-	else
-		window.pidom = window.location.hostname + ":8443";
+	// if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+    //     window.pidom = "localhost:8443";
+	// else
+    window.pidom = window.location.hostname + ":8443";
 
 	// console.log("INIT TOURNAMENT");
     if (window.tournamentSocket)
