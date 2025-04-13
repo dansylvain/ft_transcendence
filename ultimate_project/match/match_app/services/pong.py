@@ -36,7 +36,7 @@ class Pong:
 		self.start_flag = False
 		self.pause = True
 		self.score = [0, 0]
-		self.max_score = 2
+		self.max_score = 20
 		self.point_delay = 1
 		self.start_delay = 4
 		self.max_wait_delay = 2000
@@ -107,7 +107,7 @@ class Pong:
 			else:
 				self.set_waiting_state(self.players)	
 			await self.sendState();						
-			await asyncio.sleep(self.gear_delay)
+			await asyncio.sleep(0.01) # si je ne met pas ca il ne marche pas bien
 
 		print(f"in match after WHILE id:{self.id}", flush=True)
 
