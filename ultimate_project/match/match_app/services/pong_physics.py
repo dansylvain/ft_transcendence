@@ -41,8 +41,8 @@ async def horz_bounce(self, cmp, limit, pad_y_idx, dir):
 		self.ball[0] += new_vect[0]				
 		self.ball[1] += new_vect[1]
 		self.has_wall = True
-		await asyncio.sleep(self.bounce_delay)				
-
+		# await asyncio.sleep(self.bounce_delay)				
+		await self.sendState();	
 		mag = self.get_magnitude(self.vect) 				
 		y = (self.ball[1] - self.pads_y[pad_y_idx]) / (self.pad_height / 2) 
 		y = y * mag
@@ -75,7 +75,8 @@ async def vert_bounce(self, cmp, limit):
 		self.ball[0] += bounce_vect[0]				
 		self.ball[1] += bounce_vect[1]
 		self.has_wall = True
-		await asyncio.sleep(self.bounce_delay)	
+		# await asyncio.sleep(self.bounce_delay)	
+		await self.sendState();	
 		self.vect[1] = -self.vect[1]		
 		self.wall_flag = False
 

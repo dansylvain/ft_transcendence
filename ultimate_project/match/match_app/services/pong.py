@@ -80,12 +80,12 @@ class Pong:
 		# self.y_bot = 70 - self.ball_ray
 	
 	def launchTask(self):
+		# self.myEventLoop.create_task(self.sendState()),
 
 		self.myEventLoop = asyncio.new_event_loop()
 		asyncio.set_event_loop(self.myEventLoop)
 		self.tasks = [
 			self.myEventLoop.create_task(self.launch_game()),
-			self.myEventLoop.create_task(self.sendState()),
 			self.myEventLoop.create_task(self.watch_dog())		
 		]
 		try:
@@ -105,7 +105,8 @@ class Pong:
 			if None not in self.players:			
 				await self.run_game()						
 			else:
-				self.set_waiting_state(self.players)							
+				self.set_waiting_state(self.players)	
+			await self.sendState();						
 			await asyncio.sleep(self.gear_delay)
 
 		print(f"in match after WHILE id:{self.id}", flush=True)
@@ -228,15 +229,15 @@ class Pong:
 
 	async def sendState(self):		
 		
-		while self.state != State.end:	
-			self.users = [p for p in match_consumer.players
-				if self.id == p["matchId"]]
+		# while self.state != State.end:	
+			# self.users = [p for p in match_consumer.players
+			# 	if self.id == p["matchId"]]
 			for p in self.users:
-				state = self.state
-				if state != State.end:
+				# state = self.state
+				if self.state != State.end:
 					try:												
 						await p["socket"].send(text_data=json.dumps({
-							"state": state.name,
+							"state": self.state.name,
 							"yp1": self.pads_y[0],
 							"yp2": self.pads_y[1],
 							"plyIds": self.plyIds,
@@ -247,7 +248,7 @@ class Pong:
 						}))                  
 					except Exception as e:
 						pass				
-			await asyncio.sleep(self.send_delay)
+			# await asyncio.sleep(self.send_delay)
 
 	async def sendFinalState(self):
 
