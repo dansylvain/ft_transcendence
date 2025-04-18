@@ -466,7 +466,7 @@ button {
     background-size: 100% 100%;
     background-position: center;
     background-repeat: no-repeat;
-    z-index: 1000;
+    z-index: 150;
     position:relative;
     /* left:50%;
     transform: translateX(-50%); */
