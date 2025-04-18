@@ -482,3 +482,16 @@ button {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-5px); }
   }
+
+  option {
+    padding: 10px;
+    background-color: #222;
+    color: #00ff99;
+    border: none;
+    transition: background-color 0.3s;
+  }
+
+  option:hover {
+    background-color: #00ff99;
+    color: #111;
+  }
