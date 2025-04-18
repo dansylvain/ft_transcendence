@@ -1,23 +1,13 @@
-<div
-  class="modal fade"
-  id="logoutModal"
-  tabindex="-1"
-  role="dialog"
-  aria-labelledby="exampleModalLabel"
-  aria-hidden="true"
->
+{% load static %}
+<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+  aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content navbars_color text_color_text">
       <div class="modal-header">
         <h5 data-translate="ReadyToLeaveTitle" class="modal-title">
           Ready to Leave?
         </h5>
-        <button
-          class="close"
-          type="button"
-          data-dismiss="modal"
-          aria-label="Close"
-        >
+        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">×</span>
         </button>
       </div>
@@ -25,20 +15,9 @@
         Select "Logout" below if you are ready to end your current session.
       </div>
       <div class="modal-footer">
-        <button
-          class="btn btn-secondary"
-          type="button"
-          data-translate="Cancel"
-          data-dismiss="modal"
-        >Cancel</button>
-        <button
-          onclick="logoutUser()"
-          data-dismiss="modal"
-          class="btn btn-primary"
-          href=""
-          data-translate="Logout"
-          id="modalLogoutButton"
-        >
+        <button class="btn btn-secondary" type="button" data-translate="Cancel" data-dismiss="modal">Cancel</button>
+        <button onclick="logoutUser()" data-dismiss="modal" class="btn btn-primary" href="" data-translate="Logout"
+          id="modalLogoutButton">
           Logout
         </button>
       </div>

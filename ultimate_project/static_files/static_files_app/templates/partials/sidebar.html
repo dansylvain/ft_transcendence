@@ -1,91 +1,44 @@
-<!-- Sidebar -->
-<ul
-  class="navbar-nav 
+<ul class="navbar-nav 
   {% if page == 'partials/home.html' %}d-none{% endif %} 
-  bg-gradient-primary sidebar sidebar-dark"
-  id="accordionSidebar"
-
->
-  <div
-    class="sidebar-brand d-flex align-items-center justify-content-center nav-link"
-    ><div id="side-logo" class="sidebar-brand-icon rotate-n-15">
+  bg-gradient-primary sidebar sidebar-dark" id="accordionSidebar">
+  <div class="sidebar-brand d-flex align-items-center justify-content-center nav-link">
+    <div id="side-logo" class="sidebar-brand-icon rotate-n-15">
       <i class="fa-solid fa-table-tennis-paddle-ball"></i>
     </div>
     <div class="sidebar-brand-text mx-3">Pong <sup>42</sup></div>
-</div>
+  </div>
   <hr class="sidebar-divider my-0" />
   <li class="nav-item">
-    <a
-      id="side-home"
-      class="nav-link"
-      hx-trigger="click"
-      hx-push-url="true"
-      hx-get="/home/"
-      hx-target="#main_div"
-    >
+    <a id="side-home" class="nav-link" hx-trigger="click" hx-push-url="true" hx-get="/home/" hx-target="#main_div">
       <i class="fa-solid fa-house"></i>
-      <span data-translate="Accueil">Accueil</span></a
-    >
+      <span data-translate="Accueil">Accueil</span></a>
   </li>
   <hr class="sidebar-divider" />
   <div class="sidebar-heading">Menu</div>
   <li class="nav-item">
-    <a
-      id="side-match"
-      class="nav-link"
-      hx-trigger="click"
-      hx-push-url="true"
-      hx-get="/tournament/simple-match/"
-      hx-target="#main_div"
-
-
-    >
+    <a id="side-match" class="nav-link" hx-trigger="click" hx-push-url="true" hx-get="/tournament/simple-match/"
+      hx-target="#main_div">
       <i class="fa-solid fa-table-tennis-paddle-ball"></i>
-      <span data-translate="Match simple">Match simple</span></a
-    >
+      <span data-translate="Match simple">Match simple</span></a>
   </li>
 
   <li class="nav-item">
-    <a
-      id="side-tournoi"
-      class="nav-link"
-      hx-trigger="click"
-      hx-push-url="true"
-      hx-get="/tournament/tournament/"
-      hx-target="#main_div"
-
-    >
+    <a id="side-tournoi" class="nav-link" hx-trigger="click" hx-push-url="true" hx-get="/tournament/tournament/"
+      hx-target="#main_div">
       <i class="fas fa-fw fa-trophy"></i>
-      <span data-translate="Tournoi">Tournoi</span></a
-    >
+      <span data-translate="Tournoi">Tournoi</span></a>
   </li>
   <li class="nav-item">
-    <a
-      id="side-profile"
-      class="nav-link"
-      hx-trigger="click"
-      hx-push-url="true"
-      hx-get="/account/profile/"
-      hx-target="#main_div"
-
-    >
+    <a id="side-profile" class="nav-link" hx-trigger="click" hx-push-url="true" hx-get="/account/profile/"
+      hx-target="#main_div">
       <i class="fa-solid fa-user"></i>
-      <span data-translate="Profil">Profil</span></a
-    >
+      <span data-translate="Profil">Profil</span></a>
   </li>
   <li class="nav-item">
-    <a
-      id="side-stats"
-      class="nav-link"
-      hx-trigger="click"
-      hx-push-url="true"
-      hx-get="/account/game-stats/overview/"
-      hx-target="#main_div"
-
-    >
+    <a id="side-stats" class="nav-link" hx-trigger="click" hx-push-url="true" hx-get="/account/game-stats/overview/"
+      hx-target="#main_div">
       <i class="fa-solid fa-chart-simple"></i>
-      <span data-translate="Statistiques">Stats</span></a
-    >
+      <span data-translate="Statistiques">Stats</span></a>
   </li>
   <hr class="sidebar-divider d-none d-md-block" />
   <div class="text-center d-none d-md-inline">
