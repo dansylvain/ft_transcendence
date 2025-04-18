@@ -1,0 +1,43 @@
+
+.tournament-cont {
+	width: 100%;
+    min-height: 14rem;
+    min-width: fit-content;
+	background-color: rgb(109, 94, 96);	
+	border-radius: 5%;
+	padding: 5px;
+    margin-bottom: 1rem;
+    padding: 1rem;
+}
+  
+  #pattern {
+	border-radius: 5px;
+
+  }
+  #overlay-pattern {
+	width: 100%;      
+	min-width: 300px; 
+	margin: 0 auto;   
+    z-index: 400;
+  }
+ 
+  #secline {
+    display: flex;
+    justify-content: space-around; 
+    gap: 1rem; 
+  }
+
+  .pattern-pl-cont {
+    display: flex;
+    justify-content: space-between; 
+    gap: 0.5rem;
+  }
+
+  .pattern-pl {
+    flex: 1;
+    text-align: center;
+  }
+
+  #m1, #firstline, #m2, #m3, #secline {
+    border-radius: 5%;
+  }
