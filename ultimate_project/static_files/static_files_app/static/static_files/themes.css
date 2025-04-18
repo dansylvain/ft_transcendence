@@ -6,35 +6,13 @@
     --title-color: #3A95B4;
   }
 
-
-  /* [data-theme="dark"] {
-    --background-color: #0F354C;
-    --navbars-color: #2A86AB;
-    --main-color: #776A62;
-    --text-color: #9ce5f9;
-    --title-color: #6FB7D0;
-  } */
-
-/* Thème sombre */
-/* [data-theme="light"] {
-    --background-color: #1D1A45;
-    --navbars-color: #4C459F;
-    --main-color: #727364;
-    --text-color: #8A84C8;
-    --title-color: #6F66D1;
-  } */
-
-  [data-theme="light"] {
-    --background-color: #e9551b;
-    --navbars-color: #fc8230;
-    --main-color: #64ecca;
-    --text-color: #f8b34b; /* main color in the */
-    --title-color: #136d13;
-  }
-
-/* Cibler les éléments spécifiques du site */
-
-/* Logo */
+[data-theme="light"] {
+  --background-color: #e9551b;
+  --navbars-color: #fc8230;
+  --main-color: #64ecca;
+  --text-color: #f8b34b; /* main color in the */
+  --title-color: #136d13;
+}
 
 body {
     background-color: var(--background-color);
