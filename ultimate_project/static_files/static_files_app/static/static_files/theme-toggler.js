@@ -10,14 +10,13 @@ if (typeof themeToggle === 'undefined') {
                 htmlEl.setAttribute('data-theme', 'light');
             }
         });
-        // Au chargement
+
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme) {
             htmlEl.setAttribute('data-theme', savedTheme);
             themeToggle.checked = savedTheme === 'dark';
         }
 
-        // Lors du switch
         themeToggle.addEventListener('change', () => {
             const newTheme = themeToggle.checked ? 'dark' : 'light';
             htmlEl.setAttribute('data-theme', newTheme);
@@ -25,9 +24,3 @@ if (typeof themeToggle === 'undefined') {
         });
     }
 }
-
-// console.log ("*********** JE SUIS APPELE ***************");
-
-// console.log = () => {};
-// console.warn = () => {};
-// console.error = () => {};

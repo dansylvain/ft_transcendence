@@ -17,62 +17,7 @@
 <script src="{% static 'static_files/name-generator.js' %}"></script>
 <script src="{% static 'static_files/auth_animate.js' %}"></script>
 <script src="{% static 'static_files/register_checks.js' %}"></script>
-<script>
-  // this function is part of the history logic
-  window.addEventListener("beforeunload", () => {
-    console.log("URL sauvegardée avec history.state et sessionStorage");
-	stopMatch();
-    let currentURL = window.location.href;
-    history.replaceState({ lastVisitedPage: currentURL }, "");
-    sessionStorage.setItem("lastVisitedPage", currentURL);
-  });
-
-function stopMatch()
-{
-	fetch(`/match/stop-match/${window.selfId}/${window.selfMatchId}/`)
-	.then(response => {
-		if (!response.ok) 
-			throw new Error(`Error HTTP! Status: ${response.status}`);		  
-		return response.text();
-	})
-	// .then(data => console.log(data))
-	.catch(error => console.log(error))
-}
-
-  function closeWebsockets() {
-
-    console.log("########### closing websockets #######");
-    if (typeof closeSimpleMatchSocket === "function") closeSimpleMatchSocket();
-    if (typeof closeTournamentSocket === "function") closeTournamentSocket();
-  }
-
-  closeWebsockets();
-  function interceptUrlChanges() {
-    const originalReplaceState = history.replaceState;
-
-    history.replaceState = function (state, title, url) {
-      originalReplaceState.apply(history, arguments);
-      closeWebsockets();
-    };
-  }
-  
-//   console.log("Attachement de l'event popstate...");
-//   window.addEventListener("popstate", () => {
-
-//     if (window.location.pathname.includes("/home")) {
-//         console.log("Retour sur la page home, aucune requête HTMX effectuée.");
-//         return; // On ne fait rien si c'est la page home
-//     }
-
-//     console.log("popstate event triggered!");
-//     htmx.ajax("GET", window.location.pathname, {
-//       target: "#main_div",
-//       swap: "innerhtml",
-//       headers: { "HX-Login-Success": "true" },
-//     });
-    // closeWebsockets();
-//   });
-  
-  interceptUrlChanges();
-
-</script>
+<!-- !!! uncomment following line to silence navigator logs !!! -->
+<!-- <script src="{% static 'static_files/console-silencer.js' %}"></script> -->
+<script src="{% static 'static_files/sockets-func.js' %}"></script>
+<script src="{% static 'static_files/history.js' %}"></script>

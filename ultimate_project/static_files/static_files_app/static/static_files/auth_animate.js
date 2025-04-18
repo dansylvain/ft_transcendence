@@ -1,9 +1,7 @@
 function initPongAnimation(register) {
-	// Clear any existing animation before reinitializing
 	const container = document.getElementById('pong-background');
-	if (!container) return; // Exit if container doesn't exist
+	if (!container) return;
 	
-	// Clear previous icons if any
 	container.innerHTML = '';
 	
 	const cols = 12;
@@ -36,7 +34,7 @@ function initPongAnimation(register) {
 		
 		for (const icon of icons) {
 			if (register == true) {
-				icon.x -= speed; // invert for register.html
+				icon.x -= speed;
 			}
 			else{
 				icon.x += speed;
@@ -44,7 +42,7 @@ function initPongAnimation(register) {
 			icon.y += speed;
 			
 			if (register == true) {
-				if (icon.x < -50) icon.x += (cols + 2) * spacingX; // invert for register.html
+				if (icon.x < -50) icon.x += (cols + 2) * spacingX;
 			}
 			else{
 				if (icon.x > w) icon.x -= (cols + 2) * spacingX;
@@ -55,11 +53,9 @@ function initPongAnimation(register) {
 			icon.el.style.top = `${icon.y}px`;
 		}
 
-		// Store animation ID so we can cancel it if needed
 		window.pongAnimationId = requestAnimationFrame(animate);
 	}
 
-	// Cancel any existing animation before starting a new one
 	if (window.pongAnimationId) {
 		cancelAnimationFrame(window.pongAnimationId);
 	}

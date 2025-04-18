@@ -149,5 +149,4 @@ function registerChecks() {
 		checkPasswords();
 		validateForm();
 	});
-
 }

@@ -31,7 +31,6 @@ if (!window.nameGeneratorLoaded) {
         return availableNames[index];
     }
 
-
     function prefillName() {
         const input = document.getElementById('player-name');
         if (input)
@@ -49,8 +48,6 @@ if (!window.nameGeneratorLoaded) {
         prefillName();
     });
 
-
-
     const observer = new MutationObserver((mutationsList) => {
         for (const mutation of mutationsList) {
             for (const node of mutation.addedNodes) {
@@ -65,5 +62,4 @@ if (!window.nameGeneratorLoaded) {
             }
         }
     });
-
 }

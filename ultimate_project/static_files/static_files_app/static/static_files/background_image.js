@@ -1,6 +1,6 @@
 if (typeof window.applyBackground === 'undefined') {
     // Fonction pour appliquer l'image de fond
-    console.log("typeof");
+    // console.log("typeof");
 
     window.applyBackground = (bg) => {
         const main = document.getElementById('main_content');
@@ -10,14 +10,14 @@ if (typeof window.applyBackground === 'undefined') {
             main.style.backgroundSize = '100% 100%';
             main.style.backgroundPosition = 'top center';
             main.style.transition = 'background-image 0.3s ease';
-            main.style.maxHeight = '100vh'; // pour que ça remplisse l'écran
+            main.style.maxHeight = '100vh';
         }
     };
 }
 
 document.querySelectorAll('.side-nav').forEach(item => {
     const text = document.querySelector('.myText');
-    console.log("queryselector");
+    // console.log("queryselector");
     // console.log(text);
 
     item.addEventListener('mouseenter', () => {
@@ -37,17 +37,14 @@ document.querySelectorAll('.side-nav').forEach(item => {
 
 function setFirstBgImage()
 {
-    console.log("first image");
-
-
-
+    // console.log("first image");
     window.currentBg = 'https://dansylvain.github.io/pictures/marvin.jpg';
     window.applyBackground(window.currentBg);
 
 }
-window.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM CONTENT LOQDED");
 
+window.addEventListener('DOMContentLoaded', () => {
+    // console.log("DOM CONTENT LOQDED");
     // console.log("%%%%%%%% func onload executed %%%%%%%%");
     setFirstBgImage();
     
@@ -55,16 +52,15 @@ window.addEventListener('DOMContentLoaded', () => {
 
 document.body.addEventListener('htmx:afterSwap', () => {
     // console.log("%%%%%%%% HTMX content swapped %%%%%%%%");
-    console.log("AFTER SWAP");
+    // console.log("AFTER SWAP");
     window.currentBg = 'https://dansylvain.github.io/pictures/marvin.jpg';
 
     if (!window.currentBg)
         setFirstBgImage();
     else {
-        // Attendre un court instant avant d'appliquer l'image de fond
         setTimeout(() => {
-            window.applyBackground(window.currentBg); // Réappliquer l'image de fond
-        }, 100); // Attendre 100ms avant d'appliquer l'image de fond
+            window.applyBackground(window.currentBg);
+        }, 100);
     }
 });
 
@@ -75,6 +71,3 @@ if (typeof window.currentBg == 'undefined')
     setFirstBgImage();
     window.applyBackground(window.currentBg);
 }
-
-
-
