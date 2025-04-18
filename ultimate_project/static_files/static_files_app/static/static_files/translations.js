@@ -1,7 +1,7 @@
 function applyTranslations(translations) {
     const lang = localStorage.getItem("preferred_language") || "en";
     document.documentElement.lang = lang;
-    
+
     document.querySelectorAll('[data-translate]').forEach(element => {
         const key = element.getAttribute('data-translate');
         if (translations[key]) {
@@ -16,7 +16,6 @@ function applyTranslations(translations) {
         }
     });
 }
-
 
 function changeLanguage(event) {
     const lang = event.target.value;
@@ -42,8 +41,7 @@ function observeDOMChanges() {
     observer.observe(document.body, { childList: true, subtree: true });
 }
 
-
-window.onload = function() {
+window.onload = function () {
     const lang = localStorage.getItem('preferred_language') || 'en';
     el = document.getElementById('language-selector');
     if (el)

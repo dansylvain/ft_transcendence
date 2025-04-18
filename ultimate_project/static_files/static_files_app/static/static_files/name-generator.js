@@ -5,22 +5,22 @@ if (!window.nameGeneratorLoaded) {
 
     function generateRandomName() {
         const names = [
-            'Slartibartfast', 
-            'Arthur',     
-            'Ford',       
-            'Zaphod',     
-            'Trillian',   
-            'Marvin',     
+            'Slartibartfast',
+            'Arthur',
+            'Ford',
+            'Zaphod',
+            'Trillian',
+            'Marvin',
             'DeepThought',
-            'Wowbagger',  
-            'Eddie',      
-            'Vogon',      
-            'Magrathea',  
-            'Agrajag',    
-            'Prostetnic', 
-            'Fenchurch',  
-            'Shooty',     
-          ];
+            'Wowbagger',
+            'Eddie',
+            'Vogon',
+            'Magrathea',
+            'Agrajag',
+            'Prostetnic',
+            'Fenchurch',
+            'Shooty',
+        ];
         const availableNames = names.filter(name => !window.usedNames.has(name));
 
         if (availableNames.length === 0) {
@@ -30,7 +30,6 @@ if (!window.nameGeneratorLoaded) {
         const index = Math.floor(Math.random() * availableNames.length);
         return availableNames[index];
     }
-
 
     function prefillName() {
         const input = document.getElementById('player-name');
@@ -49,8 +48,6 @@ if (!window.nameGeneratorLoaded) {
         prefillName();
     });
 
-
-
     const observer = new MutationObserver((mutationsList) => {
         for (const mutation of mutationsList) {
             for (const node of mutation.addedNodes) {
@@ -59,7 +56,7 @@ if (!window.nameGeneratorLoaded) {
                     node.classList.contains('swal2-container') &&
                     node.textContent.includes('won the tournament!')
                 ) {
-                    console.log('Tournoi terminé, reset des noms...');
+                    // console.log('Tournoi terminé, reset des noms...');
                     window.usedNames.clear();
                 }
             }
