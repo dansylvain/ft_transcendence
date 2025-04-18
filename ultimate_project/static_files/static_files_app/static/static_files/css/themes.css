@@ -10,7 +10,7 @@
   --background-color: #e9551b;
   --navbars-color: #fc8230;
   --main-color: #64ecca;
-  --text-color: #f8b34b; /* main color in the */
+  --text-color: #f8b34b; 
   --title-color: #136d13;
 }
 
@@ -41,7 +41,6 @@ span:hover
   font-weight: bold;
   }
 
-/* Navbar */
 .navbar {
 background-color: var(--navbars-color);
 }
@@ -73,10 +72,6 @@ background-color: var(--navbars-color);
   color: var(--background-color);
 }
 
-/* .navbars_color i {
-  background-color: var(--navbars-color) !important;
-  color: var(--navbars-color) !important;
-} */
 .card, .card-header
 {
   background-color: var(--navbars-color) !important;
@@ -153,14 +148,12 @@ text-decoration: none;
 h1 {
     color: var(--title-color);
 
-    /* font-family: var(--font-title); */
   
   }
 
 h2, h3, h4, h6, .title, .button-title {
     color: var(--title-color);
 
-  /* font-family: var(--font-title); */
 
 }
 
@@ -178,7 +171,7 @@ footer p {
     }
 
 .sidebar-sticky {
-    height: 100%; /* Assure que le ul peut prendre toute la hauteur */
+    height: 100%;
     display: flex;
     flex-direction: column;
 }
@@ -208,28 +201,8 @@ footer p {
 
 .sidebar-btn:hover {
     background-color: var(--background-color);
-    color: var(--title-color) !important; /* typiquement blanc dans ton thème */
+    color: var(--title-color) !important;
   }
-
-/* 
-
-
-.main-content {
-background-color: var(--background-color);
-color: var(--text-color);
-padding: 20px;
-margin-left: 270px;
-}
-
-.main-content h1 {
-color: var(--primary-color);
-}
-
-.main-content p {
-font-size: 1.1em;
-}
-
-*/
 
 #language-selector {
     -webkit-appearance: none;
@@ -252,8 +225,8 @@ font-size: 1.1em;
     background-color: var(--background-color);
     color: var(--text-color);
     }
-  /* Effet au survol */
-  #language-selector:hover {
+
+    #language-selector:hover {
     background-color: var(--logo-color);
     border-color: var(--main-color);
     box-shadow: 0 0 15px var(--primary-color);
