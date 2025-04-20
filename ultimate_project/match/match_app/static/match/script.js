@@ -33,7 +33,7 @@ function delMatchScript()
 function delMatch()
 {
 	document.getElementById('match')?.remove();    
-    const rulesOverlay = document.getElementById('rules-overlay');
+    let rulesOverlay = document.getElementById('rules-overlay'); // changed const to let
 	if (rulesOverlay)
 		rulesOverlay.style.display = 'none';	 
 }
@@ -309,6 +309,7 @@ function initSecPlayer()
 		};
 		window.matchSocket2.onclose = () => {
 			console.log("Connexion Match disconnected 😈 2nd Player");
+			alert("Connexion Match disconnected 😈 2nd Player");
 		};	
 	}
 }
@@ -372,7 +373,7 @@ function initFirstPlayer(pads, elements)
 function matchWsDisconnectStrategy(event)
 {
 	console.log("Connexion Match disconnected 😈");	
-	
+	alert("Connexion Match disconnected 😈");
 	removeKeyBoardEvent();
 	window.antiLoop = false;	
 	if (event.code !== 3000 && !window.stopFlag)		

@@ -592,6 +592,7 @@ function initSimpleMatch() {
 	}
 	window.simpleMatchSocket.onclose = () => {
 		console.log("Connexion Simple Match disconnected 😈");
+		alert("Connexion Simple Match disconnected 😈");
 	};	
 	window.simpleMatchSocket.onmessage = event =>
 		onSimpleMatchMessage(event, window.simpleMatchSocket);

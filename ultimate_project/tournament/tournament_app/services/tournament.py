@@ -137,7 +137,7 @@ class Tournament():
 			await self.send_all_players(match_result)
 			tournament_result = self.get_tournament_result(match_result)
 			await self.send_all_players(tournament_result)
-			# await self.send_db(tournament_result)
+			await self.send_db(tournament_result)
 			asyncio.create_task(self.end_remove())
 			self.launch = False
 

@@ -25,6 +25,7 @@ function initTournament() {
 	}
 	window.tournamentSocket.onclose = () => {
 		console.log("Connexion Tournament disconnected 😈");
+		alert("Connexion Tournament disconnected 😈");
 	};	
 	window.tournamentSocket.onmessage = event =>
 		onTournamentMessage(event, window.tournamentSocket);
@@ -67,6 +68,7 @@ function connectNewPlayer(playerId, playerName)
 	}
 	socket.onclose = () => {
 		console.log(`Connexion Tournament ${playerName} disconnected 😈`);
+		alert(`Connexion Tournament ${playerName} disconnected 😈`);
 		console.log(window.websockets);
 		window.websockets = window.websockets.filter(ws => ws.socket !== socket);
 		console.log(window.websockets);
@@ -89,7 +91,7 @@ function newPlayer(socket) {
 		// alert("enter a name!");
 		return;
 	}
-	if (window.websockets.length >= 3)
+	if (window.websockets.length >= 8)
 	{
         messagePopUp('Oops!', 'https://dansylvain.github.io/pictures/marioNo.webp', "You can't create more than three players!", "You can't create more than three players!", "", "")
 
@@ -222,6 +224,9 @@ function onTournamentMessage(event, socket) {
 
 function tournamentResult(data)
 {
+	console.log('%%%%%%%%%%%%%%%%% tournamentResult: &&&&&&&&&&&&&&&&&&&&&&&&&&');
+	console.log(data);
+	// if (window.selfMatchId === data.)
     messagePopUp('Yeah!', 'https://dansylvain.github.io/pictures/trumpDance.webp', " won the tournament!", " won the tournament!", data.winnerName, "")	// Le tournoi est terminé
 	console.log("TOURNAMENT RESULT ", data);
 }
@@ -484,9 +489,12 @@ function updateTournaments(socket, tournamentsUp)
 		console.log("NEW PROMISE REC ", value);
 		if (value)
 		{
-			console.log("GO To UTP ULKR ", value);
-			updateTournamentsPlayers(tournamentsUp);
-			updateLinkMatchAndResult(tournamentsUp);
+			// setTimeout(()=>{
+
+				console.log("GO To UTP ULKR ", value);
+				updateTournamentsPlayers(tournamentsUp);
+				updateLinkMatchAndResult(tournamentsUp);
+			// }, 2000);
 		}
 	}));
 }
@@ -659,7 +667,7 @@ function updateLinkMatchAndResult(tournamentsUp) {
 function linkMatch(lk)
 {
 	console.log("LINK MATCH ", lk);
-
+	const patternPromises = [];
 	const tournament = document.getElementById("tournaments").querySelector(
 		`[id='${lk.tournamentId}']`
 	);
@@ -669,22 +677,49 @@ function linkMatch(lk)
 		return;
 	}
 	const overlay = tournament.querySelector("#overlay-match");
-	const localMatch = tournament.querySelector(`#${lk.localMatchId}`);
-	if (!localMatch)
-	{
-		console.log("je sors de link match parceque localMatch est faux");
-		return;
-	}
-	const localP1 = localMatch.querySelector(`#pl1`);
-	const localP2 = localMatch.querySelector(`#pl2`);
-	localP1.innerText = lk.p1Name;
-	localP2.innerText = lk.p2Name;
-	setNextMatch(lk, localMatch);	
-	if (lk.p1Id && lk.p2Id)
-	{
-		localMatch.onclick = ()=> enterTournamentMatch(lk, overlay);
-		dropMatch(localMatch, lk, overlay);	
-	}
+	// setTimeout(()=>{
+
+		const localMatch = tournament.querySelector(`#${lk.localMatchId}`);
+		if (!localMatch)
+		{
+			patternPromises.push(getPattern(lk.tournamentId));	
+			patternPromises.forEach(promise => promise.then(value =>{
+				console.log("NEW PROMISE REC INSIDE LE DEDANS ", value);
+				if (value)
+				{
+					setTimeout(()=>{
+						const localMatch = tournament.querySelector(`#${lk.localMatchId}`);
+						const localP1 = localMatch.querySelector(`#pl1`);
+						const localP2 = localMatch.querySelector(`#pl2`);
+						localP1.innerText = lk.p1Name;
+						localP2.innerText = lk.p2Name;
+						setNextMatch(lk, localMatch);	
+						if (lk.p1Id && lk.p2Id)
+						{
+							localMatch.onclick = ()=> enterTournamentMatch(lk, overlay);
+							dropMatch(localMatch, lk, overlay);	
+						}
+					}, 2000);
+				}
+			}));
+			console.log("je sors de link match parceque localMatch est faux");
+			return;
+		}
+		const localP1 = localMatch.querySelector(`#pl1`);
+		const localP2 = localMatch.querySelector(`#pl2`);
+		localP1.innerText = lk.p1Name;
+		localP2.innerText = lk.p2Name;
+		setNextMatch(lk, localMatch);	
+		if (lk.p1Id && lk.p2Id)
+		{
+			localMatch.onclick = ()=> enterTournamentMatch(lk, overlay);
+			dropMatch(localMatch, lk, overlay);	
+		}
+
+	// }, 2000);
+	
+	
+	
 }
 
 function setNextMatch(lk, localMatch)
