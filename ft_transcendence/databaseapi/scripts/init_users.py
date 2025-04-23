@@ -4,9 +4,7 @@ import sys
 from django.contrib.auth import get_user_model
 
 
-INPUT_FILE = "_docker/user.csv"
-# !!!!!!!!!!!!!!! SWITCH IN PROD
-# INPUT_FILE = "_docker/user_prod.csv"
+INPUT_FILE = "_docker/user_prod.csv"
 
 
 def create_user(current_user):
@@ -33,7 +31,7 @@ def create_user(current_user):
             two_fa_enabled=two_fa_enabled,
             _two_fa_secret=_two_fa_secret,
         )
-        print(f"⚠️  ✅✅  ⚠️  ADMIN USER created  ⚠️  ✅✅  ⚠️", flush=True)
+        # print(f"⚠️  ✅✅  ⚠️  ADMIN USER created  ⚠️  ✅✅  ⚠️", flush=True)
     else:
         User.objects.create_user(
             username=username,
@@ -44,17 +42,17 @@ def create_user(current_user):
             two_fa_enabled=two_fa_enabled,
             _two_fa_secret=_two_fa_secret,
         )
-        print(f"✅✅ User {username} created ✅✅", flush=True)
+        # print(f"✅✅ User {username} created ✅✅", flush=True)
 
 
 # Scripts for manage.py needs a run() function instead of a main()
 def run():
 
     if not os.access(INPUT_FILE, os.R_OK):
-        print("⛔⛔⛔⛔  Could't find the file user.csv  ⛔⛔⛔⛔", flush=True)
+        # print("⛔⛔⛔⛔  Could't find the file user.csv  ⛔⛔⛔⛔", flush=True)
         sys.exit(1)
 
-    print(f"🚀🚀🚀 Init DB with users 🚀🚀🚀")
+    # print(f"🚀🚀🚀 Init DB with users 🚀🚀🚀")
 
     with open(INPUT_FILE, "r") as csv_file:
         f = csv.DictReader(csv_file)
@@ -93,10 +91,3 @@ def run():
             else:
                 skipped_users.append(user["username"])
                 skipped_created_users += 1
-
-        if skipped_created_users:
-            print(
-                f"🚷 The following users :🚷\n🚷{skipped_users}🚷\n🚷have not been created. Already exists in the DB🚷"
-            )
-        if not created_users:
-            print(f"🚷 No new users created 🚷")
