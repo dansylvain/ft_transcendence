@@ -14,13 +14,13 @@ document.body.addEventListener("htmx:afterSettle", () => {
     }
 });
 
-// window.addEventListener('popstate', function (event) {
-//     // console.log("%c************* reload HTMX", 'color: red');
-//     htmx.ajax('GET', window.location.pathname, {
-//       target: 'body',
-//       swap: 'innerHTML',
-//       headers: {
-//         'HX-Login-Success': 'true'
-//       }
-//     });
-//   });
+window.addEventListener('popstate', function (event) {
+    // console.log("%c************* reload HTMX", 'color: red');
+    htmx.ajax('GET', window.location.pathname, {
+      target: 'body',
+      swap: 'innerHTML',
+      headers: {
+        'HX-Login-Success': 'true'
+      }
+    });
+  });
