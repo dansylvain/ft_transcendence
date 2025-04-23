@@ -4,6 +4,7 @@ all: create_volume
 	-docker compose -f docker-compose.yaml -f docker-compose.override.yaml up --build
 # all : calls only the classic compose
 prod: clean	create_volume 
+	bash -c "source ./get_ip.sh"
 	-docker compose -f docker-compose.yaml up --build
 
 clean:

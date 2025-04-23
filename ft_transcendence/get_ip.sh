@@ -9,5 +9,6 @@ if grep -q "^HOST_IP=" .env; then
     sed -i "s/^HOST_IP=.*/HOST_IP=$HOST_IP:8443/" .env
 else
     # Ajouter HOST_IP à la fin du fichier .env
+    echo >> .env
     echo "HOST_IP=$HOST_IP:8443" >> .env
 fi
