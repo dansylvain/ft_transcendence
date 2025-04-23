@@ -1,2 +1,0 @@
-tcp://0.tcp.eu.ngrok.io:12571
-ssh svidot@0.tcp.eu.ngrok.io -p 12571

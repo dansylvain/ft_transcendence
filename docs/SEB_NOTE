@@ -1,2 +1,0 @@
-docker run --rm -v ~/volumes_transcendence:/mnt alpine sh -c "rm -rf /mnt/* /mnt/.* 2>/dev/null"
-delete databaseapi migration
