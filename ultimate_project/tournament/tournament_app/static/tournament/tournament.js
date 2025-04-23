@@ -16,8 +16,7 @@ function initTournamentDomain()
 function initTournament()
 {	
 	initTournamentDomain();
-    if (window.tournamentSocket)
-        window.tournamentSocket.close();
+	closeWsTournament();	
     window.tournamentSocket = new WebSocket(
         `wss://${window.pidom}/ws/tournament/tournament/` + 
 		`${window.selfId}/${window.selfName}/${window.selfId}/`

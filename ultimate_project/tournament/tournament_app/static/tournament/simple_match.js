@@ -445,6 +445,7 @@ function initSimpleMatch()
 {	
 	window.busyElement = null;	
 	initSimpleMatchDomain();
+	closeWsSimpleMatch();	
     if (window.simpleMatchSocket)
         window.simpleMatchSocket.close();
     window.simpleMatchSocket = new WebSocket(
