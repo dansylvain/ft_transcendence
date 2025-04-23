@@ -122,8 +122,15 @@
     "security-dt-1": "Zwei-Faktor-Authentifizierung (2FA)",
     "security-dt-2": "Erhöhen Sie die Sicherheit Ihres Kontos, indem Sie 2FA aktivieren.",
     "security-dt-3": "2FA deaktivieren",
-    "security-dt-4": "2FA einrichten"
-
-
+    "security-dt-4": "2FA einrichten",
+	"tuto_match_1": "In den nächsten Schritten lernst du, wie man einfache Spiele spielt.",
+	"tuto_match_2": "Gib einen Namen für deinen lokalen Gegner ein.",
+	"tuto_match_3": "Füge den Spieler hinzu, um ein lokales Spiel zu starten.",
+	"tuto_match_4": "Klicke auf dein lokales Spiel, um zu kämpfen!",
+	"tuto_tourn_1": "In den nächsten Schritten lernst du, wie man Turniere spielt.",
+	"tuto_tourn_2": "Erstelle 3 lokale Spieler.",
+	"tuto_tourn_3": "Erstelle ein Turnier, indem du darauf klickst.",
+	"tuto_tourn_4": "Ziehe deine Spieler per Drag-and-Drop ins Turnier.",
+	"tuto_tourn_5": "Klicke auf dein Spiel, um zu kämpfen!"
   }
   

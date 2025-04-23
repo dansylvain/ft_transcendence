@@ -121,8 +121,14 @@
     "security-dt-1": "Autenticación en dos pasos (2FA)",
     "security-dt-2": "Mejora la seguridad de tu cuenta activando la 2FA.",
     "security-dt-3": "Desactivar 2FA",
-    "security-dt-4": "Configurar 2FA"
-
-    
+    "security-dt-4": "Configurar 2FA",
+	"tuto_match_1": "En los siguientes pasos, aprenderás a jugar partidos simples.",
+	"tuto_match_2": "Ingresa un nombre para tu oponente local.",
+	"tuto_match_3": "Agrega al jugador, lo que iniciará un partido local.",
+	"tuto_match_4": "¡Haz clic en tu partido local para luchar!",
+	"tuto_tourn_1": "En los siguientes pasos, aprenderás a jugar torneos.",
+	"tuto_tourn_2": "Crea 3 jugadores locales.",
+	"tuto_tourn_3": "Crea un torneo haciendo clic en él.",
+	"tuto_tourn_4": "Arrastra y suelta tus jugadores en el torneo.",
+	"tuto_tourn_5": "¡Haz clic en tu partido para luchar!"
   }
-  

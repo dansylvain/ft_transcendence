@@ -121,7 +121,15 @@
     "security-dt-1":"Two-Factor Authentication (2FA)",
     "security-dt-2":"Enhance your account security by enabling 2FA.",
     "security-dt-3":"Disable 2FA",
-    "security-dt-4":"Set Up 2FA"
-
+    "security-dt-4":"Set Up 2FA",
+	"tuto_match_1":"In the next steps, you'll learn how to play Simple Matches.",
+	"tuto_match_2":"Enter a name for your local opponant.",
+	"tuto_match_3":"Add the player, which launches a local match.",
+	"tuto_match_4":"Click on your local match to fight!",
+	"tuto_tourn_1":"In the next steps, you'll learn how to play Tournaments.",
+	"tuto_tourn_2":"Create 3 local players.",
+	"tuto_tourn_3":"Create a tournament by clicking on it.",
+	"tuto_tourn_4":"Drag and drop your players in the tournament.",
+	"tuto_tourn_5":"Click on your match to fight!"
   }
 

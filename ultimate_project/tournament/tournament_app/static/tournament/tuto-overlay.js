@@ -123,7 +123,7 @@ function replayTuto_tournament() {
         },
         {
             title: 'STEP 4',
-            html: "<p data-translate=\"tuto_tourn_4\">Click on your match to fight!</p>",
+            html: "<p data-translate=\"tuto_tourn_5\">Click on your match to fight!</p>",
             // text: 'Click on your local match to fight!',
             imageUrl: 'https://dansylvain.github.io/pictures/tour_4.png',
             imageWidth: 1200,

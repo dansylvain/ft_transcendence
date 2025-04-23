@@ -121,7 +121,14 @@
     "security-dt-1": "2FA qavwIj",
     "security-dt-2": "Huch mu'qaD 2FA",
     "security-dt-3": "qa'be' qoch",
-    "security-dt-4": "QavwIj 2FA"
-
+    "security-dt-4": "QavwIj 2FA",
+	"tuto_match_1": "QapmeH mIwmey Dalo'chugh, bIlaHchu'chu' Qujmey ngeD chu'taH.",
+	"tuto_match_2": "opponent local pong yI'ang.",
+	"tuto_match_3": "player yIchel, vaj Qujmey ngeD tagh.",
+	"tuto_match_4": "Quj local Daq yIclick, vaj Suv!",
+	"tuto_tourn_1": "QapmeH mIwmey Dalo'chugh, bIlaHchu'chu' toronmey chu'taH.",
+	"tuto_tourn_2": "wej player local yIchenmoH.",
+	"tuto_tourn_3": "toron yIchenmoH, 'oH yIclick.",
+	"tuto_tourn_4": "playerlIj toronDaq yIghom, yIchoH.",
+	"tuto_tourn_5": "QujDaj yIclick, vaj Suv!"
   }
-  
