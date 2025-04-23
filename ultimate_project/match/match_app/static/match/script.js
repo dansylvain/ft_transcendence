@@ -40,6 +40,7 @@ function delMatch()
 function displayGiveUp(visible)
 {
 	const giveUp = document.getElementById("quit-match-button");
+
 	if (giveUp)
 	{
 		if (visible)
@@ -119,6 +120,7 @@ function sendCommands()
 {
 	const socket = window.matchSocket;
 	const socket2 = window.matchSocket2; 
+
 	if (socket.readyState === WebSocket.OPEN)
 	{
 		if (addKeyBoardEvent.keysPressed["ArrowUp"]) 				
@@ -207,7 +209,7 @@ function movePads(data, pads, match)
 		pads.p2.style.display = "block";
 		pads.ball.style.display = "block";
 	}
-	pads.ball.style.top = -(matchRect.width / 100);//???
+	pads.ball.style.top = -(matchRect.width / 100);
 	pads.ball.style.width = (matchRect.width / 100) * 2;
 	pads.ball.style.height = (matchRect.height / 100) * 2;		       
 	window.targetPads[0] = data.yp1 * (matchRect.height / 100);
@@ -234,11 +236,8 @@ function startDelay(data)
 		if (window.gameStartTimestamp === undefined)
 		{
 			window.gameStartTimestamp = data.timestamp;           
-			console.log("✅ Premier timestamp enregistré:", data.timestamp);	
             startCountdown(data.delay);
-		}
-		else 
-			console.log("⏩ Timestamp déjà reçu, ignoré.");		
+		}				
 		return;
 	}
 }
@@ -265,7 +264,6 @@ function setEnd(data, endCont, end, spec)
 		`;		
 		endCont.classList.add("end-cont");
 		endCont.style.display = "block";
-		console.log("🏁 Match terminé, reset du timestamp");
 		window.gameStartTimestamp = undefined;	
 	}
 }
@@ -312,22 +310,16 @@ function pongUpdate(pads)
 
 function initSecPlayer()
 {
-	if (window.player2Id != 0)
-	{
-		window.matchSocket2 = createWebSocket(window.player2Id);
-		window.matchSocket2.onopen = () => {
-			console.log("Connexion Match établie 2nd Player😊");
-		};
-		window.matchSocket2.onclose = () => {
-			console.log("Connexion Match disconnected 😈 2nd Player");
-		};	
-	}
+	if (window.player2Id != 0)	
+		window.matchSocket2 = createWebSocket(window.player2Id);	
 }
 
 function initDomain()
 {
-	if (window.location.hostname === "localhost" ||
-		window.location.hostname === "127.0.0.1")
+	if (
+		window.location.hostname === "localhost" ||
+		window.location.hostname === "127.0.0.1"
+	)
         window.pidom = "localhost:8443";
 	else
 		window.pidom = window.location.hostname + ":8443";
@@ -374,16 +366,13 @@ function initFirstPlayer(pads, elements)
 	let waitingState = ["waiting"];
 	
     window.matchSocket = createWebSocket(window.playerId);
-	window.matchSocket.onopen = ()=> console.log("Connexion Match établie 😊");
 	window.matchSocket.onclose = event => matchWsDisconnectStrategy(event);
 	window.matchSocket.onmessage = event => onMatchWsMessage(
 		event, pads, elements, waitingState);
 }
 
 function matchWsDisconnectStrategy(event)
-{
-	console.log("Connexion Match disconnected 😈");	
-	
+{	
 	removeKeyBoardEvent();
 	window.antiLoop = false;	
 	if (event.code !== 3000 && !window.stopFlag)		

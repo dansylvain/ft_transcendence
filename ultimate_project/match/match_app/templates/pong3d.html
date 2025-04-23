@@ -62,7 +62,6 @@
         console.log("Dernière page visitée:", lastVisitedPage);
         console.log("Page actuelle:", window.location.href);
 
-        // check if the last visited page is the same as the current page
         if (lastVisitedPage && window.location.href === lastVisitedPage && !sessionStorage.getItem("redirected")) {
             console.log("Redirection vers la dernière page visitée :", lastVisitedPage);
             

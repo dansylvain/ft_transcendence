@@ -41,11 +41,9 @@ window.addEventListener("DOMContentLoaded", () => {
     console.log("Dernière page visitée:", lastVisitedPage);
     console.log("Page actuelle:", window.location.href);
 
-    // Vérifie si une page précédente existe et si l'URL actuelle n'est pas celle de la page d'erreur
     if (lastVisitedPage && window.location.href === lastVisitedPage && !sessionStorage.getItem("redirected")) {
         console.log("Redirection vers la dernière page visitée :", lastVisitedPage);
-        
-        // Marque que la redirection a eu lieu pour éviter la boucle infinie
+
         sessionStorage.setItem("redirected", "true");
 
     } else {

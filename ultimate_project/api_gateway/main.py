@@ -350,7 +350,7 @@ async def reverse_proxy_handler(
         content=response.content,
         status_code=response.status_code,
         headers=response_headers,
-        media_type=content_type if content_type else None,
+        media_type=content_type or "text/html; charset=utf-8"
     )
 
 

@@ -38,7 +38,6 @@
     <p id="inst-left"> <br> </p>
     <p>Be the first one to score 5 points.</p>
 	
-	<!-- !DIV FOR STYLYZING BOTH BUTTONS -->
 	<div class="match-buttons">
 		<button id="quit-match-button" onclick="
 		stopMatch('{{matchId}}');
@@ -55,11 +54,9 @@
     console.log("Dernière page visitée:", lastVisitedPage);
     console.log("Page actuelle:", window.location.href);
 
-    // Vérifie si une page précédente existe et si l'URL actuelle n'est pas celle de la page d'erreur
     if (lastVisitedPage && window.location.href === lastVisitedPage && !sessionStorage.getItem("redirected")) {
         console.log("Redirection vers la dernière page visitée :", lastVisitedPage);
         
-        // Marque que la redirection a eu lieu pour éviter la boucle infinie
         sessionStorage.setItem("redirected", "true");
 
         sessionStorage.setItem("redirected", "true");
@@ -72,7 +69,6 @@
 function toggleSize() {
         const match = document.getElementById('match');
         
-        // Toggle la classe 'small-size' sur #match
         match.classList.toggle('small-size');
         document.activeElement.blur();
     }

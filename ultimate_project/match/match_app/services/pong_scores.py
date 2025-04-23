@@ -1,4 +1,3 @@
-import asyncio
 import operator as op
 
 async def scores(self):

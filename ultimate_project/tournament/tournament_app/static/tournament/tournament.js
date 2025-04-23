@@ -4,33 +4,23 @@ window.websockets = []
 
 function initTournamentDomain()
 {
-	if (window.location.hostname === "localhost" ||
-		window.location.hostname === "127.0.0.1")
+	if (
+		window.location.hostname === "localhost" ||
+		window.location.hostname === "127.0.0.1"
+	)
         window.pidom = "localhost:8443";
 	else
 		window.pidom = window.location.hostname + ":8443";
 }
 
 function initTournament()
-{		
-	// if (typeof closeSimpleMatchSocket === 'function') 
-	// 	closeSimpleMatchSocket();
-	// else 
-	// 	console.log("closeSimpleMatch not define");	
+{	
 	initTournamentDomain();
-	console.log("INIT TOURNAMENT");
-    if (window.tournamentSocket)
-        window.tournamentSocket.close();//!!!!!!
+	closeWsTournament();	
     window.tournamentSocket = new WebSocket(
         `wss://${window.pidom}/ws/tournament/tournament/` + 
 		`${window.selfId}/${window.selfName}/${window.selfId}/`
     );
-	window.tournamentSocket.onopen = () => {
-		console.log("Connexion Tournament établie 😊");		
-	}
-	window.tournamentSocket.onclose = () => {
-		console.log("Connexion Tournament disconnected 😈");
-	};	
 	window.tournamentSocket.onmessage = event =>
 		onTournamentMessage(event, window.tournamentSocket);
 }
@@ -63,8 +53,6 @@ function messagePopUp(titre, url, text, traduction, start_var, end_var)
 
 function connectNewPlayer(playerId, playerName)
 {
-	console.log("CONNECT NEW PLAYER ", playerId, " ", playerName);
-
 	if (!playerId)
 	{
         messagePopUp(
@@ -85,11 +73,7 @@ function connectNewPlayer(playerId, playerName)
 		`${playerId}/${playerName}/${window.selfId}/`
     );
 	ws.socket = socket;
-	socket.onopen = () => {
-		console.log(`Connexion Tournament ${playerName} établie 😊`);	
-	}
-	socket.onclose = () => {
-		console.log(`Connexion Tournament ${playerName} disconnected 😈`);		
+	socket.onclose = () => {			
 		window.websockets = window.websockets.filter(
 			ws => ws.socket !== socket
 		);	
@@ -106,7 +90,7 @@ function newPlayer(socket)
 			'https://dansylvain.github.io/pictures/travolta.webp',
 			"Enter a name!", "Enter a name!", "", ""
 		);	
-	if (window.websockets.length >= 8)
+	if (window.websockets.length >= 3)
         return messagePopUp(
 			'🚫 Oops! 🚫', 'https://dansylvain.github.io/pictures/marioNo.webp',
 			"You can't create more than three players!",
@@ -131,13 +115,9 @@ function newTournament(socket)
 function enterTournament(socket, tournamentId)
 {
 	const scripts = Array.from(document.getElementsByTagName("script"));
-	
-    scripts.forEach(el => {console.log("SCRIPTNAME: ", el.src)});
-	if (scripts.some(script => script.className === "match-script")) {
-		console.log("DEJA SCRIPT");
-		return;
-	};
-	console.log("entertournement: ", socket, " ", tournamentId);
+	 
+	if (scripts.some(script => script.className === "match-script")) 	
+		return;	
 	if (socket.readyState === WebSocket.OPEN) 
 		socket.send(JSON.stringify({
 			type: "enterTournament",
@@ -158,7 +138,6 @@ window.closeWsTournament = closeWsTournament;
 
 function onTournamentMessage(event, socket)
 {
-	console.log("Message reçu :", event.data);
 	const data = JSON.parse(event.data);
 	
 	switch (data.type)
@@ -227,11 +206,7 @@ function areMyPlayersInTournament(data)
 }
 			
 function tournamentResult(data)
-{			
-	console.log("TOURNAMENT RESULT ", data);
-	console.log("%cARE IN ", "color: violet; background: black; font-weight: bold;", window.tournamentList);
-	console.log("%cARE IN in tournament", "color: violet; background: black; font-weight: bold;", areMyPlayersInTournament(data));
-	console.log("%cARE IN in some match", "color: violet; background: black; font-weight: bold;", areMyPlayersPlayInSomeMatch(data));
+{	
 	if (!(areMyPlayersPlayInSomeMatch(data) || areMyPlayersInTournament(data)))
 		return;
     messagePopUp(
@@ -242,16 +217,12 @@ function tournamentResult(data)
 
 function updatePlayers(socket, playersUp)
 {
-	console.log("UPDATE PLAYERS ", playersUp);
-
 	updateWinPlayers(socket, playersUp);
 	updatePlayersCont(playersUp);
 }
 
 function updateWinPlayers(socket, playersUp)
 {
-	console.log("UPDATE WIN PLAYERS ", playersUp);
-
 	playersUp.forEach(plyUp => {
 		if (window.players.every(el => el.id != plyUp.playerId))
 		{
@@ -270,8 +241,6 @@ function updateWinPlayers(socket, playersUp)
 
 function createPlayerElement(socket, playerId, playerName)
 {
-	console.log("CREATE PL ELEMENT ", playerId);
-
 	const div = document.createElement("div");
 	div.className = "user";
 	div.textContent = playerName;
@@ -417,27 +386,16 @@ function dragPlayer(div)
 		} );
 }
 
-// function allQuitTournament() 
-// {
-// 	console.log("ALL QUIT TOURNAMENT");
-// 	window.websockets.forEach(ws => quitTournament(ws.socket));
-// 	quitTournament(window.tournamentSocket);	
-// }
-
-function quitTournament(socket) {
-	
-	console.log("QUIT TOURNAMENT");
-
+function quitTournament(socket)
+{
 	if (socket.readyState === WebSocket.OPEN) 
 		socket.send(JSON.stringify({
 			type: "quitTournament"						
 		}));
 }
 
-function updatePlayersCont(playersUp) {
-
-	console.log("UPDATE PLAYERS CONT ", playersUp);
-
+function updatePlayersCont(playersUp)
+{
 	const playersCont = document.getElementById("players");
 	const playerElements = [...playersCont.children];
 
@@ -452,12 +410,9 @@ function updatePlayersCont(playersUp) {
 
 function updateTournaments(socket, tournamentsUp)
 {
-	console.log("UPDATE TOURNAMENTS ", tournamentsUp);
-
 	const tournamentsCont = document.getElementById("tournaments");
 	const tournamentEls = [...tournamentsCont.children];
 	const patternPromises = [];
-
 	tournamentsUp.forEach(tourUp => {
 		if (tournamentEls.every(el => el.id != tourUp.tournamentId))
 			addToTournaments(tournamentsCont, tourUp);
@@ -465,7 +420,8 @@ function updateTournaments(socket, tournamentsUp)
 			patternPromises.push(getPattern(tourUp.tournamentId));			
 	});
 	tournamentEls.slice().reverse().forEach(tourEl => {
-		if (tournamentsUp.every(el => el.tournamentId != tourEl.id)) {
+		if (tournamentsUp.every(el => el.tournamentId != tourEl.id))
+		{
 			if (tourEl.id == window.actualScriptTid)
 				delTournamentMatchScript();	
 			tournamentsCont.removeChild(tourEl);		
@@ -483,8 +439,6 @@ function updateTournaments(socket, tournamentsUp)
 
 function addToTournaments(tournamentsContainer, tournament)
 {
-	console.log("ADD TO TOURNAMENT ", tournamentsContainer, " : ", tournament);
-
 	const div = document.createElement("div");	
 	div.className = "tournament";	
 	div.id = tournament.tournamentId;
@@ -501,7 +455,6 @@ function addToTournaments(tournamentsContainer, tournament)
 
 function dropTournament(div, tournamentId)
 {
-
 	div.addEventListener("dragover", e => e.preventDefault());
 	div.addEventListener("drop", e => {	
 		e.preventDefault();
@@ -529,7 +482,6 @@ function catchPlayersInMatch(lk)
 		socket:window.tournamentSocket});
 	const p1 = wscopy.find(ws => ws.playerId == lk.p1Id);
 	const p2 = wscopy.find(ws => ws.playerId == lk.p2Id);
-	console.log("CATCH PLAYER ", p1, " and ", p2);
 	if (p1)
 		enterTournament(p1.socket, lk.tournamentId);
 	if (p2)
@@ -546,8 +498,6 @@ function catchPlayersInMatch(lk)
 
 function getPattern(tournamentId)
 {
-	console.log("GET PATTERN ", tournamentId);
-
 	const tournament = document.getElementById("tournaments").querySelector(
 		`[id='${tournamentId}']`);
 	if (!tournament)
@@ -571,7 +521,6 @@ function updateTournamentsPlayers(tournamentsUp)
 {
 	if (!tournamentsUp)
 		return;
-	console.log("UPDATE TOURNAMENTS PLAYERS ", tournamentsUp);
 
 	const tournamentsCont = document.getElementById("tournaments");
 	const tournamentEls = [...tournamentsCont.children];
@@ -597,9 +546,6 @@ function updateTournamentsPlayers(tournamentsUp)
 
 function updateLinkMatchAndResult(tournamentsUp)
 {
-
-	console.log("UPDATE LINK AND MATCH RESULT ", tournamentsUp);
-
 	tournamentsUp.forEach(tourUp => {
 		tourUp.matchs.forEach(matchUp => {
 			if (matchUp.linkMatch)			
@@ -614,23 +560,15 @@ function updateLinkMatchAndResult(tournamentsUp)
 
 function linkMatch(lk)
 {
-	console.log("LINK MATCH ", lk);
-
 	const tournament = document.getElementById("tournaments").querySelector(
 		`[id='${lk.tournamentId}']`
 	);
 	if (!tournament)
-	{
-		console.log("je sors de link match parceque tournament est faux");
-		return;
-	}
-	const overlay = tournament.querySelector("#overlay-match");
+		return;	
 	const localMatch = tournament.querySelector(`#${lk.localMatchId}`);
 	if (!localMatch)
-	{
-		console.log("je sors de link match parceque localMatch est faux");
-		return;
-	}
+		return;	
+	const overlay = tournament.querySelector("#overlay-match");
 	const localP1 = localMatch.querySelector(`#pl1`);
 	const localP2 = localMatch.querySelector(`#pl2`);
 	localP1.innerText = lk.p1Name;
@@ -663,7 +601,6 @@ function enterTournamentMatch(lk, overlay)
 		return;	
 	const [playerId, playerName, player2Id, player2Name] =
 		catchPlayersInMatch(lk);
-	console.log("TOURNAMENT TO ENTER IN MATCH : ", playerId, " ",  playerName, " ", player2Id, " ", player2Name);
 	const dim = document.getElementById("dim");
 	fetch(
 		`/match/match${dim.value}d/` +
@@ -690,7 +627,7 @@ function isYetInMatch()
 	const scripts = [...document.getElementsByTagName("script")];
 
 	if (scripts.some(script => script.className === "match-script"))	
-		return console.log("DEJA SCRIPT"), true;
+		return true;
 	return false;	
 }
 
@@ -742,8 +679,6 @@ function loadTournamentHtml(data, overlay)
 
 function matchResult(rsl)
 {
-	console.log("MATCH RESULT ", rsl);
-
 	const tournament = document.getElementById("tournaments").querySelector(
 		`[id='${rsl.tournamentId}']`
 	);
@@ -786,8 +721,6 @@ function updateMatchsPlayers(pack)
 
 function updateMatchPlayers(plys)
 {
-	console.log("MATCH PLAYERS UPDATE ", plys);	
-
 	const tournament = document.getElementById("tournaments").querySelector(
 		`[id='${plys.tournamentId}']`
 	);

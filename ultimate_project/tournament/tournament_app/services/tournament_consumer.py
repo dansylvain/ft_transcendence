@@ -1,10 +1,9 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
-import json
-from tournament_app.services.tournament import Tournament
 from typing import List
-import aiohttp
+import json
 import html
-# from django.http import JsonResponse
+
+from tournament_app.services.tournament import Tournament
 
 players : List["TournamentConsumer"] = []
 tournaments : List["Tournament"] = []
@@ -19,14 +18,11 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 		self.id = int(self.scope["url_route"]["kwargs"]["user_id"])
 		self.name = self.scope["url_route"]["kwargs"]["user_name"]
 		self.creator_id = int(self.scope["url_route"]["kwargs"]["creator_id"])
-		print(f"CONNECT TOURNAMENT {self.id} {self.name}", flush=True)
 		players.append(self)
 		await self.send_list("player", players)
 		await TournamentConsumer.send_tournaments()
 
 	async def disconnect(self, close_code):
-
-		print(f"DISCONNECT TOURNAMENT {self.id} {self.name}", flush=True)
 		
 		await self.remove_player_in_tournaments()
 		players[:] = [p for p  in players if p.id != self.id]
@@ -46,7 +42,6 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 	@staticmethod
 	async def send_tournaments():	
 
-		print(f"SEND TOURNAMENT", flush=True)	
 		for player in players:
 			await player.send(text_data=json.dumps({
 				"type": "tournamentList",			
@@ -98,8 +93,8 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 	
 	async def receive(self, text_data):
 
-		print(f"RECEIVE", flush=True)
 		data = json.loads(text_data)
+
 		match data:
 			case {"type": "newPlayer", "playerName": player_name}:
 				await self.new_player(player_name)
@@ -135,7 +130,6 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
 	async def enter_tournament(self, tournament_id):
 
-		print(f"ENTER TOURNAMENT {self.id} {self.name} {tournament_id}", flush=True)
 		tournament = next(
 			(t for t in tournaments if t.id == tournament_id), None)		
 		if tournament and self not in tournament.players:
@@ -165,14 +159,11 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			"type": "matchsPlayersUpdate",
 			"pack": matchs_players_up
 		}
-		print(f"PACK: {pack}", flush=True)
 		for player in players:
 			await player.send(text_data=json.dumps(pack))
 
 	@staticmethod
 	async def send_all_players(packet):
-
-		print(f"SEND ALL PLAYERS {packet}", flush=True)
 	
 		for player in players:				
 			await player.send(text_data=json.dumps(packet))

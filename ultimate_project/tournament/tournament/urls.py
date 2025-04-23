@@ -38,4 +38,3 @@ urlpatterns = [
     ),
     path("tournament/watch-dog/", views.watch_dog), 
 ]
-

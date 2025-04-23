@@ -1,11 +1,7 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
-import json
-import requests
-import aiohttp
-import html
 from django.utils.dateparse import parse_datetime
-from pprint import pprint
-
+import json
+import aiohttp
 
 players = []
 selfPlayers = []
@@ -15,15 +11,23 @@ class SimpleConsumer(AsyncWebsocketConsumer):
 
 	id = 0
 
+	def safe_int(self, value, default=0):
+
+		try:
+			return int(value)
+		except (TypeError, ValueError) as e:
+			print(e)
+			return default
+
 	async def connect(self):
 		
 		await self.accept() 
 		self.id = self.scope["url_route"]["kwargs"]["user_id"]
 		self.name = self.scope["url_route"]["kwargs"]["user_name"]
 		players[:] = [p for p in players if p.get('playerId') != self.id]
-		print(f"\033[36mNONE APP\033[0m", flush=True)
+		busy =  await self.is_in_match()
 		players.append(
-			{'playerId': self.id, 'playerName': self.name, 'busy': False})
+			{'playerId': self.id, 'playerName': self.name, 'busy': busy})
 		selfPlayers.append({'playerId': self.id, 'socket': self})
 		await SimpleConsumer.send_list('player', players)
 		await SimpleConsumer.send_list('match', matchs)
@@ -39,16 +43,27 @@ class SimpleConsumer(AsyncWebsocketConsumer):
 				(p for p in players if p.get('playerId') == player.get('busy')),
 			None)
 			if busy:
-				print(f"\033[36mNONE DISCO\033[0m", flush=True)
 				busy['busy'] = None			
 		selfPlayers[:] = [p for p in selfPlayers if p['socket'] != self]
 		players[:] = [p for p in players if p['playerId'] != self.id]
 		await SimpleConsumer.send_list('player', players)
 
+	async def is_in_match(self):
+
+		async with aiohttp.ClientSession() as session:
+			async with session.get(				
+					f"http://match:8002/match/is_in_match/?playerId={self.id}"
+				) as response:
+				if response.status == 200:
+					data = await response.json()
+					p1 = self.safe_int(data.get('p1', None))
+					p2 = self.safe_int(data.get('p2', None))
+					return p1 if self.id != p1 else p2
+				return None
+
 	@staticmethod
 	async def send_list(message_type, source):	
 
-		print(f"SEND LIST {source}", flush=True)	
 		for selfplay in selfPlayers:
 			await selfplay['socket'].send(text_data=json.dumps({
 				"type": message_type + "List",			
@@ -86,11 +101,9 @@ class SimpleConsumer(AsyncWebsocketConsumer):
 			(p for p in players if p['playerId'] == self.id), None)
 		if (await self.self_invitation(
 			selectedId, selectedPlayer, selectedName)):
-			print(f"\033[31mRETURN 1\033[0m", flush=True)	
 			return
 		if await self.cancel_invitation(
 			applicantPlayer, selectedPlayer, selfSelectedPlayer, selectedId):
-			print(f"\033[31mRETURN 2\033[0m", flush=True)		
 			return
 		if applicantPlayer and applicantPlayer.get('busy'):
 			await self.send_back("selfBusy")
@@ -104,7 +117,6 @@ class SimpleConsumer(AsyncWebsocketConsumer):
 	async def self_invitation(self, selectedId, selectedPlayer, selectedName):
 
 		if selectedId == self.id and not selectedPlayer.get('busy'):
-			print(f"\033[36mNONE -SELC\033[0m", flush=True)
 			selectedPlayer['busy'] = -selectedId
 			match_id = await self.start_match(
 				self.id, self.name, -selectedId, selectedName)
@@ -134,7 +146,6 @@ class SimpleConsumer(AsyncWebsocketConsumer):
 				self, selectedId, selectedPlayer.get('playerName'))		
 			await self.send_cancel(
 				selfSelectedPlayer['socket'], self.id, self.name)	
-			print(f"\033[36mNONE CANCEL INVIT\033[0m", flush=True)	
 			selectedPlayer['busy'], applicantPlayer['busy'] = None, None					
 			match = next(
 				(m for m in matchs 
@@ -170,7 +181,6 @@ class SimpleConsumer(AsyncWebsocketConsumer):
 			"applicantId": self.id,
 			"applicantName": self.name
 		}))		
-		print(f"\033[36mNONE SEND DEMAND\033[0m", flush=True)		
 		selectedPlayer['busy'] = applicantPlayer.get('playerId')
 		applicantPlayer['busy'] = selectedPlayer.get('playerId')
 			
@@ -191,7 +201,6 @@ class SimpleConsumer(AsyncWebsocketConsumer):
 			else:		
 				return
 		elif self.is_busy_with(applicant_player, self.id):
-			print(f"\033[36mNONE WEIRD\033[0m", flush=True)
 			applicant_player['busy'], selected_player['busy'] = None, None			
 		else:			
 			return	
@@ -224,7 +233,7 @@ class SimpleConsumer(AsyncWebsocketConsumer):
 		multy = True if applicantId == -other_id else False
 		async with aiohttp.ClientSession() as session:
 			async with session.get(				
-    				f"http://match:8002/match/new-match/?multy={multy}"
+    				f"http://match:8002/match/new-match/?multy={multy}&m=s"
     				f"&p1Id={applicantId}&p1Name={applicantName}"
     				f"&p2Id={other_id}&p2Name={other_name}"
 				) as response:
@@ -275,17 +284,13 @@ class SimpleConsumer(AsyncWebsocketConsumer):
 		
 	@staticmethod
 	async def match_update():
-
-		print(f"SIMPLE MATCH UPDATE {matchs}", flush=True)		
 		await SimpleConsumer.send_list('match', matchs)
 
 	@staticmethod
 	async def match_players_update(data):
 
-		print(f"SIMPLE MATCH UPDATE {matchs}", flush=True)
 		match_id = data.get("matchId", None)
 		players = data.get("players", [])
-		print(f"MATCH PLAYERS UPDATE VIEWS match_id: {match_id} {players}", flush=True)
 		match = next(
 			(m for m in matchs if m.get("matchId") == match_id), None)
 		if match:
@@ -295,17 +300,14 @@ class SimpleConsumer(AsyncWebsocketConsumer):
 	@staticmethod
 	async def match_result(data):
 
-		print(f"SIMPLE MATCH CONSUMER RESULT {data}", flush=True)		
 		p1_id = data.get('p1Id')
 		p2_id = data.get('p2Id')
 		match_id = data.get('matchId')
 		p1 = next((p for p in players if p.get("playerId") == p1_id), None)
 		p2 = next((p for p in players if p.get("playerId") == p2_id), None)
 		if p1:
-			print(f"\033[36mNONE RESULT ONE\033[0m", flush=True)
 			p1["busy"] = None
 		if p2:
-			print(f"\033[36mNONE RESULT TWO\033[0m", flush=True)
 			p2["busy"] = None 
 		match = next(
 			(m for m in matchs if m.get("matchId") == match_id), None)
@@ -317,56 +319,48 @@ class SimpleConsumer(AsyncWebsocketConsumer):
 	@staticmethod
 	async def send_db(match_results):
 
-		print(f"SIMPLE MATCH CONSUMER SEND BD {match_results}", flush=True)
 		from tournament_app.views import send_db as sdb
-
-        # Extract data from within the payload
 		p1 = max(1, match_results["p1Id"] or 0)
 		p2 = max(1, match_results["p2Id"] or 0)
 		win = max(1, match_results["winnerId"] or 0)
 		score_p1 = match_results["score"][0]
 		score_p2 = match_results["score"][1]
-		if (match_results["startTime"]):
+		if match_results["startTime"]:
 			start_time = parse_datetime(match_results["startTime"])
 		else:
 			start_time = None
-		if (match_results["endTime"]):
+		if match_results["endTime"]:
 			end_time = parse_datetime(match_results["endTime"])
 		else:
 			end_time = None
-	
 		data = {
-            "player1": p1,
-            "player2": p2,
-            "winner": win,
-            "score_p1": score_p1,
-            "score_p2": score_p2,
-            "start_time": start_time.isoformat() if start_time else None,
-            "end_time": end_time.isoformat() if end_time else None,
-        }
-		path = "api/match/"
-		await sdb(path, data)
-		# Update Player 1 stats
+			"player1": p1,
+			"player2": p2,
+			"winner": win,
+			"score_p1": score_p1,
+			"score_p2": score_p2,
+			"start_time": start_time.isoformat() if start_time else None,
+			"end_time": end_time.isoformat() if end_time else None,
+		}
+		await sdb("api/match/", data)
+		await SimpleConsumer.send_db_stats(sdb, p1, p2, win, score_p1, score_p2)
+
+	@staticmethod
+	async def send_db_stats(sdb, p1, p2, win, score_p1, score_p2):
+
 		data_p1 = {
 			"is_won": 1 if win == p1 else 0,
 			"is_lost": 1 if win != p1 else 0,
 			"points_scored": score_p1,
 			"points_conceded": score_p2,
 		}
-		# Update Player 2 stats
 		data_p2 = {
 			"is_won": 1 if win == p2 else 0,
 			"is_lost": 1 if win != p2 else 0,
 			"points_scored": score_p2,
 			"points_conceded": score_p1,
 		}
-		# Send updates to player statistics
-		# custom url for the post update , maybe send noting if bots ??
 		path_p1 = f"api/player/{p1}/stats/update-stats/"
 		await sdb(path_p1, data_p1)
 		path_p2 = f"api/player/{p2}/stats/update-stats/"
 		await sdb(path_p2, data_p2)
-
-  
-  
-

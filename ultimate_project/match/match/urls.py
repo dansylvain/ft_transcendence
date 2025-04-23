@@ -30,6 +30,7 @@ urlpatterns = [
 	path("match/new-match/", views.new_match),
     path("match/match2d/", views.enter_match2d),
     path("match/match3d/", views.enter_match3d),
+    path("match/is_in_match/", views.is_in_match),    
     re_path(
 		r"^match/stop-match/(?P<playerId>-?\d+)/(?P<matchId>-?\d+)/$",
 		views.stop_match

@@ -1,9 +1,10 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 import urllib
-from match_app.views import pongs
 import aiohttp
 import asyncio
+
+from match_app.views import pongs
 
 players = []
 
@@ -11,13 +12,10 @@ class MatchConsumer(AsyncWebsocketConsumer):
 
 	async def connect(self):
 
-		print(f"CONNECT MATCH CONSUMER: {players}", flush=True)
-
 		query_string = self.scope["query_string"].decode() 	
 		params = urllib.parse.parse_qs(query_string)
 		self.player_id = int(params.get("playerId", [None])[0])
 		self.match_id = self.scope["url_route"]["kwargs"]["matchId"]    
-		print(f"CMC p:{self.player_id} m:{self.match_id}", flush=True)	
 		await self.accept()
 		if await self.filter_player(self.match_id, self.player_id):
 			await self.close(code=3000)
@@ -31,8 +29,6 @@ class MatchConsumer(AsyncWebsocketConsumer):
 		await self.send_players_update()	
 
 	async def disconnect(self, close_code):
-
-		print(f"DISCONNECT MATCH CONSUMER p:{self.player_id} m:{self.match_id}", flush=True)
 			
 		players[:] = [p for p in players if p['playerId'] != self.player_id]		
 		await self.send_players_update()
@@ -41,17 +37,14 @@ class MatchConsumer(AsyncWebsocketConsumer):
 
 		pong = next((p for p in pongs if p.id == match_id), None)
 		if not pong:
-			print(f"MATCH DON'T EXIST p:{player_id} m:{match_id}", flush=True)			
 			return True
 		if pong and \
 			player_id < 0 and \
 			player_id not in pong.plyIds:
-			print(f"2ND PLAYER FILTERED p:{player_id} m:{match_id}", flush=True)			
 			return True
 		player = next(
 			(p for p in players if p.get('playerId') == player_id), None)
 		if player:
-			print(f"PLAYER YET EXIST p:{player_id} m:{match_id}", flush=True)			
 			return True
 		return False
 
@@ -64,8 +57,6 @@ class MatchConsumer(AsyncWebsocketConsumer):
 
 	async def send_players_update(self):
 	
-		print(f"MATCH CONSUMER SEND PLAYERS UPDATE p:{self.player_id} m:{self.match_id}", flush=True)
-
 		await asyncio.sleep(1)
 		async with aiohttp.ClientSession() as session:
 			async with session.post(
