@@ -1,8 +1,8 @@
 {% load static %}
-<script src="/static/static_files/static_files/vendor/chart.js/Chart.min.js"></script>
+<script src="{% static 'user/Chart.min.js' %}"></script>
 {{ main_stats|json_script:"mainStats" }}
 <script
-  src="{% static 'js/overview_chart.js' %}"
+  src="{% static 'user/overview_chart.js' %}"
   onload="initializeCharts();"
 ></script>
 

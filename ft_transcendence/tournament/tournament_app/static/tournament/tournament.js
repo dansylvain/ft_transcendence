@@ -736,13 +736,16 @@ function updateMatchPlayers(plys)
 	plys.players.forEach(player => {	
 		if (specs.every(el => el.id != player.playerId))
 		{	
-			const winPly = window.players.find(el => el.id == player.playerId);		
-			if (plys.p1Id == winPly.id)
-				localP1.appendChild(winPly);			
-			else if (plys.p2Id == winPly.id)
-				localP2.appendChild(winPly);			
-			else			
+			const winPly = window.players.find(el => el.id == player.playerId);
+			if (winPly)
+			{
+				if (plys.p1Id == winPly.id)
+					localP1.appendChild(winPly);			
+				else if (plys.p2Id == winPly.id)
+					localP2.appendChild(winPly);			
+				else			
 				specCont.appendChild(winPly);			
+			}			
 		}
 	});
 }
