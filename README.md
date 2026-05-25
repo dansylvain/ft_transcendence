@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="img/transcendence.jpg" width="70%"/>
+  <img src="assets/transcendence.jpg" width="70%"/>
 </p>
 
 ## 🚀 SYNOPSIS
