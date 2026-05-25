@@ -14,9 +14,7 @@ More than a technical milestone, `ft_transcendence` reflects the 42 ethos: innov
 
 
 <p align="center">
-  <video src="assets/video.mp4" width="70%" controls>
-    Votre navigateur ne prend pas en charge la lecture de cette vidéo.
-  </video>
+  <video src="assets/toto.mp4" width="70%" controls></video>
 </p>
 
 ## 🛠️ REPO SPECIFICITIES AND CONSIDERATIONS
