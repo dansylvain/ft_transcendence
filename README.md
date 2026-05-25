@@ -13,7 +13,9 @@ Beyond technical skills, the project emphasizes clean architecture, scalability,
 More than a technical milestone, `ft_transcendence` reflects the 42 ethos: innovation, self-learning, and readiness for the evolving tech landscape.
 
 
-https://raw.githubusercontent.com/dansylvain/ft_transcendence/main/assets/video.mp4
+<p align="center">
+  <video src="assets/toto.mp4" width="70%" controls></video>
+</p>
 
 ## 🛠️ REPO SPECIFICITIES AND CONSIDERATIONS
 
